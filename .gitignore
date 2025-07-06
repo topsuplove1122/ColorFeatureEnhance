@@ -98,3 +98,4 @@ build/test-results/
 # Any other IDE specific files that might appear
 *.iws
 *.ipr
+.cursor/
