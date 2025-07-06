@@ -99,3 +99,4 @@ build/test-results/
 *.iws
 *.ipr
 .cursor/
+/.cursorrules
