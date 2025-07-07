@@ -7,11 +7,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.itosfish.colorfeatureenhance.navigation.BottomNavigationBar
+import com.itosfish.colorfeatureenhance.navigation.BottomNavItem
+import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
+import com.itosfish.colorfeatureenhance.ui.AboutScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +25,33 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ColorFeatureEnhanceTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                val navController = rememberNavController()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = { BottomNavigationBar(navController) }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = BottomNavItem.FeatureConfig.route,
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable(BottomNavItem.FeatureConfig.route) {
+                            FeatureConfigScreen()
+                        }
+                        composable(BottomNavItem.About.route) {
+                            AboutScreen()
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainPreview() {
     ColorFeatureEnhanceTheme {
-        Greeting("Android")
+        FeatureConfigScreen()
     }
 }
