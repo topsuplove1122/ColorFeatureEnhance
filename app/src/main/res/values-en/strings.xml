@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ColorOS Feature Enhancer</string>
+    <string name="about_view_source_code">View source code on <b><a href="https://github.com/ItosFish/ColorFeatureEnhance">GitHub</a></b></string>
+    <string name="about">About</string>
+    <string name="config">Settings</string>
+    <string name="app_title">ColorOS Feature Enhancer</string>
+    <string name="feature_config_placeholder">Feature configuration page (to be implemented)</string>
+    <string name="about_placeholder">About page (to be implemented)</string>
+</resources> 

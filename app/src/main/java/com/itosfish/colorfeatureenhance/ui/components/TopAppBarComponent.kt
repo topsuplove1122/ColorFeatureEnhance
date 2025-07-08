@@ -11,6 +11,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.itosfish.colorfeatureenhance.R
 import com.itosfish.colorfeatureenhance.utils.showAboutDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +27,7 @@ fun ColorOSTopAppBar(title: String) {
             }) {
                 Icon(
                     imageVector = Icons.Filled.Info,
-                    contentDescription = "关于"
+                    contentDescription = stringResource(id = R.string.about)
                 )
             }
         },

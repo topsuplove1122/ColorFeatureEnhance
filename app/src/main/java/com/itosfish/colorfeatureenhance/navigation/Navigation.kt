@@ -10,19 +10,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.itosfish.colorfeatureenhance.R
 
 // Bottom level destinations of the app
 sealed class BottomNavItem(
     val route: String,
-    val label: String,
+    val labelResId: Int,
     val icon: ImageVector
 ) {
-    object FeatureConfig : BottomNavItem("featureConfig", "配置", Icons.Filled.Settings)
-    object About : BottomNavItem("about", "关于", Icons.Filled.Info)
+    object FeatureConfig : BottomNavItem("featureConfig", R.string.config, Icons.Filled.Settings)
+    object About : BottomNavItem("about", R.string.about, Icons.Filled.Info)
 
     companion object {
         val items = listOf(FeatureConfig, About)
@@ -51,9 +53,9 @@ fun BottomNavigationBar(navController: NavHostController) {
                     }
                 },
                 icon = {
-                    Icon(imageVector = screen.icon, contentDescription = screen.label)
+                    Icon(imageVector = screen.icon, contentDescription = stringResource(id = screen.labelResId))
                 },
-                label = { Text(screen.label) }
+                label = { Text(stringResource(id = screen.labelResId)) }
             )
         }
     }

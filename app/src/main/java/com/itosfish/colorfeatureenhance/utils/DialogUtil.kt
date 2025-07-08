@@ -23,7 +23,7 @@ fun showAboutDialog(activity: Activity) {
     // 版本号
     val versionNameView = root.findViewById<TextView>(R.id.version_name)
     val versionName = activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
-    versionNameView.text = "v$versionName"
+    versionNameView.text = "$versionName"
 
     // 富文本链接
     val sourceCodeView = root.findViewById<TextView>(R.id.source_code)

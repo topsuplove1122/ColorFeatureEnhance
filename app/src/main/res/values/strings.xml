@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">ColorFeatureEnhance</string>
-    <string name="about_view_source_code">查看源码：<b><a href="https://github.com/ItosFish/ColorFeatureEnhance">GitHub</a></b></string>
+    <string name="app_name">ColorOS特性补全</string>
+    <string name="about_view_source_code">在 <b><a href="https://github.com/ItosFish/ColorFeatureEnhance">GitHub</a></b> 查看源码</string>
+    <string name="about">关于</string>
+    <string name="config">配置</string>
+    <string name="app_title">ColorOS特性补全</string>
+    <string name="feature_config_placeholder">特性补全配置页面（待实现）</string>
+    <string name="about_placeholder">关于页面（待实现）</string>
 </resources>
