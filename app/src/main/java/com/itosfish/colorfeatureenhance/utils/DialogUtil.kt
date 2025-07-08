@@ -1,4 +1,4 @@
-package com.itosfish.colorfeatureenhance.ui.components
+package com.itosfish.colorfeatureenhance.utils
 
 import android.app.Activity
 import android.text.method.LinkMovementMethod
@@ -28,7 +28,6 @@ fun showAboutDialog(activity: Activity) {
     // 富文本链接
     val sourceCodeView = root.findViewById<TextView>(R.id.source_code)
     sourceCodeView.movementMethod = LinkMovementMethod.getInstance()
-
     MaterialAlertDialogBuilder(activity)
         .setView(root)
         .show()

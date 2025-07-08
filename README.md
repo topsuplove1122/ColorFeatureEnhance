@@ -13,12 +13,12 @@ com.itosfish.colorfeatureenhance/
 │   │   ├── Theme.kt             # 主题定义
 │   │   └── Type.kt              # 文字样式
 │   ├── components/              # 可复用UI组件
-│   │   └── TopAppBarComponent.kt # 顶部应用栏组件
+│   │   ├── TopAppBarComponent.kt # 顶部应用栏组件
+│   │   └── AboutDialogUtil.kt   # 对话框工具
 │   └── FeatureConfigScreen.kt   # 特性配置页面
 ├── data/                        # 数据层代码（模型、仓库等）
 ├── domain/                      # 领域层（业务逻辑）
 └── utils/                       # 工具类
-    └── BlurUtils.kt             # 模糊背景工具类（含BlurBehindDialogEffect）
 ```
 
 ## 开发规范
@@ -70,38 +70,12 @@ com.itosfish.colorfeatureenhance/
 - 新增功能时，确保其他功能、引用不受影响
 - 代码应有适当注释，尤其是复杂逻辑
 - 修改公共组件前，应评估对使用该组件的地方的影响
-- 使用Dialog时，使用原生MaterialDialog，并配合BlurBehindDialogEffect实现背景模糊
+- 使用Dialog时，使用原生MaterialAlertDialog
 - 界面风格遵循Material 3 Expressive设计风格
-
-## 开发环境
-
-- Android Studio Jellyfish | 2023.3.1
-- Kotlin 2.0+
-- Compose BOM 2025.06.01
-- compileSdk 36
-- minSdk 35
 
 ## 特别说明
 
 本应用需要Root权限才能运行完整功能。
-
-## 特性与技术亮点
-
-### 1. 对话框背景模糊
-
-应用实现了基于Android 12+ RenderEffect API的对话框背景模糊效果：
-
-- **使用方法**：在Dialog显示代码附近添加`BlurBehindDialogEffect(enable = true)`
-- **示例**：
-  ```kotlin
-  if (showDialog) {
-      BlurBehindDialogEffect(enable = true)
-      AlertDialog(
-          // 常规AlertDialog参数
-      )
-  }
-  ```
-- **实现原理**：通过`RenderEffect.createBlurEffect`对窗口DecorView应用高斯模糊，在对话框显示/关闭时自动处理模糊/取消模糊
 
 ## 贡献流程
 
