@@ -23,8 +23,8 @@ sealed class BottomNavItem(
     val labelResId: Int,
     val icon: ImageVector
 ) {
-    object FeatureConfig : BottomNavItem("featureConfig", R.string.config, Icons.Filled.Settings)
-    object About : BottomNavItem("about", R.string.about, Icons.Filled.Info)
+    data object FeatureConfig : BottomNavItem("featureConfig", R.string.config, Icons.Filled.Settings)
+    data object About : BottomNavItem("about", R.string.about, Icons.Filled.Info)
 
     companion object {
         val items = listOf(FeatureConfig, About)
