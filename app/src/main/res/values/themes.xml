@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.ColorFeatureEnhance" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- 应用基础主题，继承 Material3 无 ActionBar 版本 -->
+    <style name="Theme.ColorFeatureEnhance" parent="Theme.Material3.DayNight.NoActionBar"/>
 </resources>
