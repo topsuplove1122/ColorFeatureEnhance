@@ -2,7 +2,7 @@ package com.itosfish.colorfeatureenhance.ui.components
 
 import android.app.Activity
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +26,7 @@ fun ColorOSTopAppBar(title: String) {
                 showAboutDialog(context as Activity)
             }) {
                 Icon(
-                    imageVector = Icons.Filled.Info,
+                    imageVector = Icons.Outlined.Info,
                     contentDescription = stringResource(id = R.string.about)
                 )
             }

@@ -6,4 +6,26 @@
     <string name="app_title">ColorOS特性补全</string>
     <string name="feature_config_placeholder">特性补全配置页面（待实现）</string>
     <string name="about_placeholder">关于页面（待实现）</string>
+    <string name="feature_ai_chat_scene">AI聊天场景</string>
+    <string name="feature_live_assistant">直播助手</string>
+    <string name="feature_tap_to_wake_screen">点击屏幕唤醒息屏</string>
+    <string name="feature_livephoto_lock_screen">实况照片支持设置锁屏图片</string>
+    <string name="feature_global_aod">全局AOD</string>
+    <string name="feature_qs_icon_deformable">分离样式通控面板图标可变形</string>
+    <string name="feature_area_record">区域录屏</string>
+    <string name="feature_game_ai_v3">游戏AI 3.0</string>
+    <string name="feature_game_ai_v4">AI游戏辅助4.0</string>
+    <string name="feature_game_assist_key">游戏助手辅助</string>
+    <string name="feature_game_4d_vibration">游戏4D震动模式</string>
+    <string name="feature_phone_touch_share">电话触摸分享与屏幕共享</string>
+    <string name="feature_game_bypass_charging">游戏助手旁路供电</string>
+    <string name="feature_sidebar_audio_split_assistant">侧边栏声音分轨助手</string>
+    <string name="feature_game_fan_power_mode">游戏在开启风扇模式下火力模式</string>
+    <string name="feature_all_scene_bypass_charging">全场景旁路供电</string>
+    <string name="feature_reverse_charging">反向充电</string>
+    <string name="feature_wechat_video_call_enhance">微信视频通话功能增强</string>
+    <string name="feature_keyboard_nfc_ios_share">键盘NFC分享IOS控制中心界面</string>
+    <string name="feature_unknown">待确认</string>
+    <string name="delete_confirm_title">删除特性</string>
+    <string name="delete_confirm_message">确定删除 %1$s 及其所有配置吗？</string>
 </resources>

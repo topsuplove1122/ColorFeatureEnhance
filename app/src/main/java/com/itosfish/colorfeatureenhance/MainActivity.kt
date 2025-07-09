@@ -2,9 +2,11 @@ package com.itosfish.colorfeatureenhance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,7 +19,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ColorFeatureEnhanceTheme {
-                FeatureConfigScreen()
+                val configPath = getExternalFilesDir(null)?.absolutePath + "/com.oplus.app-features.xml"
+                Toast.makeText(this, "配置文件路径: $configPath", Toast.LENGTH_LONG).show()
+                FeatureConfigScreen(configPath = configPath)
             }
         }
     }
@@ -27,6 +31,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainPreview() {
     ColorFeatureEnhanceTheme {
-        FeatureConfigScreen()
+        FeatureConfigScreen(configPath = "")
     }
 }
