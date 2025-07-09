@@ -29,4 +29,8 @@
     <string name="feature_unknown">Unknown</string>
     <string name="delete_confirm_title">Delete Feature</string>
     <string name="delete_confirm_message">Are you sure to delete %1$s and all its configurations?</string>
+    <string name="add_feature">Add Feature</string>
+    <string name="feature_name">Feature Name</string>
+    <string name="feature_description">Feature Description</string>
+    <string name="feature_enabled">Enabled</string>
 </resources> 
