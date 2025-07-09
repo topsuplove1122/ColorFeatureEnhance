@@ -1,13 +1,13 @@
 package com.itosfish.colorfeatureenhance.data.model
 
 import com.itosfish.colorfeatureenhance.R
+import android.content.Context
 
 /**
- * 应用特性映射表 (com.oplus.app-features.xml)
- * key 为特性 `name`，value 为中文描述。
- * 暂未明确含义的特性以 "待确认" 占位。
+ * 应用特性映射表管理
  */
-object AppFeatureMappings {
+class AppFeatureMappings private constructor() {
+
     /**
      * Map of feature name to Chinese description.
      */
@@ -65,7 +65,70 @@ object AppFeatureMappings {
     )
 
     /**
+     * 单例实例
+     */
+    companion object {
+        @Volatile
+        private var INSTANCE: AppFeatureMappings? = null
+        
+        /**
+         * 获取映射表实例
+         */
+        fun getInstance(): AppFeatureMappings {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: AppFeatureMappings().also { INSTANCE = it }
+            }
+        }
+
+        /**
+         * 获取特性的描述资源ID，优先从用户自定义映射中查找
+         * @param context 上下文
+         * @param featureName 特性名称
+         * @return 描述字符串
+         */
+        fun getLocalizedDescription(context: Context, featureName: String): String {
+            // 先查找用户自定义映射
+            val userMappings = UserFeatureMappings.getInstance(context)
+            val userDescription = userMappings.getDescription(featureName)
+            // 如果用户描述存在且不为空，则使用用户描述
+            if (userDescription != null && userDescription.isNotEmpty()) {
+                return userDescription
+            }
+            
+            // 再查找预设映射
+            val resId = getInstance().getResId(featureName)
+            return if (resId == R.string.feature_unknown) {
+                featureName
+            } else {
+                context.getString(resId)
+            }
+        }
+    }
+
+    /**
      * 获取中文描述，若未收录则返回 "待确认"。
      */
     fun getResId(featureName: String): Int = NAME_TO_RES_ID[featureName] ?: R.string.feature_unknown
+
+    /**
+     * 保存用户自定义映射
+     */
+    fun saveUserMapping(context: Context, name: String, description: String) {
+        UserFeatureMappings.getInstance(context).saveMapping(name, description)
+    }
+
+    /**
+     * 删除用户自定义映射
+     */
+    fun removeUserMapping(context: Context, name: String) {
+        UserFeatureMappings.getInstance(context).removeMapping(name)
+    }
+
+    /**
+     * 批量删除用户自定义映射
+     */
+    fun removeUserMappings(context: Context, names: List<String>) {
+        val userMappings = UserFeatureMappings.getInstance(context)
+        names.forEach { userMappings.removeMapping(it) }
+    }
 } 

@@ -29,7 +29,7 @@
     <string name="delete_confirm_title">删除特性</string>
     <string name="delete_confirm_message">确定删除 %1$s 及其所有配置吗？</string>
     <string name="add_feature">添加特性</string>
-    <string name="feature_name">特性名称\n(如 com.oplus.plc_charge.support)</string>
-    <string name="feature_description">特性描述(如 旁路充电)</string>
+    <string name="feature_name">特性名称</string>
+    <string name="feature_description">特性描述</string>
     <string name="feature_enabled">启用状态</string>
 </resources>

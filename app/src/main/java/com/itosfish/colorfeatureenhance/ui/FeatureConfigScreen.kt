@@ -22,7 +22,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +58,11 @@ import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.components.ColorOSTopAppBar
 import kotlinx.coroutines.launch
+import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import com.itosfish.colorfeatureenhance.MainActivity
+import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,20 +75,18 @@ fun FeatureConfigScreen(
     val featureGroups by remember(features) {
         derivedStateOf {
             // 按nameResId分组
-            features.groupBy { feature ->
-                val resId = AppFeatureMappings.getResId(feature.name)
-                if (resId == R.string.feature_unknown) {
-                    "${resId}_${feature.name}" // unique per unknown feature
-                } else {
-                    resId.toString()
-                }
+            features.groupBy { feature -> 
+                // 使用描述作为分组键
+                val description = AppFeatureMappings.getLocalizedDescription(app, feature.name)
+                "${description}_${if (AppFeatureMappings.getInstance().getResId(feature.name) == R.string.feature_unknown) feature.name else ""}"
             }.map { (_, groupFeatures) ->
-                val nameResId = AppFeatureMappings.getResId(groupFeatures.first().name)
+                val nameResId = AppFeatureMappings.getInstance().getResId(groupFeatures.first().name)
                 FeatureGroup(nameResId, groupFeatures)
-            }
-                .sortedWith(compareBy<FeatureGroup> { it.nameResId }.thenBy { it.features.first().name })
+            }.sortedWith(compareBy<FeatureGroup> { it.nameResId }.thenBy { it.features.first().name })
         }
     }
+    
+    val context = LocalContext.current
 
     var groupToDelete by remember { mutableStateOf<FeatureGroup?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -120,10 +125,7 @@ fun FeatureConfigScreen(
                 FloatingActionButton(
                     onClick = { showAddDialog = true }
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(R.string.add_feature)
-                    )
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = stringResource(R.string.add_feature))
                 }
             }
         }
@@ -168,6 +170,7 @@ fun FeatureConfigScreen(
         if (showAddDialog) {
             AddFeatureDialog(
                 onDismiss = { showAddDialog = false },
+                context = context,
                 onConfirm = { name, description, enabled ->
                     // 添加新特性
                     val newFeature = AppFeature(name, enabled)
@@ -201,6 +204,11 @@ fun FeatureConfigScreen(
                             deleting.features.any { it.name == feature.name }
                         }
                         features = updatedFeatures
+                        
+                        // 删除用户映射
+                        val namesToDelete = deleting.features.map { it.name }
+                        AppFeatureMappings.getInstance().removeUserMappings(context, namesToDelete)
+                        
                         scope.launch {
                             repository.saveFeatures(configPath, updatedFeatures)
                         }
@@ -242,13 +250,10 @@ private fun FeatureGroupItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val label = if (group.nameResId == R.string.feature_unknown) {
-                // 对于未知特性，显示原始名称
-                group.features.firstOrNull()?.name ?: "Unknown"
-            } else {
-                stringResource(id = group.nameResId)
-            }
-
+            // 获取特性描述（优先用户自定义描述）
+            val context = LocalContext.current
+            val label = AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+            
             // 如果组内有多个项，显示计数
             val displayText = if (group.features.size > 1) {
                 "$label (${group.features.size})"
@@ -275,10 +280,11 @@ private fun FeatureGroupItem(
 @Composable
 private fun AddFeatureDialog(
     onDismiss: () -> Unit,
+    context: Context,
     onConfirm: (name: String, description: String, enabled: Boolean) -> Unit
 ) {
-    var featureDescription by remember { mutableStateOf("") }
     var featureName by remember { mutableStateOf("") }
+    var featureDescription by remember { mutableStateOf("") }
     var featureEnabled by remember { mutableStateOf(true) }
 
     AlertDialog(
@@ -286,22 +292,23 @@ private fun AddFeatureDialog(
         title = { Text(text = stringResource(id = R.string.add_feature)) },
         text = {
             Column {
-                // 特性描述输入
+                // 特性名称输入
                 OutlinedTextField(
                     value = featureName,
                     onValueChange = { featureName = it },
                     label = { Text(stringResource(id = R.string.feature_name)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 特性名称输入
+                // 特性描述输入
                 OutlinedTextField(
                     value = featureDescription,
                     onValueChange = { featureDescription = it },
                     label = { Text(stringResource(id = R.string.feature_description)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -323,11 +330,11 @@ private fun AddFeatureDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (featureDescription.isNotEmpty() && featureName.isNotEmpty()) {
-                        onConfirm(featureDescription, featureName, featureEnabled)
+                    if (featureName.isNotEmpty() && featureDescription.isNotEmpty()) {
+                        onConfirm(featureName, featureDescription, featureEnabled)
                     }
                 },
-                enabled = featureDescription.isNotEmpty() && featureName.isNotEmpty()
+                enabled = featureName.isNotEmpty() && featureDescription.isNotEmpty()
             ) {
                 Text(text = stringResource(id = android.R.string.ok))
             }

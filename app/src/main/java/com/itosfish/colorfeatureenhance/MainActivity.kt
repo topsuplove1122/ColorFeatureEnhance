@@ -17,6 +17,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        app = this
         setContent {
             ColorFeatureEnhanceTheme {
                 val configPath = getExternalFilesDir(null)?.absolutePath + "/com.oplus.app-features.xml"
@@ -24,6 +25,10 @@ class MainActivity : ComponentActivity() {
                 FeatureConfigScreen(configPath = configPath)
             }
         }
+    }
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        lateinit var app: MainActivity private set
     }
 }
 
