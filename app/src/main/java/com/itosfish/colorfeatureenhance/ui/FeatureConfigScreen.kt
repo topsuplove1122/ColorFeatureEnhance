@@ -489,7 +489,8 @@ private fun FeatureGroupItem(
             if (isComplex) {
                 Text(
                     text = stringResource(id = R.string.complex_feature_indicator),
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             } else if (currentMode == FeatureMode.APP && hasBoolean) {
                 Switch(
