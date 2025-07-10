@@ -48,8 +48,8 @@ fun FloatingActionButtonGroup(
             // 搜索按钮
             FloatingActionButton(
                 onClick = onSearchClick,
-                containerColor = if (isSearchActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondary,
-                contentColor = if (isSearchActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondary
+                containerColor = if (!isSearchActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondary,
+                contentColor = if (!isSearchActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondary
             ) {
                 Icon(
                     imageVector = Icons.Filled.Search,

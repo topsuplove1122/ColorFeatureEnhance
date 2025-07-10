@@ -64,6 +64,7 @@ import com.itosfish.colorfeatureenhance.ui.components.SearchBar
 import com.itosfish.colorfeatureenhance.ui.search.SearchLogic
 import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
 import com.itosfish.colorfeatureenhance.FeatureMode
+import androidx.activity.compose.BackHandler
 
 @Composable
 fun FeatureConfigScreen(
@@ -132,6 +133,12 @@ fun FeatureConfigScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     
+    // 当搜索栏展开时拦截系统返回键，先关闭搜索栏而非退出界面
+    BackHandler(enabled = isSearchActive) {
+        isSearchActive = false
+        searchQuery = ""
+    }
+
     // 根据搜索查询过滤特性组
     val displayedFeatureGroups = remember(featureGroups, searchQuery, currentMode) {
         if (searchQuery.isBlank()) {
@@ -184,7 +191,13 @@ fun FeatureConfigScreen(
             FloatingActionButtonGroup(
                 isVisible = fabVisible,
                 onAddClick = { showAddDialog = true },
-                onSearchClick = { isSearchActive = !isSearchActive },
+                onSearchClick = {
+                    if (isSearchActive) {
+                        // 如果当前已展开，则先清空查询再关闭
+                        searchQuery = ""
+                    }
+                    isSearchActive = !isSearchActive
+                },
                 isSearchActive = isSearchActive
             )
         }
