@@ -43,6 +43,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itosfish.colorfeatureenhance.R
@@ -58,6 +59,10 @@ import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
 import androidx.compose.ui.platform.LocalContext
 import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 import com.itosfish.colorfeatureenhance.utils.EditFeatureDialog
+import com.itosfish.colorfeatureenhance.ui.components.FloatingActionButtonGroup
+import com.itosfish.colorfeatureenhance.ui.components.SearchBar
+import com.itosfish.colorfeatureenhance.ui.search.SearchLogic
+import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
 import com.itosfish.colorfeatureenhance.FeatureMode
 
 @Composable
@@ -122,8 +127,21 @@ fun FeatureConfigScreen(
     var chooseFromGroup by remember { mutableStateOf<FeatureGroup?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var fabVisible by remember { mutableStateOf(true) }
+    
+    // 搜索相关状态
+    var isSearchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    
+    // 根据搜索查询过滤特性组
+    val displayedFeatureGroups = remember(featureGroups, searchQuery, currentMode) {
+        if (searchQuery.isBlank()) {
+            featureGroups
+        } else {
+            SearchLogic.filterFeatureGroups(featureGroups, searchQuery, context, currentMode)
+        }
+    }
 
-    // 检测滚动方向的 NestedScrollConnection
+    // 检测滚动方向的 NestedScrollConnection - 隐藏/显示浮动按钮
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -145,27 +163,30 @@ fun FeatureConfigScreen(
 
     Scaffold(
         topBar = {
-            ColorOSTopAppBar(
-                title = stringResource(id = R.string.app_title),
-                currentMode = currentMode,
-                onModeChange = onModeChange
-            )
-        },
-        // 浮动按钮（添加）
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = fabVisible,
-                enter = slideInVertically(initialOffsetY = { it * 2 }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it * 2 }) + fadeOut()
-            ) {
-                FloatingActionButton(
-                    onClick = { showAddDialog = true },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = stringResource(R.string.add_feature))
-                }
+            Column {
+                ColorOSTopAppBar(
+                    title = stringResource(id = R.string.app_title),
+                    currentMode = currentMode,
+                    onModeChange = onModeChange
+                )
+                
+                // 搜索栏
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    onClearQuery = { searchQuery = "" },
+                    isVisible = isSearchActive
+                )
             }
+        },
+        // 浮动按钮组（添加和搜索）
+        floatingActionButton = {
+            FloatingActionButtonGroup(
+                isVisible = fabVisible,
+                onAddClick = { showAddDialog = true },
+                onSearchClick = { isSearchActive = !isSearchActive },
+                isSearchActive = isSearchActive
+            )
         }
     ) { innerPadding ->
         LazyColumn(
@@ -175,7 +196,7 @@ fun FeatureConfigScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            items(featureGroups, key = {
+            items(displayedFeatureGroups, key = {
                 // 使用与分组相同的逻辑生成key
                 val firstFeature = it.features.first()
                 val description = if (currentMode == FeatureMode.APP) {
@@ -194,6 +215,7 @@ fun FeatureConfigScreen(
                 FeatureGroupItem(
                     currentMode = currentMode,
                     group = group,
+                    searchQuery = searchQuery,
                     onToggle = { updatedGroup ->
                         // 更新组内所有特性的状态
                         val updatedFeatures = features.map { feature ->
@@ -221,6 +243,24 @@ fun FeatureConfigScreen(
                     }
                 )
             }
+            // 显示空结果提示
+            if (displayedFeatureGroups.isEmpty()) {
+                item {
+                    Text(
+                        text = if (searchQuery.isNotBlank()) 
+                            stringResource(R.string.search_no_results) 
+                        else 
+                            "暂无特性配置",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            
+            // 删除重复的空列表提示
         }
 
         // 添加特性对话框
@@ -348,7 +388,8 @@ private fun FeatureGroupItem(
     group: FeatureGroup,
     onToggle: (FeatureGroup) -> Unit,
     onLongPress: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    searchQuery: String = ""
 ) {
     Card(
         modifier = Modifier
@@ -370,26 +411,26 @@ private fun FeatureGroupItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 获取特性描述（优先用户自定义描述）
-            val context = LocalContext.current
-            val label = if (currentMode == FeatureMode.APP) {
-                AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+            // 获取特性描述
+            val description = if (currentMode == FeatureMode.APP) {
+                AppFeatureMappings.getLocalizedDescription(app, group.features.first().name)
             } else {
-                OplusFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                OplusFeatureMappings.getLocalizedDescription(app, group.features.first().name)
             }
             
             // 如果组内有多个项，显示计数
             val displayText = if (group.features.size > 1) {
-                "$label (${group.features.size})"
+                "$description (${group.features.size})"
             } else {
-                label
+                description
             }
 
-            Text(
+            HighlightedText(
                 text = displayText,
+                query = searchQuery,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                // color = MaterialTheme.colorScheme.onSecondaryContainer
             )
             Switch(
                 checked = group.isEnabled,

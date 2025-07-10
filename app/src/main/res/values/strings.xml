@@ -61,4 +61,8 @@
     <string name="oplus_feature_low_lux_anti_shake">低Lux去晃动拓展支持</string>
     <string name="oplus_feature_foreground_preload">前台预加载</string>
     <string name="oplus_feature_gcstring">GCString支持</string>
+    <string name="search_feature">搜索特性</string>
+    <string name="search_hint">搜索名称或描述...</string>
+    <string name="search_no_results">未找到匹配结果</string>
+    <string name="search_clear">清除搜索</string>
 </resources>

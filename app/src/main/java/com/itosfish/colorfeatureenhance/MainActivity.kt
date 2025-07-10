@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                Toast.makeText(this, "配置文件路径: $configPath", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "配置文件路径: $configPath", Toast.LENGTH_SHORT).show()
 
                 FeatureConfigScreen(
                     configPath = configPath,
