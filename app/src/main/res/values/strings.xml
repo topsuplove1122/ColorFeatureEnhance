@@ -70,4 +70,8 @@
     <string name="root_permission_exit">退出</string>
     <string name="root_permission_continue">仍要进入</string>
     <string name="root_permission_warning">请注意，某些功能可能无法正常工作。</string>
+    <string name="module_install_success">附加模块安装成功！</string>
+    <string name="module_install_fail_title">附加模块安装失败！</string>
+    <string name="module_install_fail_message">请检查是否有 Root 权限，软件无法正常使用</string>
+    <string name="common_ok">确定</string>
 </resources>

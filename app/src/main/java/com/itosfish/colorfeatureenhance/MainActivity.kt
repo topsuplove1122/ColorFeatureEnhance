@@ -13,14 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import com.itosfish.colorfeatureenhance.utils.CSU
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
+import com.itosfish.colorfeatureenhance.utils.CSU
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 class MainActivity : ComponentActivity() {
@@ -57,6 +56,21 @@ class MainActivity : ComponentActivity() {
         }
         CSU.checkRoot()
         ConfigUtils.copySystemConfig()
+
+        // 如果目录已存在，则视为已安装
+        if (!CSU.dirExists("/data/adb/modules/ColorOSFeaturesEnhance")) {
+            val a = ConfigUtils.installModule()
+            if (a) {
+                Toast.makeText(app, app.getString(R.string.module_install_success), Toast.LENGTH_SHORT).show()
+            } else {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.module_install_fail_title)
+                    .setMessage(R.string.module_install_fail_message)
+                    .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
+                    .show()
+                Log.e("MainActivity", "Module installation failed.")
+            }
+        }
     }
 
     companion object {

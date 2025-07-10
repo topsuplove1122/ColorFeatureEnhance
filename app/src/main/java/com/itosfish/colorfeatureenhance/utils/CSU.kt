@@ -30,6 +30,17 @@ object CSU {
         return output == "exists"
     }
 
+    /**
+     * 判断目录是否存在。
+     * @param dirPath 目录路径
+     * @return true 存在，false 不存在
+     */
+    fun dirExists(dirPath: String): Boolean {
+        val command = "if [ -d \"$dirPath\" ]; then echo \"exists\"; else echo \"not exists\"; fi"
+        val output = runWithSu(command).trim()
+        return output == "exists"
+    }
+
     // 检查是否具有root权限
     fun isRooted(): Boolean {
         return checkRootMethod()

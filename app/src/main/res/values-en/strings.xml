@@ -71,4 +71,8 @@
     <string name="root_permission_exit">Exit</string>
     <string name="root_permission_continue">Continue anyway</string>
     <string name="root_permission_warning">Please note that some features may not work properly.</string>
+    <string name="module_install_success">Module installed successfully!</string>
+    <string name="module_install_fail_title">Module installation failed!</string>
+    <string name="module_install_fail_message">Please check if root permission is available, otherwise the app cannot work.</string>
+    <string name="common_ok">OK</string>
 </resources> 
