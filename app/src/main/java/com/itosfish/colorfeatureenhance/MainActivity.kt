@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
             }
         }
         CSU.checkRoot()
-        ConfigUtils.copySystemConfig()
 
         // 如果检测到原版 KernelSU，则提示不支持并跳过安装
         if (CSU.isKSU()) {
@@ -81,6 +80,9 @@ class MainActivity : ComponentActivity() {
                 Log.e("MainActivity", "Module installation failed.")
             }
         }
+
+        ConfigUtils.copySystemConfig()
+
     }
 
     companion object {

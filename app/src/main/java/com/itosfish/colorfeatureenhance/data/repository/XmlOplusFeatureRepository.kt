@@ -54,8 +54,7 @@ class XmlOplusFeatureRepository : FeatureRepository {
             writer.appendLine("<oplus-config>")
 
             features.forEach { feature ->
-                val boolValue = if (feature.enabled) "true" else "false"
-                writer.appendLine("\t<oplus-feature name=\"${feature.name}\" args=\"boolean:$boolValue\"/>")
+                writer.appendLine("\t<oplus-feature name=\"${feature.name}\"/>")
             }
             writer.appendLine("</oplus-config>")
         }

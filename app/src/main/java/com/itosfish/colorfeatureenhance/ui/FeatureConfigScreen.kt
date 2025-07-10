@@ -453,12 +453,14 @@ private fun FeatureGroupItem(
                 style = MaterialTheme.typography.bodyLarge,
                 // color = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            Switch(
-                checked = group.isEnabled,
-                onCheckedChange = {
-                    onToggle(group.withEnabled(it))
-                }
-            )
+            if (currentMode == FeatureMode.APP) {
+                Switch(
+                    checked = group.isEnabled,
+                    onCheckedChange = {
+                        onToggle(group.withEnabled(it))
+                    }
+                )
+            }
         }
     }
 }

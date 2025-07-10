@@ -96,17 +96,21 @@ fun AddFeatureDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 启用状态选择
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = stringResource(id = R.string.feature_enabled))
-                    Switch(
-                        checked = featureEnabled,
-                        onCheckedChange = { featureEnabled = it }
-                    )
+                if (currentMode == FeatureMode.APP) {
+                    // 启用状态选择
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = stringResource(id = R.string.feature_enabled))
+                        Switch(
+                            checked = featureEnabled,
+                            onCheckedChange = { featureEnabled = it }
+                        )
+                    }
+                } else {
+                    featureEnabled = true // 保持启用状态
                 }
             }
         },
@@ -222,13 +226,17 @@ fun EditFeatureDialog(
                     readOnly = isPresetDesc
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = stringResource(id = R.string.feature_enabled))
-                    Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
+                if (currentMode == FeatureMode.APP) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = stringResource(id = R.string.feature_enabled))
+                        Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
+                    }
+                } else {
+                    featureEnabled = true
                 }
             }
         },

@@ -17,23 +17,48 @@ object ConfigUtils {
     fun copySystemConfig(): Boolean {
         // 获取目标目录路径
         val destDir = app.getExternalFilesDir(null)?.absolutePath ?: return false
-
-        // Shell 脚本：创建目标目录并复制全部配置文件
         val destDirMedia = destDir.replace("/storage/emulated/0", "/data/media/0")
 
-        val shellCmd = buildString {
-            append("mkdir -p \"$destDir\" && ")
-            append("cp /my_product/etc/extension/com.oplus.app-features.xml \"$destDir/\" && ")
-            append("cp /my_product/etc/extension/com.oplus.oplus-feature.xml \"$destDir/\" && ")
-            // 修改权限，确保应用可写
-            append("chmod 777 \"$destDirMedia\" \"$destDirMedia/com.oplus.app-features.xml\" \"$destDirMedia/com.oplus.oplus-feature.xml\"")
+        val appFilePath = "$destDir/com.oplus.app-features.xml"
+        val oplusFilePath = "$destDir/com.oplus.oplus-feature.xml"
+
+        val needSystemCopy = !(CSU.fileExists(appFilePath) && CSU.fileExists(oplusFilePath))
+
+        val moduleBase = "/data/adb/modules/ColorOSFeaturesEnhance"
+        val moduleDirs = listOf(
+            "$moduleBase/my_product/etc/extension",
+            "$moduleBase/anymount/my_product/etc/extension"
+        )
+
+        val shellCmd = StringBuilder()
+
+        if (needSystemCopy) {
+            // 从系统路径复制到私有目录
+            shellCmd.append("mkdir -p \"$destDir\" && ")
+            shellCmd.append("cp /my_product/etc/extension/com.oplus.app-features.xml \"$destDir/\" && ")
+            shellCmd.append("cp /my_product/etc/extension/com.oplus.oplus-feature.xml \"$destDir/\" && ")
+
+            // 同时同步到模块目录
+            moduleDirs.forEach { mDir ->
+                shellCmd.append("mkdir -p \"$mDir\" && ")
+                shellCmd.append("cp /my_product/etc/extension/com.oplus.app-features.xml \"$mDir/\" && ")
+                shellCmd.append("cp /my_product/etc/extension/com.oplus.oplus-feature.xml \"$mDir/\" && ")
+            }
+        } else {
+            // 私有目录已有文件，尝试从模块目录同步（若存在）
+            val srcModuleDir = moduleDirs.firstOrNull { CSU.fileExists("$it/com.oplus.app-features.xml") }
+            if (srcModuleDir != null) {
+                shellCmd.append("cp \"$srcModuleDir/com.oplus.app-features.xml\" \"$destDir/\" && ")
+                shellCmd.append("cp \"$srcModuleDir/com.oplus.oplus-feature.xml\" \"$destDir/\" && ")
+            }
         }
 
-        // 执行命令（需要 root）
-        CSU.runWithSu(shellCmd)
+        // 修改权限，确保应用可写
+        shellCmd.append("chmod 777 \"$destDirMedia\" \"$destDirMedia/com.oplus.app-features.xml\" \"$destDirMedia/com.oplus.oplus-feature.xml\"")
 
-        // 基于目录是否存在来粗略判断复制是否成功
-        return CSU.fileExists(destDir)
+        CSU.runWithSu(shellCmd.toString())
+
+        return CSU.fileExists(appFilePath) && CSU.fileExists(oplusFilePath)
     }
 
     /**
