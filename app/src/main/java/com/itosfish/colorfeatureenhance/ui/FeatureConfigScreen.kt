@@ -7,12 +7,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,13 +19,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -59,12 +53,9 @@ import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.components.ColorOSTopAppBar
 import kotlinx.coroutines.launch
 import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
-import android.content.Context
 import androidx.compose.ui.platform.LocalContext
-import com.itosfish.colorfeatureenhance.MainActivity
 import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureConfigScreen(
     configPath: String,
@@ -131,6 +122,7 @@ fun FeatureConfigScreen(
         topBar = {
             ColorOSTopAppBar(title = stringResource(id = R.string.app_title))
         },
+        // 浮动按钮（添加）
         floatingActionButton = {
             AnimatedVisibility(
                 visible = fabVisible,
@@ -138,7 +130,9 @@ fun FeatureConfigScreen(
                 exit = slideOutVertically(targetOffsetY = { it * 2 }) + fadeOut()
             ) {
                 FloatingActionButton(
-                    onClick = { showAddDialog = true }
+                    onClick = { showAddDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = stringResource(R.string.add_feature))
                 }
@@ -260,6 +254,9 @@ private fun FeatureGroupItem(
                 onClick = {},
                 onLongClick = onLongPress
             ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -284,7 +281,8 @@ private fun FeatureGroupItem(
             Text(
                 text = displayText,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Switch(
                 checked = group.isEnabled,
@@ -294,77 +292,6 @@ private fun FeatureGroupItem(
             )
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AddFeatureDialog(
-    onDismiss: () -> Unit,
-    context: Context,
-    onConfirm: (name: String, description: String, enabled: Boolean) -> Unit
-) {
-    var featureName by remember { mutableStateOf("") }
-    var featureDescription by remember { mutableStateOf("") }
-    var featureEnabled by remember { mutableStateOf(true) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(id = R.string.add_feature)) },
-        text = {
-            Column {
-                // 特性名称输入
-                OutlinedTextField(
-                    value = featureName,
-                    onValueChange = { featureName = it },
-                    label = { Text(stringResource(id = R.string.feature_name)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 特性描述输入
-                OutlinedTextField(
-                    value = featureDescription,
-                    onValueChange = { featureDescription = it },
-                    label = { Text(stringResource(id = R.string.feature_description)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 启用状态选择
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = stringResource(id = R.string.feature_enabled))
-                    Switch(
-                        checked = featureEnabled,
-                        onCheckedChange = { featureEnabled = it }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (featureName.isNotEmpty() && featureDescription.isNotEmpty()) {
-                        onConfirm(featureName, featureDescription, featureEnabled)
-                    }
-                },
-                enabled = featureName.isNotEmpty() && featureDescription.isNotEmpty()
-            ) {
-                Text(text = stringResource(id = android.R.string.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(id = android.R.string.cancel))
-            }
-        }
-    )
 }
 
 @Preview(showBackground = true)
