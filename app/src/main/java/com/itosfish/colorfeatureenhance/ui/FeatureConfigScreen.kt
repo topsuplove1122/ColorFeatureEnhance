@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,11 +56,15 @@ import kotlinx.coroutines.launch
 import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
 import androidx.compose.ui.platform.LocalContext
 import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
+import com.itosfish.colorfeatureenhance.utils.EditFeatureDialog
+import com.itosfish.colorfeatureenhance.FeatureMode
 
 @Composable
 fun FeatureConfigScreen(
     configPath: String,
-    repository: FeatureRepository = remember { XmlFeatureRepository() }
+    currentMode: FeatureMode,
+    onModeChange: (FeatureMode) -> Unit,
+    repository: FeatureRepository
 ) {
     val scope = rememberCoroutineScope()
     var features by remember { mutableStateOf<List<AppFeature>>(emptyList()) }
@@ -95,6 +100,8 @@ fun FeatureConfigScreen(
     val context = LocalContext.current
 
     var groupToDelete by remember { mutableStateOf<FeatureGroup?>(null) }
+    var featureToEdit by remember { mutableStateOf<Pair<AppFeature, String>?>(null) } // feature and description
+    var chooseFromGroup by remember { mutableStateOf<FeatureGroup?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var fabVisible by remember { mutableStateOf(true) }
 
@@ -120,7 +127,11 @@ fun FeatureConfigScreen(
 
     Scaffold(
         topBar = {
-            ColorOSTopAppBar(title = stringResource(id = R.string.app_title))
+            ColorOSTopAppBar(
+                title = stringResource(id = R.string.app_title),
+                currentMode = currentMode,
+                onModeChange = onModeChange
+            )
         },
         // 浮动按钮（添加）
         floatingActionButton = {
@@ -166,6 +177,8 @@ fun FeatureConfigScreen(
                             val shouldUpdate = updatedGroup.features.any { it.name == feature.name }
                             if (shouldUpdate) feature.copy(enabled = updatedGroup.isEnabled) else feature
                         }
+                        // 强制触发重组，确保UI立即更新
+                        features = emptyList()
                         features = updatedFeatures
 
                         // 异步保存
@@ -175,6 +188,13 @@ fun FeatureConfigScreen(
                     },
                     onLongPress = {
                         groupToDelete = group
+                    },
+                    onClick = {
+                        if (group.features.size == 1) {
+                            featureToEdit = group.features.first() to AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                        } else {
+                            chooseFromGroup = group
+                        }
                     }
                 )
             }
@@ -189,6 +209,8 @@ fun FeatureConfigScreen(
                     // 添加新特性
                     val newFeature = AppFeature(name, enabled)
                     val newList = features + newFeature
+                    // 强制触发重组，确保UI立即更新
+                    features = emptyList()
                     features = newList
 
                     // 保存到文件
@@ -217,6 +239,8 @@ fun FeatureConfigScreen(
                         val updatedFeatures = features.filterNot { feature ->
                             deleting.features.any { it.name == feature.name }
                         }
+                        // 强制触发重组，确保UI立即更新
+                        features = emptyList()
                         features = updatedFeatures
                         
                         // 删除用户映射
@@ -238,6 +262,58 @@ fun FeatureConfigScreen(
                 }
             )
         }
+
+        // 当组内有多特性需要选择编辑对象
+        chooseFromGroup?.let { grp ->
+            AlertDialog(
+                onDismissRequest = { chooseFromGroup = null },
+                title = { Text(text = stringResource(id = R.string.select_feature_to_edit)) },
+                text = {
+                    Column {
+                        grp.features.forEach { ft ->
+                            TextButton(onClick = {
+                                featureToEdit = ft to AppFeatureMappings.getLocalizedDescription(context, ft.name)
+                                chooseFromGroup = null
+                            }) {
+                                Text(text = ft.name)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { chooseFromGroup = null }) {
+                        Text(text = stringResource(id = android.R.string.cancel))
+                    }
+                }
+            )
+        }
+
+        // 编辑特性对话框
+        featureToEdit?.let { (ft, desc) ->
+            EditFeatureDialog(
+                onDismiss = { featureToEdit = null },
+                context = context,
+                originalName = ft.name,
+                originalDescription = if (desc == ft.name) "" else desc,
+                originalEnabled = ft.enabled,
+                onConfirm = { newName, newDesc, newEnabled ->
+                    // 更新feature list
+                    val updatedFeatures = features.map {
+                        if (it.name == ft.name) {
+                            it.copy(name = newName, enabled = newEnabled)
+                        } else it
+                    }
+                    // 强制触发重组，确保UI立即更新
+                    features = emptyList()
+                    features = updatedFeatures.toList()
+                    scope.launch {
+                        repository.saveFeatures(configPath, updatedFeatures)
+                    }
+                    featureToEdit = null
+                }
+            )
+        }
     }
 }
 
@@ -245,19 +321,20 @@ fun FeatureConfigScreen(
 private fun FeatureGroupItem(
     group: FeatureGroup,
     onToggle: (FeatureGroup) -> Unit,
-    onLongPress: () -> Unit
+    onLongPress: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
-                onClick = {},
+                onClick = onClick,
                 onLongClick = onLongPress
             ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(25.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -282,7 +359,7 @@ private fun FeatureGroupItem(
                 text = displayText,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
             Switch(
                 checked = group.isEnabled,
@@ -298,5 +375,10 @@ private fun FeatureGroupItem(
 @Composable
 private fun FeatureConfigPreview() {
     // 使用示例配置路径或空列表
-    FeatureConfigScreen(configPath = "")
+    FeatureConfigScreen(
+        configPath = "",
+        currentMode = FeatureMode.APP,
+        onModeChange = {},
+        repository = XmlFeatureRepository()
+    )
 } 

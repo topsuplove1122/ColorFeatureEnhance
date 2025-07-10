@@ -138,11 +138,13 @@ class AppFeatureMappings private constructor() {
      */
     fun isMatchingPresetDescription(context: Context, name: String, description: String): Boolean {
         val resId = getResId(name)
-        // 如果为，直接返回false
-        return resId != R.string.feature_unknown
-//
-//        // 比较预设描述和用户输入的描述
-//        val presetDescription = context.getString(resId)
-//        return presetDescription == description
+        // 如果是未知特性，直接返回false
+        if (resId == R.string.feature_unknown) {
+            return false
+        }
+        
+        // 比较预设描述和用户输入的描述
+        val presetDescription = context.getString(resId)
+        return presetDescription == description
     }
 } 

@@ -12,6 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.itosfish.colorfeatureenhance.FeatureMode
+import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
+import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
+import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,9 +28,29 @@ class MainActivity : ComponentActivity() {
         app = this
         setContent {
             ColorFeatureEnhanceTheme {
-                val configPath = getExternalFilesDir(null)?.absolutePath + "/com.oplus.app-features.xml"
+                var currentMode by remember { mutableStateOf(FeatureMode.APP) }
+
+                val configPath = when (currentMode) {
+                    FeatureMode.APP -> getExternalFilesDir(null)?.absolutePath + "/com.oplus.app-features.xml"
+                    FeatureMode.OPLUS -> getExternalFilesDir(null)?.absolutePath + "/com.oplus.oplus-feature.xml"
+                }
+
+                // 根据模式记忆 repository，切换模式时重建
+                val repository: FeatureRepository = remember(currentMode) {
+                    when (currentMode) {
+                        FeatureMode.APP -> XmlFeatureRepository()
+                        FeatureMode.OPLUS -> XmlOplusFeatureRepository()
+                    }
+                }
+
                 Toast.makeText(this, "配置文件路径: $configPath", Toast.LENGTH_LONG).show()
-                FeatureConfigScreen(configPath = configPath)
+
+                FeatureConfigScreen(
+                    configPath = configPath,
+                    currentMode = currentMode,
+                    onModeChange = { currentMode = it },
+                    repository = repository
+                )
             }
         }
     }
@@ -36,6 +64,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainPreview() {
     ColorFeatureEnhanceTheme {
-        FeatureConfigScreen(configPath = "")
+        FeatureConfigScreen(
+            configPath = "",
+            currentMode = FeatureMode.APP,
+            onModeChange = {},
+            repository = XmlFeatureRepository()
+        )
     }
 }

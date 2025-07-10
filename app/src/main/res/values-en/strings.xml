@@ -35,4 +35,8 @@
     <string name="feature_enabled">Enabled</string>
     <string name="preset_mapping_match_title">Preset Description Match</string>
     <string name="preset_mapping_match_message">This feature already has a preset description. The system preset will be used instead of custom description.</string>
+    <string name="edit_feature">Edit Feature</string>
+    <string name="select_feature_to_edit">Select feature to edit</string>
+    <string name="mode_app">App Features</string>
+    <string name="mode_oplus">Oplus Features</string>
 </resources> 

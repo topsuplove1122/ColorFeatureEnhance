@@ -165,4 +165,81 @@ fun AddFeatureDialog(
             }
         )
     }
+}
+
+/**
+ * 编辑特性对话框
+ * @param originalName 原始特性名称
+ * @param originalDescription 原始描述
+ * @param originalEnabled 原始启用状态
+ */
+@Composable
+fun EditFeatureDialog(
+    onDismiss: () -> Unit,
+    context: Context,
+    originalName: String,
+    originalDescription: String,
+    originalEnabled: Boolean,
+    onConfirm: (newName: String, newDescription: String, newEnabled: Boolean) -> Unit
+) {
+    var featureName by remember { mutableStateOf(originalName) }
+    var featureDescription by remember { mutableStateOf(originalDescription) }
+    var featureEnabled by remember { mutableStateOf(originalEnabled) }
+    val isPresetDesc = AppFeatureMappings.getInstance().isMatchingPresetDescription(context, originalName, originalDescription)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(id = R.string.edit_feature)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = featureName,
+                    onValueChange = { featureName = it },
+                    label = { Text(stringResource(id = R.string.feature_name)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = featureDescription,
+                    onValueChange = { if (!isPresetDesc) featureDescription = it },
+                    label = { Text(stringResource(id = R.string.feature_description)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isPresetDesc,
+                    readOnly = isPresetDesc
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = stringResource(id = R.string.feature_enabled))
+                    Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                // 若描述修改为空，则检查预设映射
+                if (featureDescription.isEmpty()) {
+                    AppFeatureMappings.getInstance().removeUserMapping(context, featureName)
+                } else {
+                    val matchPreset = AppFeatureMappings.getInstance().isMatchingPresetDescription(
+                        context, featureName, featureDescription)
+                    if (!matchPreset) {
+                        AppFeatureMappings.getInstance().saveUserMapping(context, featureName, featureDescription)
+                    }
+                }
+                onConfirm(featureName, featureDescription, featureEnabled)
+                // force ui update even if feature list unchanged
+                // handled outside
+            }) {
+                Text(text = stringResource(id = android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(id = android.R.string.cancel)) }
+        }
+    )
 } 
