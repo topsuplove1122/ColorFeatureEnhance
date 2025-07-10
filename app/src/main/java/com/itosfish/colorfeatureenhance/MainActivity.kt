@@ -21,6 +21,7 @@ import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepositor
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
+import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         CSU.checkRoot()
+        ConfigUtils.copySystemConfig()
     }
 
     companion object {
