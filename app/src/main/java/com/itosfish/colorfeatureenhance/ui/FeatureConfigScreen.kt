@@ -228,6 +228,7 @@ fun FeatureConfigScreen(
             AddFeatureDialog(
                 onDismiss = { showAddDialog = false },
                 context = context,
+                currentMode = currentMode,
                 onConfirm = { name, description, enabled ->
                     // 添加新特性
                     val newFeature = AppFeature(name, enabled)
@@ -320,6 +321,7 @@ fun FeatureConfigScreen(
                 originalName = ft.name,
                 originalDescription = if (desc == ft.name) "" else desc,
                 originalEnabled = ft.enabled,
+                currentMode = currentMode,
                 onConfirm = { newName, newDesc, newEnabled ->
                     // 更新feature list
                     val updatedFeatures = features.map {

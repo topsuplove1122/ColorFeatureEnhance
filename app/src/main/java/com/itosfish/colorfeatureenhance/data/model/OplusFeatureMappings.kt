@@ -86,12 +86,31 @@ class OplusFeatureMappings private constructor() {
         }
 
         fun getLocalizedDescription(context: Context, featureName: String): String {
+            val userMappings = UserFeatureMappings.getInstance(context)
+            val userDesc = userMappings.getDescription(featureName)
+            if (!userDesc.isNullOrEmpty()) return userDesc
+
             val resId = getInstance().getResId(featureName)
             return if (resId == R.string.feature_unknown) featureName else context.getString(resId)
         }
+
+        /** 保存用户自定义映射 */
+        fun saveUserMapping(context: Context, name: String, description: String) {
+            UserFeatureMappings.getInstance(context).saveMapping(name, description)
+        }
+
+        /** 删除用户映射 */
+        fun removeUserMapping(context: Context, name: String) {
+            UserFeatureMappings.getInstance(context).removeMapping(name)
+        }
+
+        fun isMatchingPresetDescription(context: Context, name: String, description: String): Boolean {
+            val resId = getInstance().getResId(name)
+            if (resId == R.string.feature_unknown) return false
+            val preset = context.getString(resId)
+            return preset == description
+        }
     }
 
-    fun getResId(name: String): Int {
-        return NAME_TO_RES_ID[name] ?: R.string.feature_unknown
-    }
+    fun getResId(name: String): Int = NAME_TO_RES_ID[name] ?: R.string.feature_unknown
 } 

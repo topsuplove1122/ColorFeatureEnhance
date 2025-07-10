@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
+import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
+import com.itosfish.colorfeatureenhance.FeatureMode
 import android.content.Context
 
 
@@ -60,7 +62,8 @@ fun showAboutDialog(activity: Activity) {
 fun AddFeatureDialog(
     onDismiss: () -> Unit,
     onConfirm: (name: String, description: String, enabled: Boolean) -> Unit,
-    context: Context
+    context: Context,
+    currentMode: FeatureMode
 ) {
     var featureName by remember { mutableStateOf("") }
     var featureDescription by remember { mutableStateOf("") }
@@ -114,18 +117,23 @@ fun AddFeatureDialog(
                         // 只有当描述不为空时才保存映射
                         if (featureDescription.isNotEmpty()) {
                             // 检查是否与预设映射匹配
-                            val isPresetMatch = AppFeatureMappings.getInstance().isMatchingPresetDescription(
-                                context, featureName, featureDescription
-                            )
+                            val isPresetMatch = if (currentMode == FeatureMode.APP) {
+                                AppFeatureMappings.getInstance().isMatchingPresetDescription(
+                                    context, featureName, featureDescription)
+                            } else {
+                                OplusFeatureMappings.isMatchingPresetDescription(context, featureName, featureDescription)
+                            }
 
                             if (isPresetMatch) {
                                 // 显示提示对话框
                                 showPresetMatchDialog = true
                             } else {
                                 // 保存用户自定义映射
-                                AppFeatureMappings.getInstance().saveUserMapping(
-                                    context, featureName, featureDescription
-                                )
+                                if (currentMode == FeatureMode.APP) {
+                                    AppFeatureMappings.getInstance().saveUserMapping(context, featureName, featureDescription)
+                                } else {
+                                    OplusFeatureMappings.saveUserMapping(context, featureName, featureDescription)
+                                }
                                 // 添加特性并关闭对话框
                                 onConfirm(featureName, featureDescription, featureEnabled)
                                 // 不要在这里关闭对话框，因为showPresetMatchDialog=true时需要继续显示
@@ -180,12 +188,17 @@ fun EditFeatureDialog(
     originalName: String,
     originalDescription: String,
     originalEnabled: Boolean,
+    currentMode: FeatureMode,
     onConfirm: (newName: String, newDescription: String, newEnabled: Boolean) -> Unit
 ) {
     var featureName by remember { mutableStateOf(originalName) }
     var featureDescription by remember { mutableStateOf(originalDescription) }
     var featureEnabled by remember { mutableStateOf(originalEnabled) }
-    val isPresetDesc = AppFeatureMappings.getInstance().isMatchingPresetDescription(context, originalName, originalDescription)
+    val isPresetDesc = if (currentMode == FeatureMode.APP) {
+        AppFeatureMappings.getInstance().isMatchingPresetDescription(context, originalName, originalDescription)
+    } else {
+        OplusFeatureMappings.isMatchingPresetDescription(context, originalName, originalDescription)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -223,12 +236,23 @@ fun EditFeatureDialog(
             TextButton(onClick = {
                 // 若描述修改为空，则检查预设映射
                 if (featureDescription.isEmpty()) {
-                    AppFeatureMappings.getInstance().removeUserMapping(context, featureName)
+                    if (currentMode == FeatureMode.APP) {
+                        AppFeatureMappings.getInstance().removeUserMapping(context, featureName)
+                    } else {
+                        OplusFeatureMappings.removeUserMapping(context, featureName)
+                    }
                 } else {
-                    val matchPreset = AppFeatureMappings.getInstance().isMatchingPresetDescription(
-                        context, featureName, featureDescription)
+                    val matchPreset = if (currentMode == FeatureMode.APP) {
+                        AppFeatureMappings.getInstance().isMatchingPresetDescription(context, featureName, featureDescription)
+                    } else {
+                        OplusFeatureMappings.isMatchingPresetDescription(context, featureName, featureDescription)
+                    }
                     if (!matchPreset) {
-                        AppFeatureMappings.getInstance().saveUserMapping(context, featureName, featureDescription)
+                        if (currentMode == FeatureMode.APP) {
+                            AppFeatureMappings.getInstance().saveUserMapping(context, featureName, featureDescription)
+                        } else {
+                            OplusFeatureMappings.saveUserMapping(context, featureName, featureDescription)
+                        }
                     }
                 }
                 onConfirm(featureName, featureDescription, featureEnabled)
