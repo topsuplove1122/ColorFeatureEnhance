@@ -2,24 +2,25 @@ package com.itosfish.colorfeatureenhance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
-import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.itosfish.colorfeatureenhance.FeatureMode
-import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
+import androidx.compose.ui.tooling.preview.Preview
+import com.itosfish.colorfeatureenhance.utils.CSU
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
+import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
+import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
+import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +54,9 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+        CSU.checkRoot()
     }
+
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var app: MainActivity private set

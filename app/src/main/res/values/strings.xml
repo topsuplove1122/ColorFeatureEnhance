@@ -65,4 +65,9 @@
     <string name="search_hint">搜索名称或描述...</string>
     <string name="search_no_results">未找到匹配结果</string>
     <string name="search_clear">清除搜索</string>
+    <string name="root_permission_title">需要 Root 权限</string>
+    <string name="root_permission_message">该功能需要 Root 权限才能使用。请使用 Magisk 或其他工具获取 Root 权限。</string>
+    <string name="root_permission_exit">退出</string>
+    <string name="root_permission_continue">仍要进入</string>
+    <string name="root_permission_warning">请注意，某些功能可能无法正常工作。</string>
 </resources>
