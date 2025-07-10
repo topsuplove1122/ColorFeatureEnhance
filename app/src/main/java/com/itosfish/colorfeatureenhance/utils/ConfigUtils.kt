@@ -19,10 +19,15 @@ object ConfigUtils {
         val destDir = app.getExternalFilesDir(null)?.absolutePath ?: return false
 
         // Shell 脚本：创建目标目录并复制全部配置文件
-        val shellCmd =
-            "mkdir -p \"$destDir\" && " +
-            "cp /my_product/etc/extension/com.oplus.app-features.xml \"$destDir/\" && " +
-            "cp /my_product/etc/extension/com.oplus.oplus-feature.xml \"$destDir/\""
+        val destDirMedia = destDir.replace("/storage/emulated/0", "/data/media/0")
+
+        val shellCmd = buildString {
+            append("mkdir -p \"$destDir\" && ")
+            append("cp /my_product/etc/extension/com.oplus.app-features.xml \"$destDir/\" && ")
+            append("cp /my_product/etc/extension/com.oplus.oplus-feature.xml \"$destDir/\" && ")
+            // 修改权限，确保应用可写
+            append("chmod 777 \"$destDirMedia\" \"$destDirMedia/com.oplus.app-features.xml\" \"$destDirMedia/com.oplus.oplus-feature.xml\"")
+        }
 
         // 执行命令（需要 root）
         CSU.runWithSu(shellCmd)
@@ -97,5 +102,48 @@ object ConfigUtils {
             e.printStackTrace()
             false
         }
+    }
+
+    /**
+     * 将应用外部存储目录中的配置文件复制到模块目录：
+     *  /data/adb/modules/ColorOSFeaturesEnhance/my_product/etc/extension/
+     *  /data/adb/modules/ColorOSFeaturesEnhance/anymount/my_product/etc/extension/
+     *
+     * 需要 root 权限。
+     * @return 至少一个文件复制成功时返回 true
+     */
+    fun copyConfigToModule(): Boolean {
+        val baseDir = "/data/adb/modules/ColorOSFeaturesEnhance"
+        val destDirs = listOf(
+            "$baseDir/my_product/etc/extension",
+            "$baseDir/anymount/my_product/etc/extension"
+        )
+
+        // 创建目标目录
+        val mkdirCmd = destDirs.joinToString(" && ") { "mkdir -p \"$it\"" }
+
+        // 源文件列表
+        val srcDir = app.getExternalFilesDir(null)?.absolutePath ?: return false
+        val fileNames = listOf("com.oplus.app-features.xml", "com.oplus.oplus-feature.xml")
+
+        val copyCmdBuilder = StringBuilder(mkdirCmd)
+
+        fileNames.forEach { name ->
+            val srcPath = "$srcDir/$name"
+            copyCmdBuilder.append(" && if [ -e \"$srcPath\" ]; then ")
+            destDirs.forEach { dest ->
+                copyCmdBuilder.append("cp \"$srcPath\" \"$dest/\" && ")
+            }
+            // remove last && for each file block then close
+            copyCmdBuilder.append("true; fi")
+        }
+
+        CSU.runWithSu(copyCmdBuilder.toString())
+
+        // 检测至少一个文件是否已复制成功
+        val success = fileNames.any { name ->
+            destDirs.any { dest -> CSU.fileExists("$dest/$name") }
+        }
+        return success
     }
 }

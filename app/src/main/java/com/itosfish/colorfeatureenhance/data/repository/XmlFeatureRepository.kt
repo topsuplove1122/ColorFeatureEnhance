@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
+import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 class XmlFeatureRepository : FeatureRepository {
 
@@ -57,6 +58,9 @@ class XmlFeatureRepository : FeatureRepository {
 
             writer.appendLine("</extend_features>")
         }
+
+        // 将更新后的文件复制到模块目录
+        ConfigUtils.copyConfigToModule()
     }
 
     /**

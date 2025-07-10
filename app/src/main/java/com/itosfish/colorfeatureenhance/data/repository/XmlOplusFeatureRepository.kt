@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
+import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 /**
  * 针对 <oplus-config> 节点、<oplus-feature> 标签的解析/写入实现
@@ -58,6 +59,8 @@ class XmlOplusFeatureRepository : FeatureRepository {
             }
             writer.appendLine("</oplus-config>")
         }
+
+        ConfigUtils.copyConfigToModule()
     }
 
     private fun parseEnabledFromArgs(args: String): Boolean {
