@@ -288,9 +288,9 @@ fun FeatureConfigScreen(
                 onDismiss = { showAddDialog = false },
                 context = context,
                 currentMode = currentMode,
-                onConfirm = { name, description, enabled ->
+                onConfirm = { name, description, enabled, args ->
                     // 添加新特性
-                    val newFeature = AppFeature(name, enabled)
+                    val newFeature = AppFeature(name, enabled, args)
                     val newList = features + newFeature
                     // 强制触发重组，确保UI立即更新
                     features = emptyList()
@@ -380,12 +380,13 @@ fun FeatureConfigScreen(
                 originalName = ft.name,
                 originalDescription = if (desc == ft.name) "" else desc,
                 originalEnabled = ft.enabled,
+                originalArgs = ft.args,
                 currentMode = currentMode,
-                onConfirm = { newName, newDesc, newEnabled ->
+                onConfirm = { newName, newDesc, newEnabled, newArgs ->
                     // 更新feature list
                     val updatedFeatures = features.map {
                         if (it.name == ft.name) {
-                            it.copy(name = newName, enabled = newEnabled)
+                            it.copy(name = newName, enabled = newEnabled, args = newArgs)
                         } else it
                     }
                     features = updatedFeatures.toList()
@@ -422,7 +423,7 @@ private fun FeatureGroupItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
-        shape = RoundedCornerShape(25.dp),
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -453,7 +454,8 @@ private fun FeatureGroupItem(
                 style = MaterialTheme.typography.bodyLarge,
                 // color = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            if (currentMode == FeatureMode.APP) {
+            val hasBoolean = group.features.first().args?.startsWith("boolean:") == true
+            if (currentMode == FeatureMode.APP && hasBoolean) {
                 Switch(
                     checked = group.isEnabled,
                     onCheckedChange = {

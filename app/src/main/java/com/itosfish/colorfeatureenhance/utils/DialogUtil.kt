@@ -61,13 +61,14 @@ fun showAboutDialog(activity: Activity) {
 @Composable
 fun AddFeatureDialog(
     onDismiss: () -> Unit,
-    onConfirm: (name: String, description: String, enabled: Boolean) -> Unit,
+    onConfirm: (name: String, description: String, enabled: Boolean, args: String?) -> Unit,
     context: Context,
     currentMode: FeatureMode
 ) {
     var featureName by remember { mutableStateOf("") }
     var featureDescription by remember { mutableStateOf("") }
     var featureEnabled by remember { mutableStateOf(true) }
+    var argValue by remember { mutableStateOf("") }
     var showPresetMatchDialog by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -97,20 +98,32 @@ fun AddFeatureDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (currentMode == FeatureMode.APP) {
-                    // 启用状态选择
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = stringResource(id = R.string.feature_enabled))
-                        Switch(
-                            checked = featureEnabled,
-                            onCheckedChange = { featureEnabled = it }
-                        )
+                    OutlinedTextField(
+                        value = argValue,
+                        onValueChange = { argValue = it },
+                        label = { Text("配置值 (留空表示无 args)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    if (argValue.startsWith("boolean:")) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = stringResource(id = R.string.feature_enabled))
+                            Switch(
+                                checked = featureEnabled,
+                                onCheckedChange = {
+                                    featureEnabled = it
+                                    argValue = if (it) "boolean:true" else "boolean:false"
+                                }
+                            )
+                        }
                     }
                 } else {
-                    featureEnabled = true // 保持启用状态
+                    featureEnabled = true // 保持启用状态，无 args 默认为启用
                 }
             }
         },
@@ -139,12 +152,12 @@ fun AddFeatureDialog(
                                     OplusFeatureMappings.saveUserMapping(context, featureName, featureDescription)
                                 }
                                 // 添加特性并关闭对话框
-                                onConfirm(featureName, featureDescription, featureEnabled)
+                                onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
                                 // 不要在这里关闭对话框，因为showPresetMatchDialog=true时需要继续显示
                             }
                         } else {
                             // 描述为空，直接添加特性并关闭对话框
-                            onConfirm(featureName, featureDescription, featureEnabled)
+                            onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
                         }
                     }
                 },
@@ -170,7 +183,7 @@ fun AddFeatureDialog(
                 TextButton(onClick = {
                     // 关闭提示对话框，添加特性并关闭主对话框
                     showPresetMatchDialog = false
-                    onConfirm(featureName, featureDescription, featureEnabled)
+                    onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
                 }) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }
@@ -192,12 +205,14 @@ fun EditFeatureDialog(
     originalName: String,
     originalDescription: String,
     originalEnabled: Boolean,
+    originalArgs: String?,
     currentMode: FeatureMode,
-    onConfirm: (newName: String, newDescription: String, newEnabled: Boolean) -> Unit
+    onConfirm: (newName: String, newDescription: String, newEnabled: Boolean, newArgs: String?) -> Unit
 ) {
     var featureName by remember { mutableStateOf(originalName) }
     var featureDescription by remember { mutableStateOf(originalDescription) }
     var featureEnabled by remember { mutableStateOf(originalEnabled) }
+    var argValue by remember { mutableStateOf(originalArgs ?: "") }
     val isPresetDesc = if (currentMode == FeatureMode.APP) {
         AppFeatureMappings.getInstance().isMatchingPresetDescription(context, originalName, originalDescription)
     } else {
@@ -226,7 +241,9 @@ fun EditFeatureDialog(
                     readOnly = isPresetDesc
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                if (currentMode == FeatureMode.APP) {
+                val hasBoolean = originalArgs?.startsWith("boolean:") == true
+
+                if (currentMode == FeatureMode.APP && hasBoolean) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -235,6 +252,14 @@ fun EditFeatureDialog(
                         Text(text = stringResource(id = R.string.feature_enabled))
                         Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
                     }
+                } else if (!hasBoolean && currentMode == FeatureMode.APP) {
+                    OutlinedTextField(
+                        value = argValue,
+                        onValueChange = { argValue = it },
+                        label = { Text("配置值") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    featureEnabled = true
                 } else {
                     featureEnabled = true
                 }
@@ -263,7 +288,7 @@ fun EditFeatureDialog(
                         }
                     }
                 }
-                onConfirm(featureName, featureDescription, featureEnabled)
+                onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
                 // force ui update even if feature list unchanged
                 // handled outside
             }) {

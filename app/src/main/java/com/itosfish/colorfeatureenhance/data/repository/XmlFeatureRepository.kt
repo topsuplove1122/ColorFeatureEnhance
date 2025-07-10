@@ -24,11 +24,15 @@ class XmlFeatureRepository : FeatureRepository {
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG && parser.name == "app_feature") {
                 val nameAttr = parser.getAttributeValue(null, "name") ?: ""
-                val argsAttr = parser.getAttributeValue(null, "args") ?: ""
+                val argsAttr: String? = parser.getAttributeValue(null, "args")
 
-                val enabled = parseEnabledFromArgs(argsAttr)
+                val enabled = if (argsAttr != null && argsAttr.startsWith("boolean:")) {
+                    argsAttr.substringAfter("boolean:").equals("true", true)
+                } else {
+                    true // 无布尔 args 时默认视为启用
+                }
                 if (nameAttr.isNotEmpty()) {
-                    features.add(AppFeature(nameAttr, enabled))
+                    features.add(AppFeature(nameAttr, enabled, argsAttr))
                 }
             }
             eventType = parser.next()
@@ -38,7 +42,8 @@ class XmlFeatureRepository : FeatureRepository {
         features
             .groupBy { it.name }
             .map { (name, list) ->
-                AppFeature(name, list.any { it.enabled })
+                val mergedArgs = list.first().args
+                AppFeature(name, list.any { it.enabled }, mergedArgs)
             }
     }
 
@@ -52,8 +57,15 @@ class XmlFeatureRepository : FeatureRepository {
             writer.appendLine("<extend_features>")
 
             features.forEach { feature ->
-                val boolValue = if (feature.enabled) "true" else "false"
-                writer.appendLine("    <app_feature name=\"${feature.name}\" args=\"boolean:$boolValue\"/>")
+                val argsString = feature.args
+                if (argsString.isNullOrBlank()) {
+                    writer.appendLine("    <app_feature name=\"${feature.name}\"/>")
+                } else if (argsString.startsWith("boolean:")) {
+                    val boolValue = if (feature.enabled) "true" else "false"
+                    writer.appendLine("    <app_feature name=\"${feature.name}\" args=\"boolean:$boolValue\"/>")
+                } else {
+                    writer.appendLine("    <app_feature name=\"${feature.name}\" args=\"${argsString}\"/>")
+                }
             }
 
             writer.appendLine("</extend_features>")
@@ -63,17 +75,5 @@ class XmlFeatureRepository : FeatureRepository {
         ConfigUtils.copyConfigToModule()
     }
 
-    /**
-     * 根据 args 属性解析是否启用
-     * boolean:true -> true
-     * boolean:false -> false
-     * 其它情况，如果标签存在即认为启用
-     */
-    private fun parseEnabledFromArgs(args: String): Boolean {
-        if (args.startsWith("boolean:")) {
-            return args.substringAfter("boolean:").equals("true", ignoreCase = true)
-        }
-        // 没有明确 boolean 时，只要节点存在就视为已启用
-        return true
-    }
+    // 已合并到上方逻辑
 } 

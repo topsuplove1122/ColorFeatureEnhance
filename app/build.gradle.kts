@@ -13,7 +13,7 @@ android {
         minSdk = 35
         targetSdk = 36
         versionCode = 20250710
-        versionName = "0.17"
+        versionName = "0.22"
 
         ndk {
             // 设置支持的SO库架构
