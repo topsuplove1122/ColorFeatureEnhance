@@ -65,6 +65,7 @@ fun AddFeatureDialog(
     var featureName by remember { mutableStateOf("") }
     var featureDescription by remember { mutableStateOf("") }
     var featureEnabled by remember { mutableStateOf(true) }
+    var showPresetMatchDialog by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -112,12 +113,27 @@ fun AddFeatureDialog(
                     if (featureName.isNotEmpty()) {
                         // 只有当描述不为空时才保存映射
                         if (featureDescription.isNotEmpty()) {
-                            AppFeatureMappings.getInstance().saveUserMapping(
+                            // 检查是否与预设映射匹配
+                            val isPresetMatch = AppFeatureMappings.getInstance().isMatchingPresetDescription(
                                 context, featureName, featureDescription
                             )
+
+                            if (isPresetMatch) {
+                                // 显示提示对话框
+                                showPresetMatchDialog = true
+                            } else {
+                                // 保存用户自定义映射
+                                AppFeatureMappings.getInstance().saveUserMapping(
+                                    context, featureName, featureDescription
+                                )
+                                // 添加特性并关闭对话框
+                                onConfirm(featureName, featureDescription, featureEnabled)
+                                // 不要在这里关闭对话框，因为showPresetMatchDialog=true时需要继续显示
+                            }
+                        } else {
+                            // 描述为空，直接添加特性并关闭对话框
+                            onConfirm(featureName, featureDescription, featureEnabled)
                         }
-                        
-                        onConfirm(featureName, featureDescription, featureEnabled)
                     }
                 },
                 enabled = featureName.isNotEmpty() // 只要名称不为空即可
@@ -131,4 +147,22 @@ fun AddFeatureDialog(
             }
         }
     )
+
+    // 预设映射匹配提示对话框
+    if (showPresetMatchDialog) {
+        AlertDialog(
+            onDismissRequest = { showPresetMatchDialog = false },
+            title = { Text(text = stringResource(id = R.string.preset_mapping_match_title)) },
+            text = { Text(text = stringResource(id = R.string.preset_mapping_match_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    // 关闭提示对话框，添加特性并关闭主对话框
+                    showPresetMatchDialog = false
+                    onConfirm(featureName, featureDescription, featureEnabled)
+                }) {
+                    Text(text = stringResource(id = android.R.string.ok))
+                }
+            }
+        )
+    }
 } 

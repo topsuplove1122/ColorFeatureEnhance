@@ -33,4 +33,6 @@
     <string name="feature_name">Feature Name</string>
     <string name="feature_description">Feature Description</string>
     <string name="feature_enabled">Enabled</string>
+    <string name="preset_mapping_match_title">Preset Description Match</string>
+    <string name="preset_mapping_match_message">This feature already has a preset description. The system preset will be used instead of custom description.</string>
 </resources> 

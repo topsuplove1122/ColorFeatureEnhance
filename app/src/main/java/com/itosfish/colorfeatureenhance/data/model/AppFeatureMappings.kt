@@ -131,4 +131,18 @@ class AppFeatureMappings private constructor() {
         val userMappings = UserFeatureMappings.getInstance(context)
         names.forEach { userMappings.removeMapping(it) }
     }
+
+    /**
+     * 检查特性名称和描述是否与预设映射匹配
+     * @return 如果匹配返回true，否则返回false
+     */
+    fun isMatchingPresetDescription(context: Context, name: String, description: String): Boolean {
+        val resId = getResId(name)
+        // 如果为，直接返回false
+        return resId != R.string.feature_unknown
+//
+//        // 比较预设描述和用户输入的描述
+//        val presetDescription = context.getString(resId)
+//        return presetDescription == description
+    }
 } 

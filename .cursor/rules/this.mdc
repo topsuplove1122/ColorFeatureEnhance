@@ -88,3 +88,5 @@ Compose编写规则
 
 在开始一个新任务前，尽可能使用todo_tool并由我审核、修改并最终明确确认后才开始代码编辑，除非该任务极其简单
 积极使用web search
+
+本项目中所有需要MainActivity的context的地方，一律使用app即可。如Toast.makeText(app,"text",xxxxx)

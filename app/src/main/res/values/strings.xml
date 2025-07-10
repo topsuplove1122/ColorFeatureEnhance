@@ -32,4 +32,6 @@
     <string name="feature_name">特性名称</string>
     <string name="feature_description">特性描述</string>
     <string name="feature_enabled">启用状态</string>
+    <string name="preset_mapping_match_title">预设描述匹配</string>
+    <string name="preset_mapping_match_message">当前特性已有预设描述，将使用系统预设描述而非自定义描述。</string>
 </resources>

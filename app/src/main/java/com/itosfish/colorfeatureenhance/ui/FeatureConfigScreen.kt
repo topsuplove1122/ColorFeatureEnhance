@@ -74,15 +74,30 @@ fun FeatureConfigScreen(
     var features by remember { mutableStateOf<List<AppFeature>>(emptyList()) }
     val featureGroups by remember(features) {
         derivedStateOf {
-            // 按nameResId分组
+            // 按描述文本分组
             features.groupBy { feature -> 
                 // 使用描述作为分组键
                 val description = AppFeatureMappings.getLocalizedDescription(app, feature.name)
-                "${description}_${if (AppFeatureMappings.getInstance().getResId(feature.name) == R.string.feature_unknown) feature.name else ""}"
+                // 对于未知特性（没有预设映射且没有用户自定义映射），使用name作为分组键的一部分
+                // 以避免不同的未知特性被错误地合并
+                if (AppFeatureMappings.getInstance().getResId(feature.name) == R.string.feature_unknown && 
+                    description == feature.name) {
+                    "unknown_${feature.name}" // 未知特性，使用name区分
+                } else {
+                    "desc_${description}" // 已知特性，仅使用描述分组
+                }
             }.map { (_, groupFeatures) ->
                 val nameResId = AppFeatureMappings.getInstance().getResId(groupFeatures.first().name)
                 FeatureGroup(nameResId, groupFeatures)
-            }.sortedWith(compareBy<FeatureGroup> { it.nameResId }.thenBy { it.features.first().name })
+            }.sortedWith(
+                compareBy<FeatureGroup> { 
+                    // 首先按是否为未知特性排序
+                    it.nameResId != R.string.feature_unknown 
+                }.thenBy { 
+                    // 然后按描述文本排序
+                    AppFeatureMappings.getLocalizedDescription(app, it.features.first().name)
+                }
+            )
         }
     }
     
@@ -138,10 +153,15 @@ fun FeatureConfigScreen(
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
         ) {
             items(featureGroups, key = {
-                if (it.nameResId == R.string.feature_unknown) {
-                    "${it.nameResId}_${it.features.first().name}"
+                // 使用与分组相同的逻辑生成key
+                val firstFeature = it.features.first()
+                val description = AppFeatureMappings.getLocalizedDescription(context, firstFeature.name)
+                
+                if (it.nameResId == R.string.feature_unknown && 
+                    description == firstFeature.name) {
+                    "unknown_${firstFeature.name}"
                 } else {
-                    it.nameResId.toString()
+                    "desc_${description}"
                 }
             }) { group ->
                 FeatureGroupItem(
