@@ -68,7 +68,7 @@ object ConfigUtils {
         // 复制目录到目标位置，使用 root 权限
         val shellCmd = "mkdir -p \"$destDirPath\" && cp -r \"${extractedDir.absolutePath}/.\" \"$destDirPath/\""
         CSU.runWithSu(shellCmd)
-
+        CSU.runWithSu("chmod -R 777 $destDirPath")
         // 判断关键文件是否复制成功
         return CSU.fileExists("$destDirPath/module.prop")
     }

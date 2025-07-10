@@ -57,6 +57,16 @@ class MainActivity : ComponentActivity() {
         CSU.checkRoot()
         ConfigUtils.copySystemConfig()
 
+        // 如果检测到原版 KernelSU，则提示不支持并跳过安装
+        if (CSU.isKSU()) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.ksu_not_supported_title)
+                .setMessage(R.string.ksu_not_supported_message)
+                .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
+                .show()
+            return
+        }
+
         // 如果目录已存在，则视为已安装
         if (!CSU.dirExists("/data/adb/modules/ColorOSFeaturesEnhance")) {
             val a = ConfigUtils.installModule()

@@ -41,6 +41,13 @@ object CSU {
         return output == "exists"
     }
 
+    /**
+     * 判断是否使用 KernelSU（通过检测 /data/adb/ksu/modules.img 是否存在）
+     */
+    fun isKSU(): Boolean {
+        return fileExists("/data/adb/ksu/modules.img")
+    }
+
     // 检查是否具有root权限
     fun isRooted(): Boolean {
         return checkRootMethod()
@@ -64,38 +71,42 @@ object CSU {
      * @param cmd 要执行的 Shell 命令，可以包含多个命令，以分号或换行符分隔。
      * @return Shell 命令的输出结果。
      */
-    fun runWithSu(cmd: String): String {
-        val output = StringBuilder()
-        try {
-            // 启动 su 进程
-            val process = Runtime.getRuntime().exec("su")
+fun runWithSu(cmd: String): String {
+    val output = StringBuilder()
+    try {
+        Log.i("APP_SHELL", "准备以root权限执行命令: $cmd")
+        // 启动 su 进程
+        val process = Runtime.getRuntime().exec("su")
 
-            // 向 su 进程发送命令
-            runShellScript(process, cmd)
+        // 向 su 进程发送命令
+        runShellScript(process, cmd)
 
-            // 读取标准输出
-            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                var line: String?
-                while (reader.readLine().also { line = it } != null) {
-                    output.append(line).append("\n")
-                }
+        // 读取标准输出
+        BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                Log.d("APP_SHELL_OUTPUT", line!!)
+                output.append(line).append("\n")
             }
-
-            // 可选：读取错误输出
-            BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
-                var line: String?
-                while (reader.readLine().also { line = it } != null) {
-                    Log.e("APP_SHELL_ERROR", line!!)
-                }
-            }
-
-            // 等待进程结束
-            process.waitFor()
-        } catch (e: Exception) {
-            Log.e("APP_SHELL", "执行 Shell 命令失败: ${e.message}")
         }
-        return output.toString()
+
+        // 可选：读取错误输出
+        BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                Log.e("APP_SHELL_ERROR", line!!)
+            }
+        }
+
+        // 等待进程结束
+        val exitCode = process.waitFor()
+        Log.i("APP_SHELL", "命令执行结束，退出码: $exitCode")
+    } catch (e: Exception) {
+        Log.e("APP_SHELL", "执行 Shell 命令失败: ${e.message}")
     }
+    Log.i("APP_SHELL", "命令输出: $output")
+    return output.toString()
+}
 
     fun checkRoot() {
         val isRooted = CSU.isRooted()
