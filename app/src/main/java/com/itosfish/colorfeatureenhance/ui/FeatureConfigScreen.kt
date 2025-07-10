@@ -131,6 +131,10 @@ fun FeatureConfigScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var fabVisible by remember { mutableStateOf(true) }
     
+    // 复杂特性对话框状态
+    var showComplexFeatureDialog by remember { mutableStateOf(false) }
+    var complexFeatureConfigPath by remember { mutableStateOf("") }
+    
     // 搜索相关状态
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -251,10 +255,12 @@ fun FeatureConfigScreen(
                     },
                     onClick = {
                         if (group.features.size == 1) {
-                            featureToEdit = group.features.first() to if (currentMode == FeatureMode.APP) {
-                                AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                            // 检查是否为复杂特性
+                            val feature = group.features.first()
+                            featureToEdit = feature to if (currentMode == FeatureMode.APP) {
+                                AppFeatureMappings.getLocalizedDescription(context, feature.name)
                             } else {
-                                OplusFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                                OplusFeatureMappings.getLocalizedDescription(context, feature.name)
                             }
                         } else {
                             chooseFromGroup = group
@@ -381,12 +387,18 @@ fun FeatureConfigScreen(
                 originalDescription = if (desc == ft.name) "" else desc,
                 originalEnabled = ft.enabled,
                 originalArgs = ft.args,
+                originalSubNodes = ft.subNodes,
                 currentMode = currentMode,
                 onConfirm = { newName, newDesc, newEnabled, newArgs ->
                     // 更新feature list
                     val updatedFeatures = features.map {
                         if (it.name == ft.name) {
-                            it.copy(name = newName, enabled = newEnabled, args = newArgs)
+                            // 如果是复杂特性，保留原有子节点和参数
+                            if (it.isComplex) {
+                                it.copy(name = newName, enabled = newEnabled)
+                            } else {
+                                it.copy(name = newName, enabled = newEnabled, args = newArgs)
+                            }
                         } else it
                     }
                     features = updatedFeatures.toList()
@@ -398,6 +410,22 @@ fun FeatureConfigScreen(
                     // 手动触发刷新
                     refreshTrigger++
                     featureToEdit = null
+                }
+            )
+        }
+
+        // 复杂特性提示对话框
+        if (showComplexFeatureDialog) {
+            AlertDialog(
+                onDismissRequest = { showComplexFeatureDialog = false },
+                title = { Text(text = stringResource(id = R.string.complex_feature_title)) },
+                text = { 
+                    Text(text = stringResource(id = R.string.complex_feature_message, complexFeatureConfigPath))
+                },
+                confirmButton = {
+                    TextButton(onClick = { showComplexFeatureDialog = false }) {
+                        Text(text = stringResource(id = android.R.string.ok))
+                    }
                 }
             )
         }
@@ -454,8 +482,16 @@ private fun FeatureGroupItem(
                 style = MaterialTheme.typography.bodyLarge,
                 // color = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            val hasBoolean = group.features.first().args?.startsWith("boolean:") == true
-            if (currentMode == FeatureMode.APP && hasBoolean) {
+            val feature = group.features.first()
+            val hasBoolean = feature.args?.startsWith("boolean:") == true
+            val isComplex = feature.isComplex
+
+            if (isComplex) {
+                Text(
+                    text = stringResource(id = R.string.complex_feature_indicator),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else if (currentMode == FeatureMode.APP && hasBoolean) {
                 Switch(
                     checked = group.isEnabled,
                     onCheckedChange = {

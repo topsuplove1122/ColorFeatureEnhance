@@ -77,4 +77,7 @@
     <string name="common_ok">OK</string>
     <string name="ksu_not_supported_title">Unsupported KernelSU version</string>
     <string name="ksu_not_supported_message">Original KernelSU detected. This module supports only the KernelSU branch with Magisk Mount support. Please switch and try again.</string>
+    <string name="complex_feature_title">Complex Configuration</string>
+    <string name="complex_feature_message">This feature contains complex configuration that cannot be edited in the app. To modify parameters, please manually edit the config file:\n%1$s</string>
+    <string name="complex_feature_indicator">(Complex Config)</string>
 </resources> 

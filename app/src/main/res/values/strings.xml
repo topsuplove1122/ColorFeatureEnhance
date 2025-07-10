@@ -76,4 +76,7 @@
     <string name="common_ok">确定</string>
     <string name="ksu_not_supported_title">不支持的 KernelSU 版本</string>
     <string name="ksu_not_supported_message">检测到设备正在使用原版 KernelSU。当前模块仅支持 Magisk Mount 版本的 KernelSU，请更换后再尝试。</string>
+    <string name="complex_feature_title">复杂配置</string>
+    <string name="complex_feature_message">此特性包含复杂配置，无法在应用内编辑参数值。如需修改参数，请手动编辑配置文件：\n%1$s</string>
+    <string name="complex_feature_indicator">(复杂配置)</string>
 </resources>

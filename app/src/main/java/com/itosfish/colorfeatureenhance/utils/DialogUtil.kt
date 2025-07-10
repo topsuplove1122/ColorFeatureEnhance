@@ -32,6 +32,9 @@ import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
 import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
 import com.itosfish.colorfeatureenhance.FeatureMode
 import android.content.Context
+import androidx.compose.material3.MaterialTheme
+import com.itosfish.colorfeatureenhance.data.model.AppFeature
+import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
 
 
 /**
@@ -207,6 +210,7 @@ fun EditFeatureDialog(
     originalEnabled: Boolean,
     originalArgs: String?,
     currentMode: FeatureMode,
+    originalSubNodes: List<FeatureSubNode> = emptyList(),
     onConfirm: (newName: String, newDescription: String, newEnabled: Boolean, newArgs: String?) -> Unit
 ) {
     var featureName by remember { mutableStateOf(originalName) }
@@ -241,27 +245,49 @@ fun EditFeatureDialog(
                     readOnly = isPresetDesc
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                val hasBoolean = originalArgs?.startsWith("boolean:") == true
-
-                if (currentMode == FeatureMode.APP && hasBoolean) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = stringResource(id = R.string.feature_enabled))
-                        Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
-                    }
-                } else if (!hasBoolean && currentMode == FeatureMode.APP) {
-                    OutlinedTextField(
-                        value = argValue,
-                        onValueChange = { argValue = it },
-                        label = { Text("配置值") },
-                        modifier = Modifier.fillMaxWidth()
+                // 检查是否为复杂特性
+                val tempFeature = AppFeature(
+                    name = originalName,
+                    enabled = originalEnabled,
+                    args = originalArgs,
+                    subNodes = originalSubNodes
+                )
+                
+                val configPath = context.getExternalFilesDir(null)?.absolutePath + 
+                    if (currentMode == FeatureMode.APP) "/com.oplus.app-features.xml" 
+                    else "/com.oplus.oplus-feature.xml"
+                
+                if (tempFeature.isComplex) {
+                    Text(
+                        text = stringResource(id = R.string.complex_feature_message, configPath),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
                     )
-                    featureEnabled = true
+                    // 复杂特性不显示参数编辑控件
+                    return@Column
                 } else {
-                    featureEnabled = true
+                    val hasBoolean = originalArgs?.startsWith("boolean:") == true
+
+                    if (currentMode == FeatureMode.APP && hasBoolean) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = stringResource(id = R.string.feature_enabled))
+                            Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
+                        }
+                    } else if (!hasBoolean && currentMode == FeatureMode.APP) {
+                        OutlinedTextField(
+                            value = argValue,
+                            onValueChange = { argValue = it },
+                            label = { Text("配置值") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        featureEnabled = true
+                    } else {
+                        featureEnabled = true
+                    }
                 }
             }
         },
