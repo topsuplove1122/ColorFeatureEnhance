@@ -60,9 +60,9 @@
     @butterknife.On* <methods>;
 }
 # 配置自定义字典
--obfuscationdictionary lloveyou.txt
--classobfuscationdictionary lloveyou.txt
--packageobfuscationdictionary lloveyou.txt
+#-obfuscationdictionary lloveyou.txt
+#-classobfuscationdictionary lloveyou.txt
+#-packageobfuscationdictionary lloveyou.txt
 
 # JS 调用 Java 方法时需要保留的规则
 -keepattributes *JavascriptInterface*
