@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.itosfish.colorfeatureenhance.R
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
+import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
 import com.itosfish.colorfeatureenhance.data.model.FeatureGroup
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
@@ -68,22 +69,35 @@ fun FeatureConfigScreen(
 ) {
     val scope = rememberCoroutineScope()
     var features by remember { mutableStateOf<List<AppFeature>>(emptyList()) }
-    val featureGroups by remember(features) {
+    val featureGroups by remember(features, currentMode) {
         derivedStateOf {
             // 按描述文本分组
             features.groupBy { feature -> 
                 // 使用描述作为分组键
-                val description = AppFeatureMappings.getLocalizedDescription(app, feature.name)
+                val description = if (currentMode == FeatureMode.APP) {
+                    AppFeatureMappings.getLocalizedDescription(app, feature.name)
+                } else {
+                    OplusFeatureMappings.getLocalizedDescription(app, feature.name)
+                }
                 // 对于未知特性（没有预设映射且没有用户自定义映射），使用name作为分组键的一部分
                 // 以避免不同的未知特性被错误地合并
-                if (AppFeatureMappings.getInstance().getResId(feature.name) == R.string.feature_unknown && 
+                val resUnknown = if (currentMode == FeatureMode.APP) {
+                    AppFeatureMappings.getInstance().getResId(feature.name)
+                } else {
+                    OplusFeatureMappings.getInstance().getResId(feature.name)
+                }
+                if (resUnknown == R.string.feature_unknown && 
                     description == feature.name) {
                     "unknown_${feature.name}" // 未知特性，使用name区分
                 } else {
                     "desc_${description}" // 已知特性，仅使用描述分组
                 }
             }.map { (_, groupFeatures) ->
-                val nameResId = AppFeatureMappings.getInstance().getResId(groupFeatures.first().name)
+                val nameResId = if (currentMode == FeatureMode.APP) {
+                    AppFeatureMappings.getInstance().getResId(groupFeatures.first().name)
+                } else {
+                    OplusFeatureMappings.getInstance().getResId(groupFeatures.first().name)
+                }
                 FeatureGroup(nameResId, groupFeatures)
             }.sortedWith(
                 compareBy<FeatureGroup> { 
@@ -91,7 +105,11 @@ fun FeatureConfigScreen(
                     it.nameResId != R.string.feature_unknown 
                 }.thenBy { 
                     // 然后按描述文本排序
-                    AppFeatureMappings.getLocalizedDescription(app, it.features.first().name)
+                    if (currentMode == FeatureMode.APP) {
+                        AppFeatureMappings.getLocalizedDescription(app, it.features.first().name)
+                    } else {
+                        OplusFeatureMappings.getLocalizedDescription(app, it.features.first().name)
+                    }
                 }
             )
         }
@@ -160,7 +178,11 @@ fun FeatureConfigScreen(
             items(featureGroups, key = {
                 // 使用与分组相同的逻辑生成key
                 val firstFeature = it.features.first()
-                val description = AppFeatureMappings.getLocalizedDescription(context, firstFeature.name)
+                val description = if (currentMode == FeatureMode.APP) {
+                    AppFeatureMappings.getLocalizedDescription(context, firstFeature.name)
+                } else {
+                    OplusFeatureMappings.getLocalizedDescription(context, firstFeature.name)
+                }
                 
                 if (it.nameResId == R.string.feature_unknown && 
                     description == firstFeature.name) {
@@ -170,6 +192,7 @@ fun FeatureConfigScreen(
                 }
             }) { group ->
                 FeatureGroupItem(
+                    currentMode = currentMode,
                     group = group,
                     onToggle = { updatedGroup ->
                         // 更新组内所有特性的状态
@@ -319,6 +342,7 @@ fun FeatureConfigScreen(
 
 @Composable
 private fun FeatureGroupItem(
+    currentMode: FeatureMode,
     group: FeatureGroup,
     onToggle: (FeatureGroup) -> Unit,
     onLongPress: () -> Unit,
@@ -346,7 +370,11 @@ private fun FeatureGroupItem(
         ) {
             // 获取特性描述（优先用户自定义描述）
             val context = LocalContext.current
-            val label = AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+            val label = if (currentMode == FeatureMode.APP) {
+                AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+            } else {
+                OplusFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+            }
             
             // 如果组内有多个项，显示计数
             val displayText = if (group.features.size > 1) {

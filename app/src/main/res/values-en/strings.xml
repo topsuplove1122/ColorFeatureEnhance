@@ -39,4 +39,27 @@
     <string name="select_feature_to_edit">Select feature to edit</string>
     <string name="mode_app">App Features</string>
     <string name="mode_oplus">Oplus Features</string>
+    <!-- Oplus features preset descriptions -->
+    <string name="oplus_feature_compatibility_code">Compatibility Code</string>
+    <string name="oplus_feature_ai_eye_protect">AI Eye Protect</string>
+    <string name="oplus_feature_satellite_network">Satellite Network</string>
+    <string name="oplus_feature_game_acceleration">Game Acceleration</string>
+    <string name="oplus_feature_hyper_engine">Hyper Mode Performance Engine</string>
+    <string name="oplus_feature_touch_optimization">Touch Optimization</string>
+    <string name="oplus_feature_game_color_button">Game Assistant Color Button</string>
+    <string name="oplus_feature_eyeprotect_reminder">Eye-protection Reminder</string>
+    <string name="oplus_feature_reduce_white_point">Reduce White Point</string>
+    <string name="oplus_feature_genshin_shoulder_key">Genshin Shoulder Key</string>
+    <string name="oplus_feature_min_brightness_expand">Min Brightness Expand</string>
+    <string name="oplus_feature_low_brightness_flicker">Low Brightness Flicker</string>
+    <string name="oplus_feature_game_ifs">Game Assistant IFS</string>
+    <string name="oplus_feature_video_volume_enhance">Video Volume Enhancement</string>
+    <string name="oplus_feature_sidebar_video_assistant">Sidebar Video Assistant</string>
+    <string name="oplus_feature_cooling_fan">Cooling Fan</string>
+    <string name="oplus_feature_pick_color_optimization">Navbar Pick Color Optimization</string>
+    <string name="oplus_feature_live_scene_acceleration">Live Broadcast Acceleration</string>
+    <string name="oplus_feature_sound_focus_record">Recording Sound Focus</string>
+    <string name="oplus_feature_low_lux_anti_shake">Low Lux Anti-shake</string>
+    <string name="oplus_feature_foreground_preload">Foreground Preload</string>
+    <string name="oplus_feature_gcstring">GCString Support</string>
 </resources> 

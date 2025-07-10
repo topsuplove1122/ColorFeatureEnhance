@@ -38,4 +38,27 @@
     <string name="select_feature_to_edit">请选择要编辑的特性</string>
     <string name="mode_app">App Features</string>
     <string name="mode_oplus">Oplus Features</string>
+    <!-- Oplus features preset descriptions -->
+    <string name="oplus_feature_compatibility_code">适配性代码</string>
+    <string name="oplus_feature_ai_eye_protect">AI护眼</string>
+    <string name="oplus_feature_satellite_network">卫星网络</string>
+    <string name="oplus_feature_game_acceleration">游戏加速</string>
+    <string name="oplus_feature_hyper_engine">Hyper模式性能引擎</string>
+    <string name="oplus_feature_touch_optimization">触摸优化</string>
+    <string name="oplus_feature_game_color_button">独立游戏助手色彩按钮</string>
+    <string name="oplus_feature_eyeprotect_reminder">护眼提醒</string>
+    <string name="oplus_feature_reduce_white_point">无障碍屏幕白点减少</string>
+    <string name="oplus_feature_genshin_shoulder_key">原神肩键</string>
+    <string name="oplus_feature_min_brightness_expand">屏幕最小亮度拓展</string>
+    <string name="oplus_feature_low_brightness_flicker">低亮度屏闪</string>
+    <string name="oplus_feature_game_ifs">游戏助手IFS画面</string>
+    <string name="oplus_feature_video_volume_enhance">视频音量增强</string>
+    <string name="oplus_feature_sidebar_video_assistant">侧边栏视频助手</string>
+    <string name="oplus_feature_cooling_fan">散热风扇</string>
+    <string name="oplus_feature_pick_color_optimization">小横条拾取颜色优化</string>
+    <string name="oplus_feature_live_scene_acceleration">直播场景加速</string>
+    <string name="oplus_feature_sound_focus_record">录音声音焦点支持</string>
+    <string name="oplus_feature_low_lux_anti_shake">低Lux去晃动拓展支持</string>
+    <string name="oplus_feature_foreground_preload">前台预加载</string>
+    <string name="oplus_feature_gcstring">GCString支持</string>
 </resources>
