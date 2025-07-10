@@ -115,33 +115,39 @@ class XmlFeatureRepository : FeatureRepository {
             }
     }
     
+    private fun escapeAttr(value: String): String {
+        return value
+            .replace("&", "&amp;")
+            .replace("\"", "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+    }
+
     /**
      * 将特性写入 XML
      */
     private fun writeFeature(writer: java.io.BufferedWriter, feature: AppFeature) {
+        fun attrArgs(args: String?): String {
+            if (args.isNullOrBlank()) return ""
+            return " args=\"${escapeAttr(args)}\""
+        }
         if (feature.isSimple) {
-            // 简单特性
-            val argsString = feature.args
-            if (argsString.isNullOrBlank()) {
-                writer.appendLine("    <app_feature name=\"${feature.name}\"/>")
-            } else if (argsString.startsWith("boolean:")) {
+            if (feature.args.isNullOrBlank()) {
+                writer.appendLine("\t<app_feature name=\"${feature.name}\"/>")
+            } else if (feature.args.startsWith("boolean:")) {
                 val boolValue = if (feature.enabled) "true" else "false"
-                writer.appendLine("    <app_feature name=\"${feature.name}\" args=\"boolean:$boolValue\"/>")
+                writer.appendLine("\t<app_feature name=\"${feature.name}\" args=\"boolean:$boolValue\"/>")
             } else {
-                writer.appendLine("    <app_feature name=\"${feature.name}\" args=\"${argsString}\"/>")
+                writer.appendLine("\t<app_feature name=\"${feature.name}\"${attrArgs(feature.args)}/>")
             }
         } else {
-            // 复杂特性
-            val argsString = if (feature.args.isNullOrBlank()) "" else " args=\"${feature.args}\""
-            writer.appendLine("    <app_feature name=\"${feature.name}\"${argsString}>")
-            
+            writer.appendLine("\t<app_feature name=\"${feature.name}\"${attrArgs(feature.args)}>")
             // 写入子节点
             feature.subNodes.forEach { subNode ->
-                val nameAttr = if (subNode.name.isNullOrBlank()) "" else " name=\"${subNode.name}\""
-                writer.appendLine("        <${subNode.type}${nameAttr} args=\"${subNode.args}\"/>")
+                val nameAttr = if (subNode.name.isNullOrBlank()) "" else " name=\"${escapeAttr(subNode.name)}\""
+                writer.appendLine("\t\t<${subNode.type}${nameAttr} args=\"${escapeAttr(subNode.args)}\"/>")
             }
-            
-            writer.appendLine("    </app_feature>")
+            writer.appendLine("\t</app_feature>")
         }
     }
 } 

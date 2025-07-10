@@ -109,25 +109,30 @@ class XmlOplusFeatureRepository : FeatureRepository {
             }
     }
     
+    private fun escapeAttr(value: String): String {
+        return value
+            .replace("&", "&amp;")
+            .replace("\"", "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+    }
+
     /**
      * 将特性写入 XML
      */
     private fun writeFeature(writer: java.io.BufferedWriter, feature: AppFeature) {
+        fun attrArgs(args: String?): String {
+            if (args.isNullOrBlank()) return ""
+            return " args=\"${escapeAttr(args)}\""
+        }
         if (feature.isSimple) {
-            // 简单特性
-            val argsString = if (feature.args.isNullOrBlank()) "" else " args=\"${feature.args}\""
-            writer.appendLine("\t<oplus-feature name=\"${feature.name}\"${argsString}/>")
+            writer.appendLine("\t<oplus-feature name=\"${feature.name}\"${attrArgs(feature.args)}/>")
         } else {
-            // 复杂特性
-            val argsString = if (feature.args.isNullOrBlank()) "" else " args=\"${feature.args}\""
-            writer.appendLine("\t<oplus-feature name=\"${feature.name}\"${argsString}>")
-            
-            // 写入子节点
+            writer.appendLine("\t<oplus-feature name=\"${feature.name}\"${attrArgs(feature.args)}>")
             feature.subNodes.forEach { subNode ->
-                val nameAttr = if (subNode.name.isNullOrBlank()) "" else " name=\"${subNode.name}\""
-                writer.appendLine("\t\t<${subNode.type}${nameAttr} args=\"${subNode.args}\"/>")
+                val nameAttr = if (subNode.name.isNullOrBlank()) "" else " name=\"${escapeAttr(subNode.name)}\""
+                writer.appendLine("\t\t<${subNode.type}${nameAttr} args=\"${escapeAttr(subNode.args)}\"/>")
             }
-            
             writer.appendLine("\t</oplus-feature>")
         }
     }
