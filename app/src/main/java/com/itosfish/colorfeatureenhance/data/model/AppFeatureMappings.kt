@@ -97,11 +97,12 @@ class AppFeatureMappings private constructor() {
             
             // 再查找预设映射
             val resId = getInstance().getResId(featureName)
-            return if (resId == R.string.feature_unknown) {
+            val result = if (resId == R.string.feature_unknown) {
                 featureName
             } else {
                 context.getString(resId)
             }
+            return result
         }
     }
 

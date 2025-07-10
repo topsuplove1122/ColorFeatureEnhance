@@ -91,7 +91,8 @@ class OplusFeatureMappings private constructor() {
             if (!userDesc.isNullOrEmpty()) return userDesc
 
             val resId = getInstance().getResId(featureName)
-            return if (resId == R.string.feature_unknown) featureName else context.getString(resId)
+            val result = if (resId == R.string.feature_unknown) featureName else context.getString(resId)
+            return result
         }
 
         /** 保存用户自定义映射 */

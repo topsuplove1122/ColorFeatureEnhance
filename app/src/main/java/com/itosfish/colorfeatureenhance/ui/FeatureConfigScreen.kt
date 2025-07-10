@@ -65,6 +65,7 @@ import com.itosfish.colorfeatureenhance.ui.search.SearchLogic
 import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
 import com.itosfish.colorfeatureenhance.FeatureMode
 import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.neverEqualPolicy
 
 @Composable
 fun FeatureConfigScreen(
@@ -74,8 +75,9 @@ fun FeatureConfigScreen(
     repository: FeatureRepository
 ) {
     val scope = rememberCoroutineScope()
-    var features by remember { mutableStateOf<List<AppFeature>>(emptyList()) }
-    val featureGroups by remember(features, currentMode) {
+    var features by remember { mutableStateOf<List<AppFeature>>(emptyList(), neverEqualPolicy()) }
+    var refreshTrigger by remember { mutableStateOf(0) }
+    val featureGroups by remember(features, currentMode, refreshTrigger) {
         derivedStateOf {
             // 按描述文本分组
             features.groupBy { feature -> 
@@ -220,9 +222,9 @@ fun FeatureConfigScreen(
                 
                 if (it.nameResId == R.string.feature_unknown && 
                     description == firstFeature.name) {
-                    "unknown_${firstFeature.name}"
+                    "unknown_${firstFeature.name}_$refreshTrigger"
                 } else {
-                    "desc_${description}"
+                    "desc_${description}_$refreshTrigger"
                 }
             }) { group ->
                 FeatureGroupItem(
@@ -249,7 +251,11 @@ fun FeatureConfigScreen(
                     },
                     onClick = {
                         if (group.features.size == 1) {
-                            featureToEdit = group.features.first() to AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                            featureToEdit = group.features.first() to if (currentMode == FeatureMode.APP) {
+                                AppFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                            } else {
+                                OplusFeatureMappings.getLocalizedDescription(context, group.features.first().name)
+                            }
                         } else {
                             chooseFromGroup = group
                         }
@@ -382,12 +388,14 @@ fun FeatureConfigScreen(
                             it.copy(name = newName, enabled = newEnabled)
                         } else it
                     }
-                    // 强制触发重组，确保UI立即更新
-                    features = emptyList()
                     features = updatedFeatures.toList()
+
                     scope.launch {
                         repository.saveFeatures(configPath, updatedFeatures)
                     }
+                    
+                    // 手动触发刷新
+                    refreshTrigger++
                     featureToEdit = null
                 }
             )

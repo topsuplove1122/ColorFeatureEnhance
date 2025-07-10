@@ -17,7 +17,7 @@ class UserFeatureMappings(context: Context) {
      * 保存特性名称和描述映射
      */
     fun saveMapping(name: String, description: String) {
-        prefs.edit {
+        prefs.edit(commit = true) {
             putString(name, description)
         }
     }
@@ -26,7 +26,8 @@ class UserFeatureMappings(context: Context) {
      * 获取特性的描述，如果不存在则返回null
      */
     fun getDescription(name: String): String? {
-        return prefs.getString(name, null)
+        val desc = prefs.getString(name, null)
+        return desc
     }
     
     /**
@@ -47,7 +48,7 @@ class UserFeatureMappings(context: Context) {
      * 删除特性映射
      */
     fun removeMapping(name: String) {
-        prefs.edit {
+        prefs.edit(commit = true) {
             remove(name)
         }
     }
@@ -56,7 +57,7 @@ class UserFeatureMappings(context: Context) {
      * 清空所有映射
      */
     fun clear() {
-        prefs.edit {
+        prefs.edit(commit = true) {
             clear()
         }
     }
