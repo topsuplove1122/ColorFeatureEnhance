@@ -69,6 +69,13 @@ class XmlOplusFeatureRepository : FeatureRepository {
                                 currentSubNodes.clear()
                             }
                         }
+                        "unavailable-oplus-feature" -> {
+                            val nameAttr = parser.getAttributeValue(null, "name") ?: ""
+                            if (nameAttr.isNotEmpty()) {
+                                // 使用特殊 args 标记不可用
+                                features.add(AppFeature(nameAttr, enabled = true, args = "unavailable"))
+                            }
+                        }
                         else -> {
                             // 可能是子节点，如 StringList
                             if (currentFeature != null) {
@@ -125,6 +132,12 @@ class XmlOplusFeatureRepository : FeatureRepository {
             if (args.isNullOrBlank()) return ""
             return " args=\"${escapeAttr(args)}\""
         }
+        // unavailable 特性
+        if (feature.args == "unavailable") {
+            writer.appendLine("\t<unavailable-oplus-feature name=\"${escapeAttr(feature.name)}\"/>")
+            return
+        }
+
         if (feature.isSimple) {
             writer.appendLine("\t<oplus-feature name=\"${feature.name}\"${attrArgs(feature.args)}/>")
         } else {

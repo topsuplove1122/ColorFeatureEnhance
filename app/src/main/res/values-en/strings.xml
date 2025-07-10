@@ -63,7 +63,7 @@
     <string name="oplus_feature_foreground_preload">Foreground Preload</string>
     <string name="oplus_feature_gcstring">GCString Support</string>
     <string name="search_feature">Search Feature</string>
-    <string name="search_hint">Search name or description...</string>
+    <string name="search_hint">Search name or description…</string>
     <string name="search_no_results">No matching results</string>
     <string name="search_clear">Clear Search</string>
     <string name="root_permission_title">Root permission required</string>
@@ -80,4 +80,5 @@
     <string name="complex_feature_title">Complex Configuration</string>
     <string name="complex_feature_message">This feature contains complex configuration that cannot be edited in the app. To modify parameters, please manually edit the config file:\n%1$s</string>
     <string name="complex_feature_indicator">(Complex Config)</string>
+    <string name="unavailable_feature_indicator">(Unavailable)</string>
 </resources> 
