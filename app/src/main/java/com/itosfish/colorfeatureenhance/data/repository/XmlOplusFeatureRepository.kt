@@ -2,17 +2,17 @@ package com.itosfish.colorfeatureenhance.data.repository
 
 import android.util.Log
 import android.util.Xml
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
+import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.io.StringReader
-import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
-import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 /**
  * 针对 <oplus-config> 节点、<oplus-feature> 标签的解析/写入实现
@@ -40,7 +40,7 @@ class XmlOplusFeatureRepository : FeatureRepository {
         Log.i("XmlOplusFeatureRepository", "开始保存oplus特性配置，原始特性数量: ${originalOplusFeatures.size}, 修改后特性数量: ${features.size}")
 
         // 将AppFeature转换为OplusFeature
-        val modifiedOplusFeatures = convertAppFeaturesToOplusFeatures(features)
+        val modifiedOplusFeatures = convertAppFeaturesToOplusFeatures(features.filter { it.enabled || it.args == "unavailable" })
         Log.i("XmlOplusFeatureRepository", "转换后的oplus特性数量: ${modifiedOplusFeatures.size}")
 
         // 生成并保存用户补丁
@@ -143,8 +143,8 @@ class XmlOplusFeatureRepository : FeatureRepository {
                         "unavailable-oplus-feature" -> {
                             val nameAttr = parser.getAttributeValue(null, "name") ?: ""
                             if (nameAttr.isNotEmpty()) {
-                                // 使用特殊 args 标记不可用
-                                features.add(AppFeature(nameAttr, enabled = true, args = "unavailable"))
+                                // 解析为未启用的特性
+                                features.add(AppFeature(nameAttr, enabled = false, args = "unavailable"))
                             }
                         }
                         else -> {
@@ -183,7 +183,9 @@ class XmlOplusFeatureRepository : FeatureRepository {
             .map { (_, list) ->
                 val first = list.first()
                 val subNodes = list.flatMap { it.subNodes }.distinctBy { it.args }
-                AppFeature(first.name, true, first.args, subNodes)
+                // 只要有一项 enabled=true，则视为启用
+                val enabled = list.any { it.enabled }
+                AppFeature(first.name, enabled, first.args, subNodes)
             }
     }
     

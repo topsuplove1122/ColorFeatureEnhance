@@ -1,13 +1,12 @@
 package com.itosfish.colorfeatureenhance.utils
 
-import android.app.Activity
-import android.text.method.LinkMovementMethod
 // Linkify 可能引入歧义，已不再需要
+import android.app.Activity
+import android.content.Context
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.TextView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.itosfish.colorfeatureenhance.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -28,13 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
-import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.itosfish.colorfeatureenhance.FeatureMode
-import android.content.Context
-import androidx.compose.material3.MaterialTheme
+import com.itosfish.colorfeatureenhance.R
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
+import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
+import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
 
 
 /**
@@ -79,6 +79,16 @@ fun AddFeatureDialog(
         title = { Text(text = stringResource(id = R.string.add_feature)) },
         text = {
             Column {
+                // 特性描述输入
+                OutlinedTextField(
+                    value = featureDescription,
+                    onValueChange = { featureDescription = it },
+                    label = { Text(stringResource(id = R.string.feature_description)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // 特性名称输入
                 OutlinedTextField(
                     value = featureName,
@@ -86,16 +96,6 @@ fun AddFeatureDialog(
                     label = { Text(stringResource(id = R.string.feature_name)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 特性描述输入
-                OutlinedTextField(
-                    value = featureDescription,
-                    onValueChange = { featureDescription = it },
-                    label = { Text(stringResource(id = R.string.feature_description)) },
-                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -110,19 +110,19 @@ fun AddFeatureDialog(
 
                     if (argValue.startsWith("boolean:")) {
                         Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = stringResource(id = R.string.feature_enabled))
-                    Switch(
-                        checked = featureEnabled,
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = stringResource(id = R.string.feature_enabled))
+                            Switch(
+                                checked = featureEnabled,
                                 onCheckedChange = {
                                     featureEnabled = it
                                     argValue = if (it) "boolean:true" else "boolean:false"
                                 }
-                    )
+                            )
                         }
                     }
                 } else {
@@ -139,9 +139,14 @@ fun AddFeatureDialog(
                             // 检查是否与预设映射匹配
                             val isPresetMatch = if (currentMode == FeatureMode.APP) {
                                 AppFeatureMappings.getInstance().isMatchingPresetDescription(
-                                    context, featureName, featureDescription)
+                                    context, featureName, featureDescription
+                                )
                             } else {
-                                OplusFeatureMappings.isMatchingPresetDescription(context, featureName, featureDescription)
+                                OplusFeatureMappings.isMatchingPresetDescription(
+                                    context,
+                                    featureName,
+                                    featureDescription
+                                )
                             }
 
                             if (isPresetMatch) {
@@ -150,17 +155,32 @@ fun AddFeatureDialog(
                             } else {
                                 // 保存用户自定义映射
                                 if (currentMode == FeatureMode.APP) {
-                                    AppFeatureMappings.getInstance().saveUserMapping(context, featureName, featureDescription)
+                                    AppFeatureMappings.getInstance()
+                                        .saveUserMapping(context, featureName, featureDescription)
                                 } else {
-                                    OplusFeatureMappings.saveUserMapping(context, featureName, featureDescription)
+                                    OplusFeatureMappings.saveUserMapping(
+                                        context,
+                                        featureName,
+                                        featureDescription
+                                    )
                                 }
                                 // 添加特性并关闭对话框
-                                onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
+                                onConfirm(
+                                    featureName,
+                                    featureDescription,
+                                    featureEnabled,
+                                    if (argValue.isBlank()) null else argValue
+                                )
                                 // 不要在这里关闭对话框，因为showPresetMatchDialog=true时需要继续显示
                             }
                         } else {
                             // 描述为空，直接添加特性并关闭对话框
-                            onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
+                            onConfirm(
+                                featureName,
+                                featureDescription,
+                                featureEnabled,
+                                if (argValue.isBlank()) null else argValue
+                            )
                         }
                     }
                 },
@@ -186,7 +206,12 @@ fun AddFeatureDialog(
                 TextButton(onClick = {
                     // 关闭提示对话框，添加特性并关闭主对话框
                     showPresetMatchDialog = false
-                    onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
+                    onConfirm(
+                        featureName,
+                        featureDescription,
+                        featureEnabled,
+                        if (argValue.isBlank()) null else argValue
+                    )
                 }) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }
@@ -218,7 +243,8 @@ fun EditFeatureDialog(
     var featureEnabled by remember { mutableStateOf(originalEnabled) }
     var argValue by remember { mutableStateOf(originalArgs ?: "") }
     val isPresetDesc = if (currentMode == FeatureMode.APP) {
-        AppFeatureMappings.getInstance().isMatchingPresetDescription(context, originalName, originalDescription)
+        AppFeatureMappings.getInstance()
+            .isMatchingPresetDescription(context, originalName, originalDescription)
     } else {
         OplusFeatureMappings.isMatchingPresetDescription(context, originalName, originalDescription)
     }
@@ -229,20 +255,20 @@ fun EditFeatureDialog(
         text = {
             Column {
                 OutlinedTextField(
-                    value = featureName,
-                    onValueChange = { featureName = it },
-                    label = { Text(stringResource(id = R.string.feature_name)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
                     value = featureDescription,
                     onValueChange = { if (!isPresetDesc) featureDescription = it },
                     label = { Text(stringResource(id = R.string.feature_description)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isPresetDesc,
                     readOnly = isPresetDesc
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = featureName,
+                    onValueChange = { featureName = it },
+                    label = { Text(stringResource(id = R.string.feature_name)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 // 检查是否为复杂特性
@@ -252,7 +278,7 @@ fun EditFeatureDialog(
                     args = originalArgs,
                     subNodes = originalSubNodes
                 )
-                
+
                 if (tempFeature.isComplex) {
                     Text(
                         text = stringResource(R.string.complex_feature_edit_restriction),
@@ -265,13 +291,19 @@ fun EditFeatureDialog(
                     val hasBoolean = originalArgs?.startsWith("boolean:") == true
 
                     if (currentMode == FeatureMode.APP && hasBoolean) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = stringResource(id = R.string.feature_enabled))
-                    Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = stringResource(id = R.string.feature_enabled))
+                            Switch(
+                                checked = featureEnabled,
+                                onCheckedChange = {
+                                    featureEnabled = it
+                                    // 同步更新argValue以确保boolean参数正确
+                                    argValue = if (it) "boolean:true" else "boolean:false"
+                                })
                         }
                     } else if (!hasBoolean && currentMode == FeatureMode.APP) {
                         OutlinedTextField(
@@ -298,19 +330,34 @@ fun EditFeatureDialog(
                     }
                 } else {
                     val matchPreset = if (currentMode == FeatureMode.APP) {
-                        AppFeatureMappings.getInstance().isMatchingPresetDescription(context, featureName, featureDescription)
+                        AppFeatureMappings.getInstance()
+                            .isMatchingPresetDescription(context, featureName, featureDescription)
                     } else {
-                        OplusFeatureMappings.isMatchingPresetDescription(context, featureName, featureDescription)
+                        OplusFeatureMappings.isMatchingPresetDescription(
+                            context,
+                            featureName,
+                            featureDescription
+                        )
                     }
                     if (!matchPreset) {
                         if (currentMode == FeatureMode.APP) {
-                            AppFeatureMappings.getInstance().saveUserMapping(context, featureName, featureDescription)
+                            AppFeatureMappings.getInstance()
+                                .saveUserMapping(context, featureName, featureDescription)
                         } else {
-                            OplusFeatureMappings.saveUserMapping(context, featureName, featureDescription)
+                            OplusFeatureMappings.saveUserMapping(
+                                context,
+                                featureName,
+                                featureDescription
+                            )
                         }
                     }
                 }
-                onConfirm(featureName, featureDescription, featureEnabled, if (argValue.isBlank()) null else argValue)
+                onConfirm(
+                    featureName,
+                    featureDescription,
+                    featureEnabled,
+                    if (argValue.isBlank()) null else argValue
+                )
                 // force ui update even if feature list unchanged
                 // handled outside
             }) {

@@ -282,16 +282,25 @@ fun FeatureConfigScreen(
                         features = emptyList()
                         features = updatedFeatures
 
-                        // 异步保存
+                        // 异步保存并重新加载
                         scope.launch {
                             repository.saveFeatures(configPath, updatedFeatures)
 
+                            // 重新加载配置文件以获取最新的合并结果
+                            val reloadedFeatures = repository.loadFeatures(configPath)
+                            features = reloadedFeatures
+
                             // 更新补丁状态
-                            val featureNames = updatedFeatures.map { it.name }
-                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
-                                featureNames,
-                                currentMode == FeatureMode.APP
-                            )
+                            if (reloadedFeatures.isNotEmpty()) {
+                                val featureNames = reloadedFeatures.map { it.name }
+                                patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                    featureNames,
+                                    currentMode == FeatureMode.APP
+                                )
+                            }
+
+                            // 触发UI刷新
+                            refreshTrigger++
                         }
                     },
                     onLongPress = {
@@ -346,16 +355,25 @@ fun FeatureConfigScreen(
                     features = emptyList()
                     features = newList
 
-                    // 保存到文件
+                    // 保存到文件并重新加载
                     scope.launch {
                         repository.saveFeatures(configPath, newList)
 
+                        // 重新加载配置文件以获取最新的合并结果
+                        val reloadedFeatures = repository.loadFeatures(configPath)
+                        features = reloadedFeatures
+
                         // 更新补丁状态
-                        val featureNames = newList.map { it.name }
-                        patchActions = ConfigMergeManager.getFeaturesPatchActions(
-                            featureNames,
-                            currentMode == FeatureMode.APP
-                        )
+                        if (reloadedFeatures.isNotEmpty()) {
+                            val featureNames = reloadedFeatures.map { it.name }
+                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                featureNames,
+                                currentMode == FeatureMode.APP
+                            )
+                        }
+
+                        // 触发UI刷新
+                        refreshTrigger++
                     }
 
                     showAddDialog = false
@@ -390,12 +408,21 @@ fun FeatureConfigScreen(
                         scope.launch {
                             repository.saveFeatures(configPath, updatedFeatures)
 
+                            // 重新加载配置文件以获取最新的合并结果
+                            val reloadedFeatures = repository.loadFeatures(configPath)
+                            features = reloadedFeatures
+
                             // 更新补丁状态
-                            val featureNames = updatedFeatures.map { it.name }
-                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
-                                featureNames,
-                                currentMode == FeatureMode.APP
-                            )
+                            if (reloadedFeatures.isNotEmpty()) {
+                                val featureNames = reloadedFeatures.map { it.name }
+                                patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                    featureNames,
+                                    currentMode == FeatureMode.APP
+                                )
+                            }
+
+                            // 触发UI刷新
+                            refreshTrigger++
                         }
                         groupToDelete = null
                     }) {
@@ -463,10 +490,24 @@ fun FeatureConfigScreen(
 
                     scope.launch {
                         repository.saveFeatures(configPath, updatedFeatures)
+
+                        // 重新加载配置文件以获取最新的合并结果
+                        val reloadedFeatures = repository.loadFeatures(configPath)
+                        features = reloadedFeatures
+
+                        // 更新补丁状态
+                        if (reloadedFeatures.isNotEmpty()) {
+                            val featureNames = reloadedFeatures.map { it.name }
+                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                featureNames,
+                                currentMode == FeatureMode.APP
+                            )
+                        }
+
+                        // 触发UI刷新
+                        refreshTrigger++
                     }
-                    
-                    // 手动触发刷新
-                    refreshTrigger++
+
                     featureToEdit = null
                 }
             )
@@ -570,7 +611,15 @@ private fun FeatureGroupItem(
             val isComplex = feature.isComplex
             val isUnavailable = currentMode == FeatureMode.OPLUS && feature.args == "unavailable"
             val trailingModifier = Modifier.padding(start = 8.dp)
-            if (isComplex) {
+            if (currentMode == FeatureMode.OPLUS) {
+                Switch(
+                    checked = group.isEnabled,
+                    onCheckedChange = {
+                        onToggle(group.withEnabled(it))
+                    },
+                    modifier = trailingModifier
+                )
+            } else if (isComplex) {
                 Text(
                     text = stringResource(id = R.string.complex_feature_indicator),
                     style = MaterialTheme.typography.bodySmall,
@@ -584,15 +633,9 @@ private fun FeatureGroupItem(
                     color = MaterialTheme.colorScheme.error,
                     modifier = trailingModifier
                 )
-            } else if (currentMode == FeatureMode.APP && hasBoolean) {
-                Switch(
-                    checked = group.isEnabled,
-                    onCheckedChange = {
-                        onToggle(group.withEnabled(it))
-                    },
-                    modifier = trailingModifier
-                )
             }
+            // 移除了 args 为 boolean 的配置在列表中显示开关的逻辑
+            // args 为 boolean 的配置只在编辑界面显示开关
         }
     }
 }

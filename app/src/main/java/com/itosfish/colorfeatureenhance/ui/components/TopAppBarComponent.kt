@@ -2,9 +2,8 @@ package com.itosfish.colorfeatureenhance.ui.components
 
 import android.app.Activity
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,14 +54,14 @@ fun ColorOSTopAppBar(
                 }
             }
             // 刷新按钮（可选）
-            if (onRefresh != null) {
-                IconButton(onClick = onRefresh) {
-                    Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = stringResource(id = R.string.refresh)
-                    )
-                }
-            }
+//            if (onRefresh != null) {
+//                IconButton(onClick = onRefresh) {
+//                    Icon(
+//                        imageVector = Icons.Filled.Refresh,
+//                        contentDescription = stringResource(id = R.string.refresh)
+//                    )
+//                }
+//            }
             IconButton(onClick = {
                 showAboutDialog(context as Activity)
             }) {

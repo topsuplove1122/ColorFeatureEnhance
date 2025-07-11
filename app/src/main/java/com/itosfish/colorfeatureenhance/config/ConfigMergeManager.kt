@@ -647,23 +647,37 @@ object ConfigMergeManager {
                     args = modifiedFeature.args,
                     subNodes = modifiedFeature.subNodes
                 ))
-            } else if (originalFeature != modifiedFeature) {
-                // 修改特性 - 关键修复：正确处理布尔值逻辑
-                val finalArgs = if (modifiedFeature.args?.startsWith("boolean:") == true) {
-                    // 对于布尔类型，根据enabled状态生成正确的args
-                    "boolean:${modifiedFeature.enabled}"
+            } else {
+                // 检查是否真的有变化 - 特别处理boolean参数
+                val hasChanged = if (modifiedFeature.args?.startsWith("boolean:") == true &&
+                                    originalFeature.args?.startsWith("boolean:") == true) {
+                    // 对于boolean参数，比较enabled状态而不是args字符串
+                    originalFeature.enabled != modifiedFeature.enabled ||
+                    originalFeature.name != modifiedFeature.name ||
+                    originalFeature.subNodes != modifiedFeature.subNodes
                 } else {
-                    // 对于非布尔类型，直接使用args
-                    modifiedFeature.args
+                    // 对于非boolean参数，使用标准比较
+                    originalFeature != modifiedFeature
                 }
 
-                patches.add(AppFeaturePatch(
-                    name = modifiedFeature.name,
-                    action = PatchAction.MODIFY,
-                    enabled = modifiedFeature.enabled,
-                    args = finalArgs,
-                    subNodes = modifiedFeature.subNodes
-                ))
+                if (hasChanged) {
+                    // 修改特性 - 关键修复：正确处理布尔值逻辑
+                    val finalArgs = if (modifiedFeature.args?.startsWith("boolean:") == true) {
+                        // 对于布尔类型，根据enabled状态生成正确的args
+                        "boolean:${modifiedFeature.enabled}"
+                    } else {
+                        // 对于非布尔类型，直接使用args
+                        modifiedFeature.args
+                    }
+
+                    patches.add(AppFeaturePatch(
+                        name = modifiedFeature.name,
+                        action = PatchAction.MODIFY,
+                        enabled = modifiedFeature.enabled,
+                        args = finalArgs,
+                        subNodes = modifiedFeature.subNodes
+                    ))
+                }
             }
         }
 
