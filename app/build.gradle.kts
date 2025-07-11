@@ -18,7 +18,7 @@ android {
 
         ndk {
             // 设置支持的SO库架构
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.addAll(listOf("arm64-v8a"))
         }
     }
 
