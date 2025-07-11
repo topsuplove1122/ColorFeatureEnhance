@@ -545,12 +545,14 @@ private fun FeatureGroupItem(
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 
-                // 名称使用淡色小字体
-                Text(
-                    text = featureName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+                // 名称使用淡色小字体，仅当不是分组卡片时显示
+                if (group.features.size == 1) {
+                    Text(
+                        text = featureName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
             
             // 补丁状态指示器

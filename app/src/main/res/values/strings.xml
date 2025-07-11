@@ -259,8 +259,8 @@
     <string name="oplus_feature_aon_phone_enable">[软] AON手机感知启用</string>
     <string name="oplus_feature_aon_phone_mute">[软] AON手掌静音</string>
     <string name="oplus_feature_aon_pose_detection_enable">[软] AON姿态检测</string>
-    <string name="oplus_feature_hardware_aon_enable">AON开关</string>
-    <string name="oplus_feature_aon_enable">AON开关</string>
+    <string name="oplus_feature_hardware_aon_enable">熄屏显示支持</string>
+    <string name="oplus_feature_aon_enable">熄屏显示支持</string>
     <string name="oplus_feature_radio_cybersense_travel_enabled">[软] 高铁场景网络优化</string>
     <string name="oplus_feature_aon_pay_qrcode_enable">[软] AON快捷支付码</string>
     <string name="oplus_feature_aon_sensorhub_enable">[软] AON SensorHub启用</string>
