@@ -94,4 +94,48 @@
     <!-- 补丁状态相关 -->
     <string name="patch_status_add">新增</string>
     <string name="patch_status_modify">修改</string>
+
+    <!-- Oplus 新特性中文描述 -->
+    <string name="oplus_feature_finger_flashnotes">小布记忆</string>
+    <string name="oplus_feature_icon_blur">桌面图标模糊效果</string>
+    <string name="oplus_feature_game_htfi_high_temp">游戏助手高温框架</string>
+    <string name="oplus_feature_pwm_dimming">PWM调光</string>
+    <string name="oplus_feature_full_brightness_dc">全亮度DC调光</string>
+    <string name="oplus_feature_super_volume_4x">超级音量（4倍）</string>
+    <string name="oplus_feature_voice_isolation">人声凸显</string>
+    <string name="oplus_feature_speaker_spatializer">扬声器空间音频</string>
+    <string name="oplus_feature_5g_support">5G网络支持</string>
+    <string name="oplus_feature_dual_nr">双NR支持</string>
+    <string name="oplus_feature_nr_always_sa_pre">SA优先模式</string>
+    <string name="oplus_feature_smart5g_sa">智能5G SA模式</string>
+    <string name="oplus_feature_game_accelerate_concert">演唱会专网加速</string>
+    <string name="oplus_feature_meeting_accelerate">会议场景加速</string>
+    <string name="oplus_feature_data_concert_accelerate">演唱会数据加速</string>
+    <string name="oplus_feature_aipq">AIPQ</string>
+    <string name="oplus_feature_aisdr2hdr">AISDR2 HDR</string>
+    <string name="oplus_feature_genshin_vibration">原神振动效果</string>
+    <string name="oplus_feature_screenshot_wave_vibration">截图振动波形效果</string>
+    <string name="oplus_feature_smart_loop_drag">智能循环拖拽功能</string>
+    <string name="oplus_feature_screenon_before_camera">唤醒屏幕</string>
+    <string name="oplus_feature_underwater_camera">水下相机功能</string>
+    <string name="oplus_feature_ultrasonic_underwater_shutter">超声波指纹水下快门</string>
+    <string name="oplus_feature_floatwindow_hide_alert_notification">浮动窗口隐藏警报窗口通知</string>
+    <string name="oplus_feature_tv_connect">视频通话电视投屏</string>
+    <string name="oplus_feature_tv_videocall">电视视频通话</string>
+    <string name="oplus_feature_flexible_freeform">小窗自由大小</string>
+    <string name="oplus_feature_magicvoice_loopback">游戏变声回录</string>
+    <string name="oplus_feature_game_support_vulkan">游戏Vulkan渲染</string>
+    <string name="oplus_feature_game_color_enhance_2">游戏助手色彩增强2.0</string>
+    <string name="oplus_feature_game_dark_eyeprotect">游戏助手夜晚护眼</string>
+    <string name="oplus_feature_zoom_game_enter">游戏进入小窗优化</string>
+    <string name="oplus_feature_zoom_center_exit">中心退出小窗优化</string>
+
+    <!-- App 新特性中文描述 -->
+    <string name="feature_wireless_charge_support">无线充电支持</string>
+    <string name="feature_onwireless_charge">无线充电器充电支持</string>
+    <string name="feature_wireless_charge_when_wired">有线时无线充电支持</string>
+    <string name="feature_no_guide_dialog">不显示引导对话框</string>
+    <string name="feature_wireless_coil_position">无线充电线圈位置</string>
+    <string name="feature_wireless_charge_power">无线充电功率</string>
+    <string name="feature_ptc_nfc_settings">一碰即联NFC设置</string>
 </resources>

@@ -1,7 +1,7 @@
 package com.itosfish.colorfeatureenhance.data.model
 
-import com.itosfish.colorfeatureenhance.R
 import android.content.Context
+import com.itosfish.colorfeatureenhance.R
 
 /**
  * 应用特性映射表管理
@@ -53,6 +53,13 @@ class AppFeatureMappings private constructor() {
         "com.oplus.mediaturbo.wechat_videoCalling" to R.string.feature_wechat_video_call_enhance,
         // 键盘 NFC 分享 iOS 控制中心界面
         "oplus.ptc.nfc.ios.settings" to R.string.feature_keyboard_nfc_ios_share,
+        "os.charge.settings.wirelesscharge.support" to R.string.feature_wireless_charge_support,
+        "oplus.power.onwirelesscharger.support" to R.string.feature_wireless_charge_support,
+        "oplus.power.wirelesschgwhenwired.support" to R.string.feature_wireless_charge_support,
+        "com.oplus.systemui.not_show_guide_dialog" to R.string.feature_no_guide_dialog,
+        "os.charge.settings.wirelesschargingcoil.position" to R.string.feature_wireless_coil_position,
+        "os.charge.settings.wirelesscharging.power" to R.string.feature_wireless_charge_power,
+        "oplus.ptc.nfc.settings" to R.string.feature_ptc_nfc_settings,
         // 以下特性暂未明确中文描述
         "com.oplus.battery.whitelist_vowifi" to R.string.feature_unknown,
         "oplus_skip_remove_recent_task" to R.string.feature_unknown,
