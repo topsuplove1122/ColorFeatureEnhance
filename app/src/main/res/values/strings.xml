@@ -90,4 +90,8 @@
     <string name="save_success_sync_failed">已保存但同步到模块失败</string>
     <string name="save_success_merge_failed">保存成功但配置合并失败</string>
     <string name="refresh">刷新</string>
+
+    <!-- 补丁状态相关 -->
+    <string name="patch_status_add">新增</string>
+    <string name="patch_status_modify">修改</string>
 </resources>

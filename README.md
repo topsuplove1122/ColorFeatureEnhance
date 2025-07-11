@@ -129,7 +129,7 @@ com.itosfish.colorfeatureenhance/
 - **序列化**: Kotlinx Serialization JSON
 
 ### Android 组件
-- **最低 SDK**: Android 15 (API 35)
+- **最低 SDK**: Android 14 (API 34)
 - **目标 SDK**: Android 16 (API 36)
 - **Compose BOM**: 2025.06.01
 - **Navigation**: Compose Navigation 2.9.1

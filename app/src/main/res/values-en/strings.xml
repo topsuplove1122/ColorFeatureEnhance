@@ -90,4 +90,8 @@
     <string name="save_and_sync_success">Saved and synced to module successfully</string>
     <string name="save_success_sync_failed">Saved successfully but failed to sync to module</string>
     <string name="save_success_merge_failed">Saved successfully but configuration merge failed</string>
+
+    <!-- Patch status related -->
+    <string name="patch_status_add">Added</string>
+    <string name="patch_status_modify">Modified</string>
 </resources>

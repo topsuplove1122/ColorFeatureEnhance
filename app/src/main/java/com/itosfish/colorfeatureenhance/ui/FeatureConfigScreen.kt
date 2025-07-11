@@ -1,5 +1,6 @@
 package com.itosfish.colorfeatureenhance.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,7 +21,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -42,30 +43,29 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itosfish.colorfeatureenhance.FeatureMode
+import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 import com.itosfish.colorfeatureenhance.R
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
-import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
 import com.itosfish.colorfeatureenhance.data.model.FeatureGroup
+import com.itosfish.colorfeatureenhance.data.model.OplusFeatureMappings
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.components.ColorOSTopAppBar
-import kotlinx.coroutines.launch
-import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
-import androidx.compose.ui.platform.LocalContext
-import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
-import com.itosfish.colorfeatureenhance.utils.EditFeatureDialog
+import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
 import com.itosfish.colorfeatureenhance.ui.components.SearchBar
 import com.itosfish.colorfeatureenhance.ui.search.SearchLogic
-import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
-import com.itosfish.colorfeatureenhance.FeatureMode
-import androidx.activity.compose.BackHandler
-import androidx.compose.runtime.neverEqualPolicy
-import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
+import com.itosfish.colorfeatureenhance.ui.theme.PatchColors
+import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
+import com.itosfish.colorfeatureenhance.utils.EditFeatureDialog
+import kotlinx.coroutines.launch
 
 @Composable
 fun FeatureConfigScreen(
@@ -77,6 +77,7 @@ fun FeatureConfigScreen(
     val scope = rememberCoroutineScope()
     var features by remember { mutableStateOf<List<AppFeature>>(emptyList(), neverEqualPolicy()) }
     var refreshTrigger by remember { mutableStateOf(0) }
+    var patchActions by remember { mutableStateOf<Map<String, ConfigMergeManager.PatchAction>>(emptyMap()) }
     val featureGroups by remember(features, currentMode, refreshTrigger) {
         derivedStateOf {
             // 按描述文本分组
@@ -175,6 +176,15 @@ fun FeatureConfigScreen(
         ConfigMergeManager.performConfigMerge()
         // 再加载特性
         features = repository.loadFeatures(configPath)
+
+        // 加载补丁状态
+        if (features.isNotEmpty()) {
+            val featureNames = features.map { it.name }
+            patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                featureNames,
+                currentMode == FeatureMode.APP
+            )
+        }
     }
 
     Scaffold(
@@ -261,6 +271,7 @@ fun FeatureConfigScreen(
                     currentMode = currentMode,
                     group = group,
                     searchQuery = searchQuery,
+                    patchAction = patchActions[group.features.first().name],
                     onToggle = { updatedGroup ->
                         // 更新组内所有特性的状态
                         val updatedFeatures = features.map { feature ->
@@ -274,6 +285,13 @@ fun FeatureConfigScreen(
                         // 异步保存
                         scope.launch {
                             repository.saveFeatures(configPath, updatedFeatures)
+
+                            // 更新补丁状态
+                            val featureNames = updatedFeatures.map { it.name }
+                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                featureNames,
+                                currentMode == FeatureMode.APP
+                            )
                         }
                     },
                     onLongPress = {
@@ -331,6 +349,13 @@ fun FeatureConfigScreen(
                     // 保存到文件
                     scope.launch {
                         repository.saveFeatures(configPath, newList)
+
+                        // 更新补丁状态
+                        val featureNames = newList.map { it.name }
+                        patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                            featureNames,
+                            currentMode == FeatureMode.APP
+                        )
                     }
 
                     showAddDialog = false
@@ -364,6 +389,13 @@ fun FeatureConfigScreen(
                         
                         scope.launch {
                             repository.saveFeatures(configPath, updatedFeatures)
+
+                            // 更新补丁状态
+                            val featureNames = updatedFeatures.map { it.name }
+                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                featureNames,
+                                currentMode == FeatureMode.APP
+                            )
                         }
                         groupToDelete = null
                     }) {
@@ -465,7 +497,8 @@ private fun FeatureGroupItem(
     onToggle: (FeatureGroup) -> Unit,
     onLongPress: () -> Unit,
     onClick: () -> Unit,
-    searchQuery: String = ""
+    searchQuery: String = "",
+    patchAction: ConfigMergeManager.PatchAction? = null
 ) {
     Card(
         modifier = Modifier
@@ -474,9 +507,7 @@ private fun FeatureGroupItem(
                 onClick = onClick,
                 onLongClick = onLongPress
             ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
+        colors = PatchColors.getCardColors(patchAction),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -508,6 +539,16 @@ private fun FeatureGroupItem(
                 style = MaterialTheme.typography.bodyLarge,
                 // color = MaterialTheme.colorScheme.onSecondaryContainer
             )
+            // 补丁状态指示器
+            patchAction?.let { action ->
+                Text(
+                    text = PatchColors.getPatchActionDescription(action),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = PatchColors.getIndicatorColor(action) ?: MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
             val feature = group.features.first()
             val hasBoolean = feature.args?.startsWith("boolean:") == true
             val isComplex = feature.isComplex

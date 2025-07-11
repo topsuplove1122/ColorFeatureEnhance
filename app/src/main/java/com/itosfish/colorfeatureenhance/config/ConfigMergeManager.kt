@@ -3,13 +3,12 @@ package com.itosfish.colorfeatureenhance.config
 import android.util.Log
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
-import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import com.itosfish.colorfeatureenhance.utils.CSU
+import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
@@ -145,10 +144,128 @@ object ConfigMergeManager {
     suspend fun saveOplusFeaturePatches(originalFeatures: List<OplusFeature>, modifiedFeatures: List<OplusFeature>) = withContext(Dispatchers.IO) {
         val patches = generateOplusFeaturePatches(originalFeatures, modifiedFeatures)
         val patchFile = File(configPaths.userPatchesDir, "oplus-features.patch.json")
-        
+
         patchFile.writeText(json.encodeToString(patches))
-        
+
         Log.i(TAG, "保存 oplus-features 补丁: ${patches.size} 个变更")
+    }
+
+    /**
+     * 获取特性的补丁状态
+     * @param featureName 特性名称
+     * @param isAppFeature 是否为app-features模式
+     * @return 补丁动作类型，如果没有补丁则返回null
+     */
+    suspend fun getFeaturePatchAction(featureName: String, isAppFeature: Boolean): PatchAction? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            if (isAppFeature) {
+                val patchFile = File(configPaths.userPatchesDir, "app-features.patch.json")
+                if (patchFile.exists()) {
+                    val patches = loadAppFeaturePatches(patchFile)
+                    patches.find { it.name == featureName }?.action
+                } else {
+                    null
+                }
+            } else {
+                val patchFile = File(configPaths.userPatchesDir, "oplus-features.patch.json")
+                if (patchFile.exists()) {
+                    val patches = loadOplusFeaturePatches(patchFile)
+                    val patch = patches.find { it.name == featureName }
+                    // 将OplusPatchAction转换为PatchAction
+                    when (patch?.action) {
+                        OplusPatchAction.ENABLE -> PatchAction.MODIFY
+                        OplusPatchAction.DISABLE -> PatchAction.MODIFY
+                        OplusPatchAction.REMOVE -> null // REMOVE状态的特性不会显示在列表中
+                        null -> null
+                    }
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "获取特性补丁状态失败: $featureName", e)
+            null
+        }
+    }
+
+    /**
+     * 检查特性是否存在于系统基线配置中
+     * @param featureName 特性名称
+     * @param isAppFeature 是否为app-features模式
+     * @return true表示存在于系统基线中
+     */
+    private suspend fun isFeatureInSystemBaseline(featureName: String, isAppFeature: Boolean): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            if (isAppFeature) {
+                val systemFile = File(configPaths.systemBaselineDir, configPaths.appFeaturesFile)
+                if (systemFile.exists()) {
+                    val systemFeatures = parseAppFeaturesXml(systemFile)
+                    systemFeatures.any { it.name == featureName }
+                } else {
+                    false
+                }
+            } else {
+                val systemFile = File(configPaths.systemBaselineDir, configPaths.oplusFeaturesFile)
+                if (systemFile.exists()) {
+                    val systemFeatures = parseOplusFeaturesXml(systemFile)
+                    systemFeatures.any { it.name == featureName }
+                } else {
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "检查系统基线特性失败: $featureName", e)
+            false
+        }
+    }
+
+    /**
+     * 批量获取多个特性的补丁状态
+     * @param featureNames 特性名称列表
+     * @param isAppFeature 是否为app-features模式
+     * @return 特性名称到补丁动作的映射
+     */
+    suspend fun getFeaturesPatchActions(featureNames: List<String>, isAppFeature: Boolean): Map<String, PatchAction> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            if (isAppFeature) {
+                val patchFile = File(configPaths.userPatchesDir, "app-features.patch.json")
+                if (patchFile.exists()) {
+                    val patches = loadAppFeaturePatches(patchFile)
+                    patches.mapNotNull { patch ->
+                        if (patch.name in featureNames) {
+                            // 对于app-features，直接使用补丁中的action
+                            patch.name to patch.action
+                        } else {
+                            null
+                        }
+                    }.toMap()
+                } else {
+                    emptyMap()
+                }
+            } else {
+                val patchFile = File(configPaths.userPatchesDir, "oplus-features.patch.json")
+                if (patchFile.exists()) {
+                    val patches = loadOplusFeaturePatches(patchFile)
+                    patches.mapNotNull { patch ->
+                        if (patch.name in featureNames) {
+                            val action = when (patch.action) {
+                                OplusPatchAction.ENABLE -> PatchAction.MODIFY
+                                OplusPatchAction.DISABLE -> PatchAction.MODIFY
+                                OplusPatchAction.REMOVE -> return@mapNotNull null // REMOVE状态不返回
+                            }
+                            patch.name to action
+                        } else {
+                            null
+                        }
+                    }.toMap()
+                } else {
+                    emptyMap()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "批量获取特性补丁状态失败", e)
+            emptyMap()
+        }
     }
 
     /**
