@@ -291,7 +291,7 @@ object ConfigMergeManager {
             if (CSU.fileExists(appFeaturesSystemPath)) {
                 Log.d(TAG, "系统文件存在，开始复制: $appFeaturesFile")
                 val copyCmd = "cp \"$appFeaturesSystemPath\" \"$appFeaturesTargetPath\""
-                val result = CSU.runWithSu(copyCmd)
+                val result = CSU.runWithSu(copyCmd).output
 
                 if (CSU.fileExists(appFeaturesTargetPath)) {
                     Log.i(TAG, "成功复制系统配置: $appFeaturesFile")
@@ -312,7 +312,7 @@ object ConfigMergeManager {
             if (CSU.fileExists(oplusFeaturesSystemPath)) {
                 Log.d(TAG, "系统文件存在，开始复制: $oplusFeaturesFile")
                 val copyCmd = "cp \"$oplusFeaturesSystemPath\" \"$oplusFeaturesTargetPath\""
-                val result = CSU.runWithSu(copyCmd)
+                val result = CSU.runWithSu(copyCmd).output
 
                 if (CSU.fileExists(oplusFeaturesTargetPath)) {
                     Log.i(TAG, "成功复制系统配置: $oplusFeaturesFile")

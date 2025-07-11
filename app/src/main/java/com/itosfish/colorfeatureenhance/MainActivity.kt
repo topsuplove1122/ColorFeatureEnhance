@@ -14,12 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
-import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.CSU
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import kotlinx.coroutines.CoroutineScope
@@ -62,8 +62,8 @@ class MainActivity : ComponentActivity() {
         }
         CSU.checkRoot()
 
-        // 如果检测到原版 KernelSU，则提示不支持并跳过安装
-        if (CSU.isKSU()) {
+        // 如果检测到 Overlayfs，则提示不支持并跳过安装
+        if (CSU.isOverlayfs()) {
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.ksu_not_supported_title)
                 .setMessage(R.string.ksu_not_supported_message)
