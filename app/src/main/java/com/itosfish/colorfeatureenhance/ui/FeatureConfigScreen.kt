@@ -531,14 +531,28 @@ private fun FeatureGroupItem(
             } else {
                 description
             }
+            
+            // 特性名称
+            val featureName = group.features.first().name
 
-            HighlightedText(
-                text = displayText,
-                query = searchQuery,
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge,
-                // color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                // 描述使用正常字体
+                HighlightedText(
+                    text = displayText,
+                    query = searchQuery,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                
+                // 名称使用淡色小字体
+                Text(
+                    text = featureName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+            
             // 补丁状态指示器
             patchAction?.let { action ->
                 Text(
