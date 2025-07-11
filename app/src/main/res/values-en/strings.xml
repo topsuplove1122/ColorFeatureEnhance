@@ -15,7 +15,7 @@
     <string name="feature_qs_icon_deformable">QS Icon Deformable</string>
     <string name="feature_area_record">Area Screen Recording</string>
     <string name="feature_game_ai_v3">Game AI 3.0</string>
-    <string name="feature_game_ai_v4">Game AI Help 4.0</string>
+    <string name="feature_game_ai_v4">Game AI 4.0</string>
     <string name="feature_game_assist_key">Game Assist Key</string>
     <string name="feature_game_4d_vibration">Game 4D Vibration</string>
     <string name="feature_phone_touch_share">Phone Touch Share &amp; Screen Share</string>
@@ -94,4 +94,13 @@
     <!-- Patch status related -->
     <string name="patch_status_add">Added</string>
     <string name="patch_status_modify">Modified</string>
+
+    <!-- Feature mapping internationalization additions -->
+    <string name="feature_launcher_packages_to_hide">Launcher Hidden Packages List</string>
+    <string name="feature_support_swipe_up_to_split">Support Swipe Up to Split Screen</string>
+    <string name="feature_mediaturbo_service">Media Turbo Service</string>
+    <string name="feature_ai_voice_detect">AI Voice Detection</string>
+    <string name="feature_networkless_audiovolume_config">Offline Audio Volume Configuration</string>
+    <string name="feature_os15_gallery_secrecy">C15 Gallery Privacy Protection</string>
+    <string name="feature_speechassist_device_info">Speech Assistant Device Info</string>
 </resources>

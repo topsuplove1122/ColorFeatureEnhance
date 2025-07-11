@@ -13,8 +13,8 @@
     <string name="feature_global_aod">全局AOD</string>
     <string name="feature_qs_icon_deformable">分离样式通控面板图标可变形</string>
     <string name="feature_area_record">区域录屏</string>
-    <string name="feature_game_ai_v3">游戏AI 3.0</string>
-    <string name="feature_game_ai_v4">AI游戏辅助4.0</string>
+    <string name="feature_game_ai_v3">AI游戏辅助 3.0</string>
+    <string name="feature_game_ai_v4">AI游戏辅助 4.0</string>
     <string name="feature_game_assist_key">游戏助手辅助</string>
     <string name="feature_game_4d_vibration">游戏4D震动模式</string>
     <string name="feature_phone_touch_share">电话触摸分享与屏幕共享</string>
@@ -138,4 +138,20 @@
     <string name="feature_wireless_coil_position">无线充电线圈位置</string>
     <string name="feature_wireless_charge_power">无线充电功率</string>
     <string name="feature_ptc_nfc_settings">一碰即联NFC设置</string>
+    <string name="feature_vowifi_battery_whitelist">VoWiFi电池白名单</string>
+    <string name="feature_skip_remove_recent_task">跳过最近任务移除</string>
+    <string name="feature_disallow_run_apps">禁止运行的应用列表</string>
+    <string name="feature_colordirectservice_enable">ColorOS直达服务管理启用</string>
+    <string name="feature_tencent_meeting_turbo">腾讯会议媒体加速</string>
+    <string name="feature_network_access_permission">网络访问权限设置</string>
+    <string name="feature_autostart_limit_num">自启动应用数量限制</string>
+    <string name="feature_recent_lock_limit_num">最近任务锁定数量限制</string>
+    <!-- 图片中的特性描述 -->
+    <string name="feature_launcher_packages_to_hide">桌面隐藏应用包列表</string>
+    <string name="feature_support_swipe_up_to_split">支持上滑分屏</string>
+    <string name="feature_mediaturbo_service">媒体加速服务</string>
+    <string name="feature_ai_voice_detect">AI语音检测</string>
+    <string name="feature_networkless_audiovolume_config">离线音量配置</string>
+    <string name="feature_os15_gallery_secrecy">C15相册隐私保护</string>
+    <string name="feature_speechassist_device_info">语音助手设备信息</string>
 </resources>

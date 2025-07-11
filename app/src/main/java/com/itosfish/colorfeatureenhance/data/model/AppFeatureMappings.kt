@@ -60,15 +60,25 @@ class AppFeatureMappings private constructor() {
         "os.charge.settings.wirelesschargingcoil.position" to R.string.feature_wireless_coil_position,
         "os.charge.settings.wirelesscharging.power" to R.string.feature_wireless_charge_power,
         "oplus.ptc.nfc.settings" to R.string.feature_ptc_nfc_settings,
-        // 以下特性暂未明确中文描述
-        "com.oplus.battery.whitelist_vowifi" to R.string.feature_unknown,
-        "oplus_skip_remove_recent_task" to R.string.feature_unknown,
-        "oplus_disallow_run_apps" to R.string.feature_unknown,
-        "com.coloros.colordirectservice.cm_enable" to R.string.feature_unknown,
-        "com.oplus.mediaturbo.tencent_meeting" to R.string.feature_unknown,
-        "com.android.settings.network_access_permission" to R.string.feature_unknown,
-        "com.oplus.battery.autostart_limit_num" to R.string.feature_unknown,
-        "com.android.launcher.recent_lock_limit_num" to R.string.feature_unknown
+        
+        // 根据特性名称推测的描述
+        "com.oplus.battery.whitelist_vowifi" to R.string.feature_vowifi_battery_whitelist,
+        "oplus_skip_remove_recent_task" to R.string.feature_skip_remove_recent_task,
+        "oplus_disallow_run_apps" to R.string.feature_disallow_run_apps,
+        "com.coloros.colordirectservice.cm_enable" to R.string.feature_colordirectservice_enable,
+        "com.oplus.mediaturbo.tencent_meeting" to R.string.feature_tencent_meeting_turbo,
+        "com.android.settings.network_access_permission" to R.string.feature_network_access_permission,
+        "com.oplus.battery.autostart_limit_num" to R.string.feature_autostart_limit_num,
+        "com.android.launcher.recent_lock_limit_num" to R.string.feature_recent_lock_limit_num,
+        
+        // 图片中分析的特性
+        "com.android.launcher.packages_to_hide" to R.string.feature_launcher_packages_to_hide,
+        "com.android.launcher.support_swipe_up_to_split" to R.string.feature_support_swipe_up_to_split,
+        "com.oplus.mediaturbo.service" to R.string.feature_mediaturbo_service,
+        "com.oplus.phonemanager.ai_voice_detect" to R.string.feature_ai_voice_detect,
+        "oplus.appfeature.networkless_audiovolume_config" to R.string.feature_networkless_audiovolume_config,
+        "os.graphic.gallery.os15_secrecy" to R.string.feature_os15_gallery_secrecy,
+        "speechassist.cui.device.info" to R.string.feature_speechassist_device_info
     )
 
     /**
