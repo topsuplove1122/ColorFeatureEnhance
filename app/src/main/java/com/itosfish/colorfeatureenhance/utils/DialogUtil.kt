@@ -110,19 +110,19 @@ fun AddFeatureDialog(
 
                     if (argValue.startsWith("boolean:")) {
                         Spacer(modifier = Modifier.height(16.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = stringResource(id = R.string.feature_enabled))
-                            Switch(
-                                checked = featureEnabled,
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = stringResource(id = R.string.feature_enabled))
+                    Switch(
+                        checked = featureEnabled,
                                 onCheckedChange = {
                                     featureEnabled = it
                                     argValue = if (it) "boolean:true" else "boolean:false"
                                 }
-                            )
+                    )
                         }
                     }
                 } else {
@@ -278,13 +278,13 @@ fun EditFeatureDialog(
                     val hasBoolean = originalArgs?.startsWith("boolean:") == true
 
                     if (currentMode == FeatureMode.APP && hasBoolean) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = stringResource(id = R.string.feature_enabled))
-                            Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = stringResource(id = R.string.feature_enabled))
+                    Switch(checked = featureEnabled, onCheckedChange = { featureEnabled = it })
                         }
                     } else if (!hasBoolean && currentMode == FeatureMode.APP) {
                         OutlinedTextField(

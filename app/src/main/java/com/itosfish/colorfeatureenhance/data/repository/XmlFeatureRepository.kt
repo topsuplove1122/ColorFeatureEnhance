@@ -30,7 +30,7 @@ class XmlFeatureRepository : FeatureRepository {
             writer.appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             writer.appendLine("<extend_features>")
 
-            features.forEach { feature -> 
+            features.forEach { feature ->
                 writeFeature(writer, feature)
             }
 
@@ -139,7 +139,7 @@ class XmlFeatureRepository : FeatureRepository {
                 writer.appendLine("\t<app_feature name=\"${feature.name}\" args=\"boolean:$boolValue\"/>")
             } else {
                 writer.appendLine("\t<app_feature name=\"${feature.name}\"${attrArgs(feature.args)}/>")
-            }
+        }
         } else {
             writer.appendLine("\t<app_feature name=\"${feature.name}\"${attrArgs(feature.args)}>")
             // 写入子节点

@@ -59,7 +59,6 @@ import com.itosfish.colorfeatureenhance.utils.AddFeatureDialog
 import androidx.compose.ui.platform.LocalContext
 import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
 import com.itosfish.colorfeatureenhance.utils.EditFeatureDialog
-import com.itosfish.colorfeatureenhance.ui.components.FloatingActionButtonGroup
 import com.itosfish.colorfeatureenhance.ui.components.SearchBar
 import com.itosfish.colorfeatureenhance.ui.search.SearchLogic
 import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
@@ -180,7 +179,14 @@ fun FeatureConfigScreen(
                 ColorOSTopAppBar(
                     title = stringResource(id = R.string.app_title),
                     currentMode = currentMode,
-                    onModeChange = onModeChange
+                    onModeChange = onModeChange,
+                    isSearchActive = isSearchActive,
+                    onSearchClick = {
+                        if (isSearchActive) {
+                            searchQuery = ""
+                        }
+                        isSearchActive = !isSearchActive
+                    }
                 )
                 
                 // 搜索栏
@@ -192,20 +198,24 @@ fun FeatureConfigScreen(
                 )
             }
         },
-        // 浮动按钮组（添加和搜索）
+        // 仅添加按钮浮动
         floatingActionButton = {
-            FloatingActionButtonGroup(
-                isVisible = fabVisible,
-                onAddClick = { showAddDialog = true },
-                onSearchClick = {
-                    if (isSearchActive) {
-                        // 如果当前已展开，则先清空查询再关闭
-                        searchQuery = ""
-                    }
-                    isSearchActive = !isSearchActive
-                },
-                isSearchActive = isSearchActive
-            )
+            AnimatedVisibility(
+                visible = fabVisible,
+                enter = slideInVertically(initialOffsetY = { it * 2 }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it * 2 }) + fadeOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.add_feature)
+                    )
+                }
+            }
         }
     ) { innerPadding ->
         LazyColumn(

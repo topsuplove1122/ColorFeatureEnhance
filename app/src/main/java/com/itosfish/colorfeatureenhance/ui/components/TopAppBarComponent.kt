@@ -3,9 +3,11 @@ package com.itosfish.colorfeatureenhance.ui.components
 import android.app.Activity
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -22,7 +24,9 @@ import com.itosfish.colorfeatureenhance.utils.showAboutDialog
 fun ColorOSTopAppBar(
     title: String,
     currentMode: FeatureMode,
-    onModeChange: (FeatureMode) -> Unit
+    onModeChange: (FeatureMode) -> Unit,
+    isSearchActive: Boolean = false,
+    onSearchClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     TopAppBar(
@@ -30,13 +34,24 @@ fun ColorOSTopAppBar(
         actions = {
             // 模式切换按钮
             TextButton(onClick = {
-                val next = if (currentMode == FeatureMode.APP) FeatureMode.OPLUS else FeatureMode.APP
+                val next =
+                    if (currentMode == FeatureMode.APP) FeatureMode.OPLUS else FeatureMode.APP
                 onModeChange(next)
             }) {
-                val labelRes = if (currentMode == FeatureMode.APP) R.string.mode_app else R.string.mode_oplus
+                val labelRes =
+                    if (currentMode == FeatureMode.APP) R.string.mode_app else R.string.mode_oplus
                 Text(text = stringResource(id = labelRes))
             }
-
+            // 搜索按钮（可选）
+            if (onSearchClick != null) {
+                IconButton(onClick = onSearchClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = stringResource(id = R.string.search_feature),
+                        tint = if (isSearchActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
             IconButton(onClick = {
                 showAboutDialog(context as Activity)
             }) {
