@@ -13,8 +13,8 @@ android {
         applicationId = "com.itosfish.colorfeatureenhance"
         minSdk = 34
         targetSdk = 36
-        versionCode = 20250711
-        versionName = "0.51"
+        versionCode = 20250712
+        versionName = "0.54"
 
         ndk {
             // 设置支持的SO库架构
