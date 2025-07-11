@@ -198,10 +198,10 @@ main() {
 
     # 移动配置文件
     move_temp_to_app
-
-    # 清理临时文件（暂时注释掉，便于调试）
-    # cleanup_temp
-    log_debug "跳过清理临时文件（调试模式）"
+    
+    # 清理临时文件
+    cleanup_temp
+    log_debug "跳过清理临时文件"
 
     log_info "=== Service脚本执行完成 ==="
 }
