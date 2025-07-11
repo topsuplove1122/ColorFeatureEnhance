@@ -9,6 +9,10 @@ import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
 
+data class ShellResult(
+    val output: String,
+    val exitCode: Int
+)
 
 object CSU {
     /**
@@ -21,13 +25,11 @@ object CSU {
         // 构建 Shell 命令：
         // 使用 if 语句和 [ -e ] 来检查文件是否存在
         // 如果存在，输出 "exists"，否则输出 "not exists"
-        val command = "if [ -e \"$filePath\" ]; then echo \"exists\"; else echo \"not exists\"; fi"
+        val command = "[ -e \"$filePath\" ]"
 
-        // 使用 runWithSu 执行命令并获取输出
-        val output = runWithSu(command).trim()
-
-        // 根据输出判断文件是否存在
-        return output == "exists"
+        // 使用 runWithSu 执行命令并获取返回值
+        // 根据返回值判断文件是否存在
+        return runWithSu(command).exitCode == 0
     }
 
     /**
@@ -36,15 +38,14 @@ object CSU {
      * @return true 存在，false 不存在
      */
     fun dirExists(dirPath: String): Boolean {
-        val command = "if [ -d \"$dirPath\" ]; then echo \"exists\"; else echo \"not exists\"; fi"
-        val output = runWithSu(command).trim()
-        return output == "exists"
+        val command = "[ -d \"$dirPath\" ]"
+        return runWithSu(command).exitCode == 0
     }
 
     /**
-     * 判断是否使用 KernelSU（通过检测 /data/adb/ksu/modules.img 是否存在）
+     * 判断是否使用 Overlayfs（通过检测 /data/adb/ksu/modules.img 是否存在）
      */
-    fun isKSU(): Boolean {
+    fun isOverlayfs(): Boolean {
         return fileExists("/data/adb/ksu/modules.img")
     }
 
@@ -71,8 +72,9 @@ object CSU {
      * @param cmd 要执行的 Shell 命令，可以包含多个命令，以分号或换行符分隔。
      * @return Shell 命令的输出结果。
      */
-    fun runWithSu(cmd: String): String {
+    fun runWithSu(cmd: String): ShellResult {
         val output = StringBuilder()
+        var exitCode = -1
         try {
             Log.i("APP_SHELL", "准备以root权限执行命令: $cmd")
             // 启动 su 进程
@@ -99,17 +101,17 @@ object CSU {
             }
 
             // 等待进程结束
-            val exitCode = process.waitFor()
+            exitCode = process.waitFor()
             Log.i("APP_SHELL", "命令执行结束，退出码: $exitCode")
         } catch (e: Exception) {
             Log.e("APP_SHELL", "执行 Shell 命令失败: ${e.message}")
         }
         Log.i("APP_SHELL", "命令输出: $output")
-        return output.toString()
+        return ShellResult(output = output.toString(), exitCode = exitCode)
     }
 
     fun checkRoot() {
-        val isRooted = CSU.isRooted()
+        val isRooted = isRooted()
         if (!isRooted) {
             Log.i("MainActivity", "Device not rooted")
             MaterialAlertDialogBuilder(app)

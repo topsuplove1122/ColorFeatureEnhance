@@ -255,7 +255,7 @@ object ConfigUtils {
         if (!CSU.fileExists(modulePropsPath)) return null
 
         return try {
-            val output = CSU.runWithSu("grep '^version=' \"$modulePropsPath\" | cut -d'=' -f2")
+            val output = CSU.runWithSu("grep '^version=' \"$modulePropsPath\" | cut -d'=' -f2").output
             output.trim().takeIf { it.isNotEmpty() }
         } catch (e: Exception) {
             Log.e(TAG, "获取模块版本失败", e)
@@ -325,7 +325,7 @@ object ConfigUtils {
             Log.d(TAG, "执行Shell命令: $finalCmd")
 
             if (finalCmd.isNotEmpty()) {
-                val result = CSU.runWithSu(finalCmd)
+                val result = CSU.runWithSu(finalCmd).output
                 Log.d(TAG, "Shell命令执行结果: $result")
             } else {
                 Log.w(TAG, "没有Shell命令需要执行")
@@ -390,7 +390,7 @@ object ConfigUtils {
                 val finalPermissionCmd = permissionCmd.toString().removeSuffix(" && ")
                 Log.d(TAG, "执行权限设置命令: $finalPermissionCmd")
 
-                val result = CSU.runWithSu(finalPermissionCmd)
+                val result = CSU.runWithSu(finalPermissionCmd).output
                 Log.d(TAG, "权限设置命令执行结果: $result")
                 Log.i(TAG, "模块目录权限设置完成")
             } else {
