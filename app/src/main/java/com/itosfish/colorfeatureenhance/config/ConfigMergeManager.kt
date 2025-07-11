@@ -4,6 +4,7 @@ import android.util.Log
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
+import com.itosfish.colorfeatureenhance.utils.CSU
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -38,13 +39,24 @@ object ConfigMergeManager {
     suspend fun performConfigMerge(): Boolean = withContext(Dispatchers.IO) {
         try {
             Log.i(TAG, "开始执行配置合并")
-            
+
+            // 检查并复制缺失的系统配置
+            if (!ConfigUtils.hasSystemBaseline()) {
+                Log.i(TAG, "system_baseline为空，从系统路径复制配置文件")
+                val copySuccess = copySystemConfigsToBaseline()
+                if (!copySuccess) {
+                    Log.w(TAG, "系统配置复制失败，继续使用空配置进行合并")
+                }
+            } else {
+                Log.i(TAG, "system_baseline配置文件已存在，跳过复制")
+            }
+
             // 合并 app-features.xml
             mergeAppFeatures()
-            
+
             // 合并 oplus-feature.xml
             mergeOplusFeatures()
-            
+
             Log.i(TAG, "所有配置文件合并完成")
             return@withContext true
         } catch (e: Exception) {
@@ -138,7 +150,80 @@ object ConfigMergeManager {
         
         Log.i(TAG, "保存 oplus-features 补丁: ${patches.size} 个变更")
     }
-    
+
+    /**
+     * 从系统路径复制配置文件到system_baseline目录
+     * 用于首次启动时初始化配置
+     */
+    private fun copySystemConfigsToBaseline(): Boolean {
+        try {
+            Log.i(TAG, "开始从系统路径复制配置文件到system_baseline")
+
+            val systemConfigDir = "/my_product/etc/extension"
+            val appFeaturesFile = configPaths.appFeaturesFile
+            val oplusFeaturesFile = configPaths.oplusFeaturesFile
+
+            var successCount = 0
+            var totalFiles = 0
+
+            // 复制 app-features.xml
+            val appFeaturesSystemPath = "$systemConfigDir/$appFeaturesFile"
+            val appFeaturesTargetPath = "${configPaths.systemBaselineDir}/$appFeaturesFile"
+
+            Log.d(TAG, "检查系统文件: $appFeaturesSystemPath")
+            if (CSU.fileExists(appFeaturesSystemPath)) {
+                Log.d(TAG, "系统文件存在，开始复制: $appFeaturesFile")
+                val copyCmd = "cp \"$appFeaturesSystemPath\" \"$appFeaturesTargetPath\""
+                val result = CSU.runWithSu(copyCmd)
+
+                if (CSU.fileExists(appFeaturesTargetPath)) {
+                    Log.i(TAG, "成功复制系统配置: $appFeaturesFile")
+                    successCount++
+                } else {
+                    Log.w(TAG, "复制失败: $appFeaturesFile (命令输出: $result)")
+                }
+                totalFiles++
+            } else {
+                Log.w(TAG, "系统配置文件不存在: $appFeaturesSystemPath")
+            }
+
+            // 复制 oplus-feature.xml
+            val oplusFeaturesSystemPath = "$systemConfigDir/$oplusFeaturesFile"
+            val oplusFeaturesTargetPath = "${configPaths.systemBaselineDir}/$oplusFeaturesFile"
+
+            Log.d(TAG, "检查系统文件: $oplusFeaturesSystemPath")
+            if (CSU.fileExists(oplusFeaturesSystemPath)) {
+                Log.d(TAG, "系统文件存在，开始复制: $oplusFeaturesFile")
+                val copyCmd = "cp \"$oplusFeaturesSystemPath\" \"$oplusFeaturesTargetPath\""
+                val result = CSU.runWithSu(copyCmd)
+
+                if (CSU.fileExists(oplusFeaturesTargetPath)) {
+                    Log.i(TAG, "成功复制系统配置: $oplusFeaturesFile")
+                    successCount++
+                } else {
+                    Log.w(TAG, "复制失败: $oplusFeaturesFile (命令输出: $result)")
+                }
+                totalFiles++
+            } else {
+                Log.w(TAG, "系统配置文件不存在: $oplusFeaturesSystemPath")
+            }
+
+            // 总结复制结果
+            val success = successCount > 0
+            if (success) {
+                Log.i(TAG, "系统配置复制完成: $successCount/$totalFiles 个文件复制成功")
+            } else {
+                Log.w(TAG, "系统配置复制失败: 没有成功复制任何文件 (总共检查了 $totalFiles 个文件)")
+            }
+
+            return success
+
+        } catch (e: Exception) {
+            Log.e(TAG, "复制系统配置时发生异常", e)
+            return false
+        }
+    }
+
     // ========== 数据模型 ==========
     
     @Serializable
