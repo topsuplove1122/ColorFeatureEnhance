@@ -125,15 +125,15 @@ ensure_default_configs
 
 # 3. 执行挂载逻辑
 log_info "开始挂载配置文件"
-#mount --bind $MODDIR/my_product/etc/ /my_product/etc/
+mount --bind $MODDIR/my_product/etc/ /my_product/etc/
 
-# 挂载any目录下的其他文件
-# TMPDIR=${0%/*}/anymount
-# if [ -d "$TMPDIR" ]; then
-    # for i in `/bin/find $TMPDIR -type f -printf "%P "`; do
-        # /bin/mount /$TMPDIR/$i /$i
-        # restorecon /$i
-    # done
-# fi
+挂载any目录下的其他文件
+TMPDIR=${0%/*}/anymount
+if [ -d "$TMPDIR" ]; then
+    for i in `/bin/find $TMPDIR -type f -printf "%P "`; do
+        /bin/mount /$TMPDIR/$i /$i
+        restorecon /$i
+    done
+fi
 
 log_info "=== post-fs-data阶段完成 ==="
