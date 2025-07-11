@@ -65,6 +65,7 @@ import com.itosfish.colorfeatureenhance.ui.components.HighlightedText
 import com.itosfish.colorfeatureenhance.FeatureMode
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.neverEqualPolicy
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 
 @Composable
 fun FeatureConfigScreen(
@@ -168,8 +169,11 @@ fun FeatureConfigScreen(
         }
     }
 
-    // 加载配置
+    // 首次进入或配置路径变化时，自动执行一次合并再加载，避免出现空列表
     LaunchedEffect(configPath) {
+        // 先确保系统配置已复制并完成合并
+        ConfigMergeManager.performConfigMerge()
+        // 再加载特性
         features = repository.loadFeatures(configPath)
     }
 
@@ -186,6 +190,18 @@ fun FeatureConfigScreen(
                             searchQuery = ""
                         }
                         isSearchActive = !isSearchActive
+                    },
+                    onRefresh = {
+                        scope.launch {
+                            // 重新合并配置以确保最新复制的系统配置被处理
+                            ConfigMergeManager.performConfigMerge()
+                            // 重新加载特性列表
+                            val updated = repository.loadFeatures(configPath)
+                            // 强制触发重组，更新UI
+                            features = emptyList()
+                            features = updated
+                            refreshTrigger++
+                        }
                     }
                 )
                 

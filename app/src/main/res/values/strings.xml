@@ -89,4 +89,5 @@
     <string name="save_and_sync_success">已保存并同步到模块</string>
     <string name="save_success_sync_failed">已保存但同步到模块失败</string>
     <string name="save_success_merge_failed">保存成功但配置合并失败</string>
+    <string name="refresh">刷新</string>
 </resources>

@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +27,8 @@ fun ColorOSTopAppBar(
     currentMode: FeatureMode,
     onModeChange: (FeatureMode) -> Unit,
     isSearchActive: Boolean = false,
-    onSearchClick: (() -> Unit)? = null
+    onSearchClick: (() -> Unit)? = null,
+    onRefresh: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     TopAppBar(
@@ -49,6 +51,15 @@ fun ColorOSTopAppBar(
                         imageVector = Icons.Filled.Search,
                         contentDescription = stringResource(id = R.string.search_feature),
                         tint = if (isSearchActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            // 刷新按钮（可选）
+            if (onRefresh != null) {
+                IconButton(onClick = onRefresh) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = stringResource(id = R.string.refresh)
                     )
                 }
             }
