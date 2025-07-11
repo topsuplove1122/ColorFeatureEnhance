@@ -331,6 +331,9 @@ object ConfigUtils {
                 Log.w(TAG, "没有Shell命令需要执行")
             }
 
+            // 设置模块目录权限为644
+            setModulePermissions(moduleBase)
+
             // 验证复制是否成功
             var successCount = 0
             moduleDirs.forEach { dir ->
@@ -354,6 +357,48 @@ object ConfigUtils {
         } catch (e: Exception) {
             Log.e(TAG, "复制配置到模块目录时发生异常", e)
             return false
+        }
+    }
+
+    /**
+     * 设置模块目录权限为644
+     * 对 /模块路径/anymount/ 和 /模块路径/my_product/ 目录及其子目录、文件设置权限
+     */
+    private fun setModulePermissions(moduleBase: String) {
+        try {
+            Log.i(TAG, "开始设置模块目录权限")
+
+            val targetDirs = listOf(
+                "$moduleBase/anymount",
+                "$moduleBase/my_product"
+            )
+
+            val permissionCmd = StringBuilder()
+
+            targetDirs.forEach { dir ->
+                if (CSU.dirExists(dir)) {
+                    Log.d(TAG, "设置目录权限: $dir")
+                    // 设置目录及其所有子目录和文件的权限为644
+                    permissionCmd.append("chmod -R 644 \"$dir\" && ")
+                } else {
+                    Log.d(TAG, "目录不存在，跳过权限设置: $dir")
+                }
+            }
+
+            if (permissionCmd.isNotEmpty()) {
+                // 移除最后的 &&
+                val finalPermissionCmd = permissionCmd.toString().removeSuffix(" && ")
+                Log.d(TAG, "执行权限设置命令: $finalPermissionCmd")
+
+                val result = CSU.runWithSu(finalPermissionCmd)
+                Log.d(TAG, "权限设置命令执行结果: $result")
+                Log.i(TAG, "模块目录权限设置完成")
+            } else {
+                Log.w(TAG, "没有需要设置权限的目录")
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "设置模块目录权限时发生异常", e)
         }
     }
 }
