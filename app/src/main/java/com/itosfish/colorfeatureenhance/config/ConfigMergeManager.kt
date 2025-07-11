@@ -145,6 +145,7 @@ object ConfigMergeManager {
     data class AppFeaturePatch(
         val name: String,
         val action: PatchAction,
+        val enabled: Boolean = true,
         val args: String? = null,
         val subNodes: List<FeatureSubNode> = emptyList()
     )
@@ -295,6 +296,7 @@ object ConfigMergeManager {
                     if (result.none { it.name == patch.name }) {
                         result.add(AppFeature(
                             name = patch.name,
+                            enabled = patch.enabled,
                             args = patch.args,
                             subNodes = patch.subNodes
                         ))
@@ -306,6 +308,7 @@ object ConfigMergeManager {
                     if (index >= 0) {
                         result[index] = AppFeature(
                             name = patch.name,
+                            enabled = patch.enabled,
                             args = patch.args,
                             subNodes = patch.subNodes
                         )
@@ -438,15 +441,25 @@ object ConfigMergeManager {
                 patches.add(AppFeaturePatch(
                     name = modifiedFeature.name,
                     action = PatchAction.ADD,
+                    enabled = modifiedFeature.enabled,
                     args = modifiedFeature.args,
                     subNodes = modifiedFeature.subNodes
                 ))
             } else if (originalFeature != modifiedFeature) {
-                // 修改特性
+                // 修改特性 - 关键修复：正确处理布尔值逻辑
+                val finalArgs = if (modifiedFeature.args?.startsWith("boolean:") == true) {
+                    // 对于布尔类型，根据enabled状态生成正确的args
+                    "boolean:${modifiedFeature.enabled}"
+                } else {
+                    // 对于非布尔类型，直接使用args
+                    modifiedFeature.args
+                }
+
                 patches.add(AppFeaturePatch(
                     name = modifiedFeature.name,
                     action = PatchAction.MODIFY,
-                    args = modifiedFeature.args,
+                    enabled = modifiedFeature.enabled,
+                    args = finalArgs,
                     subNodes = modifiedFeature.subNodes
                 ))
             }

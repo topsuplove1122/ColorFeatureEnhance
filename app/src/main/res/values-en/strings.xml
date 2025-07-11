@@ -4,7 +4,7 @@
     <string name="about_view_source_code">View source code on <b><a href="https://github.com/ItosFish/ColorFeatureEnhance">GitHub</a></b></string>
     <string name="about">About</string>
     <string name="config">Settings</string>
-    <string name="app_title">ColorOS Feature Enhancer</string>
+    <string name="app_title">Feature Enhancer</string>
     <string name="feature_config_placeholder">Feature configuration page (to be implemented)</string>
     <string name="about_placeholder">About page (to be implemented)</string>
     <string name="feature_ai_chat_scene">AI Chat Scene</string>
@@ -81,4 +81,13 @@
     <string name="complex_feature_message">This feature contains complex configuration that cannot be edited in the app. To modify parameters, please manually edit the config file:\n%1$s</string>
     <string name="complex_feature_indicator">(Complex Config)</string>
     <string name="unavailable_feature_indicator">(Unavailable)</string>
-</resources> 
+
+    <!-- New internationalization strings -->
+    <string name="back">Back</string>
+    <string name="config_content">Configuration Content</string>
+    <string name="config_value">Configuration Value</string>
+    <string name="complex_feature_edit_restriction">Complex features cannot be edited through this dialog. Please use an external editor to modify the configuration file</string>
+    <string name="save_and_sync_success">Saved and synced to module successfully</string>
+    <string name="save_success_sync_failed">Saved successfully but failed to sync to module</string>
+    <string name="save_success_merge_failed">Saved successfully but configuration merge failed</string>
+</resources>

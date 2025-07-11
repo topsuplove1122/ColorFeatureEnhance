@@ -253,25 +253,12 @@ fun EditFeatureDialog(
                     subNodes = originalSubNodes
                 )
                 
-                val configPath = context.getExternalFilesDir(null)?.absolutePath + 
-                    if (currentMode == FeatureMode.APP) "/com.oplus.app-features.xml" 
-                    else "/com.oplus.oplus-feature.xml"
-                
                 if (tempFeature.isComplex) {
                     Text(
-                        text = stringResource(id = R.string.complex_feature_message, configPath),
+                        text = stringResource(R.string.complex_feature_edit_restriction),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(onClick = {
-                        val intent = android.content.Intent(context, com.itosfish.colorfeatureenhance.ui.TextEditorActivity::class.java).apply {
-                            putExtra(com.itosfish.colorfeatureenhance.ui.TextEditorActivity.KEY_PATH, configPath)
-                        }
-                        context.startActivity(intent)
-                    }) {
-                        Text(text = "在内置编辑器中打开")
-                    }
                     // 复杂特性不显示参数编辑控件
                     return@Column
                 } else {
@@ -290,7 +277,7 @@ fun EditFeatureDialog(
                         OutlinedTextField(
                             value = argValue,
                             onValueChange = { argValue = it },
-                            label = { Text("配置值") },
+                            label = { Text(stringResource(R.string.config_value)) },
                             modifier = Modifier.fillMaxWidth()
                         )
                         featureEnabled = true

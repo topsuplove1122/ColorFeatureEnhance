@@ -28,8 +28,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.itosfish.colorfeatureenhance.R
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
 import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
@@ -81,7 +83,7 @@ fun TextEditorScreen(filePath: String, onFinish: () -> Unit) {
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = { onFinish() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 title = { Text(text = File(filePath).name) },
@@ -103,15 +105,15 @@ fun TextEditorScreen(filePath: String, onFinish: () -> Unit) {
                                 launch(Dispatchers.Main) {
                                     when {
                                         mergeSuccess && copySuccess -> {
-                                            Toast.makeText(context, "已保存并同步到模块", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.save_and_sync_success), Toast.LENGTH_SHORT).show()
                                             isModified = false
                                         }
                                         mergeSuccess && !copySuccess -> {
-                                            Toast.makeText(context, "已保存但同步到模块失败", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(context, context.getString(R.string.save_success_sync_failed), Toast.LENGTH_LONG).show()
                                             isModified = false
                                         }
                                         else -> {
-                                            Toast.makeText(context, "保存成功但配置合并失败", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(context, context.getString(R.string.save_success_merge_failed), Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 }
@@ -142,7 +144,7 @@ fun TextEditorScreen(filePath: String, onFinish: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(12.dp),
-                label = { Text("配置内容") },
+                label = { Text(stringResource(R.string.config_content)) },
                 // 默认使用较小字体以便在小屏幕上显示更多配置内容
                 textStyle = LocalTextStyle.current.copy(fontSize = 12.sp, lineHeight = 16.sp),
                 singleLine = false,

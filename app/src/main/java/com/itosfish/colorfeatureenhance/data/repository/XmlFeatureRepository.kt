@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
+import android.util.Log
 import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
@@ -32,15 +33,22 @@ class XmlFeatureRepository : FeatureRepository {
             emptyList()
         }
 
+        Log.i("XmlFeatureRepository", "开始保存特性配置，原始特性数量: ${originalFeatures.size}, 修改后特性数量: ${features.size}")
+
         // 生成并保存用户补丁
         ConfigMergeManager.saveAppFeaturePatches(originalFeatures, features)
+        Log.i("XmlFeatureRepository", "用户补丁已保存")
 
         // 重新执行配置合并
         val mergeSuccess = ConfigMergeManager.performConfigMerge()
+        Log.i("XmlFeatureRepository", "配置合并结果: $mergeSuccess")
 
         // 如果合并成功，复制到模块目录
         if (mergeSuccess) {
-            ConfigUtils.copyMergedConfigToModule()
+            val copySuccess = ConfigUtils.copyMergedConfigToModule()
+            Log.i("XmlFeatureRepository", "复制到模块目录结果: $copySuccess")
+        } else {
+            Log.e("XmlFeatureRepository", "配置合并失败，跳过复制到模块目录")
         }
     }
 

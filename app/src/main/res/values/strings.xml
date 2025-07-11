@@ -80,4 +80,13 @@
     <string name="complex_feature_message">此特性包含复杂配置，无法在应用内编辑参数值。如需修改参数，请手动编辑配置文件：\n%1$s\n\n等大佬提PR</string>
     <string name="complex_feature_indicator">(复杂配置)</string>
     <string name="unavailable_feature_indicator">(不可用)</string>
+
+    <!-- 新增的国际化字符串 -->
+    <string name="back">返回</string>
+    <string name="config_content">配置内容</string>
+    <string name="config_value">配置值</string>
+    <string name="complex_feature_edit_restriction">复杂特性无法通过此对话框编辑，请使用外部编辑器修改配置文件</string>
+    <string name="save_and_sync_success">已保存并同步到模块</string>
+    <string name="save_success_sync_failed">已保存但同步到模块失败</string>
+    <string name="save_success_merge_failed">保存成功但配置合并失败</string>
 </resources>

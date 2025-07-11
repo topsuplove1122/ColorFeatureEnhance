@@ -272,6 +272,8 @@ object ConfigUtils {
             Log.i(TAG, "开始复制合并配置到模块目录")
 
             val configPaths = getConfigPaths()
+            Log.d(TAG, "配置路径: mergedOutputDir=${configPaths.mergedOutputDir}")
+
             val moduleBase = "/data/adb/modules/ColorOSFeaturesEnhance"
             val moduleDirs = listOf(
                 "$moduleBase/my_product/etc/extension",
@@ -285,40 +287,66 @@ object ConfigUtils {
                 shellCmd.append("mkdir -p \"$dir\" && ")
             }
 
+            var hasFilesToCopy = false
+
             // 复制app-features.xml
             val appFeaturesSource = "${configPaths.mergedOutputDir}/${configPaths.appFeaturesFile}"
+            Log.d(TAG, "检查源文件: $appFeaturesSource")
             if (File(appFeaturesSource).exists()) {
+                Log.i(TAG, "源文件存在，准备复制 app-features.xml")
                 moduleDirs.forEach { dir ->
                     shellCmd.append("cp \"$appFeaturesSource\" \"$dir/\" && ")
                 }
-                Log.i(TAG, "复制 app-features.xml 到模块目录")
+                hasFilesToCopy = true
+            } else {
+                Log.w(TAG, "源文件不存在: $appFeaturesSource")
             }
 
             // 复制oplus-feature.xml
             val oplusFeaturesSource = "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
+            Log.d(TAG, "检查源文件: $oplusFeaturesSource")
             if (File(oplusFeaturesSource).exists()) {
+                Log.i(TAG, "源文件存在，准备复制 oplus-feature.xml")
                 moduleDirs.forEach { dir ->
                     shellCmd.append("cp \"$oplusFeaturesSource\" \"$dir/\" && ")
                 }
-                Log.i(TAG, "复制 oplus-feature.xml 到模块目录")
+                hasFilesToCopy = true
+            } else {
+                Log.w(TAG, "源文件不存在: $oplusFeaturesSource")
+            }
+
+            if (!hasFilesToCopy) {
+                Log.e(TAG, "没有找到任何需要复制的文件")
+                return false
             }
 
             // 移除最后的 &&
             val finalCmd = shellCmd.toString().removeSuffix(" && ")
+            Log.d(TAG, "执行Shell命令: $finalCmd")
+
             if (finalCmd.isNotEmpty()) {
-                CSU.runWithSu(finalCmd)
+                val result = CSU.runWithSu(finalCmd)
+                Log.d(TAG, "Shell命令执行结果: $result")
+            } else {
+                Log.w(TAG, "没有Shell命令需要执行")
             }
 
             // 验证复制是否成功
-            val success = moduleDirs.any { dir ->
-                CSU.fileExists("$dir/${configPaths.appFeaturesFile}") ||
-                CSU.fileExists("$dir/${configPaths.oplusFeaturesFile}")
+            var successCount = 0
+            moduleDirs.forEach { dir ->
+                val appExists = CSU.fileExists("$dir/${configPaths.appFeaturesFile}")
+                val oplusExists = CSU.fileExists("$dir/${configPaths.oplusFeaturesFile}")
+                Log.d(TAG, "目录 $dir: app-features存在=$appExists, oplus-feature存在=$oplusExists")
+                if (appExists || oplusExists) {
+                    successCount++
+                }
             }
 
+            val success = successCount > 0
             if (success) {
-                Log.i(TAG, "配置文件复制到模块目录成功")
+                Log.i(TAG, "配置文件复制到模块目录成功 ($successCount/${moduleDirs.size} 个目录)")
             } else {
-                Log.w(TAG, "配置文件复制到模块目录失败")
+                Log.e(TAG, "配置文件复制到模块目录失败，所有目录都没有文件")
             }
 
             return success

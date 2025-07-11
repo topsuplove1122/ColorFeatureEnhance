@@ -37,18 +37,26 @@ class XmlOplusFeatureRepository : FeatureRepository {
             emptyList()
         }
 
+        Log.i("XmlOplusFeatureRepository", "开始保存oplus特性配置，原始特性数量: ${originalOplusFeatures.size}, 修改后特性数量: ${features.size}")
+
         // 将AppFeature转换为OplusFeature
         val modifiedOplusFeatures = convertAppFeaturesToOplusFeatures(features)
+        Log.i("XmlOplusFeatureRepository", "转换后的oplus特性数量: ${modifiedOplusFeatures.size}")
 
         // 生成并保存用户补丁
         ConfigMergeManager.saveOplusFeaturePatches(originalOplusFeatures, modifiedOplusFeatures)
+        Log.i("XmlOplusFeatureRepository", "用户补丁已保存")
 
         // 重新执行配置合并
         val mergeSuccess = ConfigMergeManager.performConfigMerge()
+        Log.i("XmlOplusFeatureRepository", "配置合并结果: $mergeSuccess")
 
         // 如果合并成功，复制到模块目录
         if (mergeSuccess) {
-            ConfigUtils.copyMergedConfigToModule()
+            val copySuccess = ConfigUtils.copyMergedConfigToModule()
+            Log.i("XmlOplusFeatureRepository", "复制到模块目录结果: $copySuccess")
+        } else {
+            Log.e("XmlOplusFeatureRepository", "配置合并失败，跳过复制到模块目录")
         }
     }
 
