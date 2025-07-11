@@ -19,8 +19,12 @@ import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepositor
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.CSU
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,9 +35,11 @@ class MainActivity : ComponentActivity() {
             ColorFeatureEnhanceTheme {
                 var currentMode by remember { mutableStateOf(FeatureMode.APP) }
 
+                // 使用新架构的配置路径（从merged_output读取）
+                val configPaths = ConfigUtils.getConfigPaths()
                 val configPath = when (currentMode) {
-                    FeatureMode.APP -> getExternalFilesDir(null)?.absolutePath + "/com.oplus.app-features.xml"
-                    FeatureMode.OPLUS -> getExternalFilesDir(null)?.absolutePath + "/com.oplus.oplus-feature.xml"
+                    FeatureMode.APP -> "${configPaths.mergedOutputDir}/${configPaths.appFeaturesFile}"
+                    FeatureMode.OPLUS -> "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
                 }
 
                 // 根据模式记忆 repository，切换模式时重建
@@ -66,22 +72,43 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        // 如果目录已存在，则视为已安装
-        if (!CSU.dirExists("/data/adb/modules/ColorOSFeaturesEnhance")) {
-            val a = ConfigUtils.installModule()
-            if (a) {
+        // 检查并安装模块
+        if (!ConfigUtils.isModuleInstalled()) {
+            val installSuccess = ConfigUtils.installModule()
+            if (installSuccess) {
                 Toast.makeText(app, app.getString(R.string.module_install_success), Toast.LENGTH_SHORT).show()
+                Log.i("MainActivity", "模块安装成功")
             } else {
                 MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.module_install_fail_title)
                     .setMessage(R.string.module_install_fail_message)
                     .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
                     .show()
-                Log.e("MainActivity", "Module installation failed.")
+                Log.e("MainActivity", "模块安装失败")
             }
         }
 
-        ConfigUtils.copySystemConfig()
+        // 初始化新的配置管理系统
+        val initSuccess = ConfigUtils.initializeConfigSystem()
+        if (initSuccess) {
+            Log.i("MainActivity", "配置系统初始化成功")
+
+            // 异步执行配置合并
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val mergeSuccess = ConfigMergeManager.performConfigMerge()
+                    if (mergeSuccess) {
+                        Log.i("MainActivity", "配置合并完成")
+                    } else {
+                        Log.w("MainActivity", "配置合并失败")
+                    }
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "配置合并过程中发生异常", e)
+                }
+            }
+        } else {
+            Log.e("MainActivity", "配置系统初始化失败")
+        }
 
     }
 

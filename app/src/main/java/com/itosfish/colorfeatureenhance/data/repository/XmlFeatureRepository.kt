@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 class XmlFeatureRepository : FeatureRepository {
@@ -22,23 +23,25 @@ class XmlFeatureRepository : FeatureRepository {
     }
 
     override suspend fun saveFeatures(configPath: String, features: List<AppFeature>): Unit = withContext(Dispatchers.IO) {
-        val file = File(configPath)
-        // 确保父目录存在
-        file.parentFile?.mkdirs()
-
-        file.outputStream().bufferedWriter(Charsets.UTF_8).use { writer ->
-            writer.appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-            writer.appendLine("<extend_features>")
-
-            features.forEach { feature ->
-                writeFeature(writer, feature)
-            }
-
-            writer.appendLine("</extend_features>")
+        // 读取系统基线配置作为原始配置
+        val configPaths = ConfigUtils.getConfigPaths()
+        val systemBaselineFile = File(configPaths.systemBaselineDir, configPaths.appFeaturesFile)
+        val originalFeatures = if (systemBaselineFile.exists()) {
+            loadFeatures(systemBaselineFile.absolutePath)
+        } else {
+            emptyList()
         }
 
-        // 将更新后的文件复制到模块目录
-        ConfigUtils.copyConfigToModule()
+        // 生成并保存用户补丁
+        ConfigMergeManager.saveAppFeaturePatches(originalFeatures, features)
+
+        // 重新执行配置合并
+        val mergeSuccess = ConfigMergeManager.performConfigMerge()
+
+        // 如果合并成功，复制到模块目录
+        if (mergeSuccess) {
+            ConfigUtils.copyMergedConfigToModule()
+        }
     }
 
     /**

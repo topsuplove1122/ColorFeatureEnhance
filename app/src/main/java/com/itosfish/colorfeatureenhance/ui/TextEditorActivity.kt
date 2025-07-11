@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,16 +90,34 @@ fun TextEditorScreen(filePath: String, onFinish: () -> Unit) {
                         scope.launch(Dispatchers.IO) {
                             kotlin.runCatching {
                                 File(filePath).writeText(content)
-                                // 同步到模块
-                                ConfigUtils.copyConfigToModule()
-                            }.onSuccess {
-                                launch(Dispatchers.Main) {
-                                    Toast.makeText(context, "已保存并同步到模块", Toast.LENGTH_SHORT).show()
-                                    isModified = false
+                                // 重新执行配置合并
+                                val mergeSuccess = ConfigMergeManager.performConfigMerge()
+                                // 如果合并成功，复制到模块目录
+                                val copySuccess = if (mergeSuccess) {
+                                    ConfigUtils.copyMergedConfigToModule()
+                                } else {
+                                    false
                                 }
-                            }.onFailure {
+                                Pair(mergeSuccess, copySuccess)
+                            }.onSuccess { (mergeSuccess: Boolean, copySuccess: Boolean) ->
                                 launch(Dispatchers.Main) {
-                                    Toast.makeText(context, "保存失败: ${'$'}it", Toast.LENGTH_LONG).show()
+                                    when {
+                                        mergeSuccess && copySuccess -> {
+                                            Toast.makeText(context, "已保存并同步到模块", Toast.LENGTH_SHORT).show()
+                                            isModified = false
+                                        }
+                                        mergeSuccess && !copySuccess -> {
+                                            Toast.makeText(context, "已保存但同步到模块失败", Toast.LENGTH_LONG).show()
+                                            isModified = false
+                                        }
+                                        else -> {
+                                            Toast.makeText(context, "保存成功但配置合并失败", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+                            }.onFailure { exception: Throwable ->
+                                launch(Dispatchers.Main) {
+                                    Toast.makeText(context, "保存失败: ${exception.message}", Toast.LENGTH_LONG).show()
                                 }
                             }
                         }

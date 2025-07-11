@@ -1,5 +1,6 @@
 package com.itosfish.colorfeatureenhance.data.repository
 
+import android.util.Log
 import android.util.Xml
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
@@ -7,7 +8,10 @@ import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
+import java.io.StringReader
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 /**
@@ -24,20 +28,79 @@ class XmlOplusFeatureRepository : FeatureRepository {
     }
 
     override suspend fun saveFeatures(configPath: String, features: List<AppFeature>): Unit = withContext(Dispatchers.IO) {
-        val file = File(configPath)
-        file.parentFile?.mkdirs()
-
-        file.outputStream().bufferedWriter(Charsets.UTF_8).use { writer ->
-            writer.appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-            writer.appendLine("<oplus-config>")
-
-            features.forEach { feature ->
-                writeFeature(writer, feature)
-            }
-            writer.appendLine("</oplus-config>")
+        // 读取系统基线配置作为原始配置
+        val configPaths = ConfigUtils.getConfigPaths()
+        val systemBaselineFile = File(configPaths.systemBaselineDir, configPaths.oplusFeaturesFile)
+        val originalOplusFeatures = if (systemBaselineFile.exists()) {
+            loadOplusFeatures(systemBaselineFile.absolutePath)
+        } else {
+            emptyList()
         }
 
-        ConfigUtils.copyConfigToModule()
+        // 将AppFeature转换为OplusFeature
+        val modifiedOplusFeatures = convertAppFeaturesToOplusFeatures(features)
+
+        // 生成并保存用户补丁
+        ConfigMergeManager.saveOplusFeaturePatches(originalOplusFeatures, modifiedOplusFeatures)
+
+        // 重新执行配置合并
+        val mergeSuccess = ConfigMergeManager.performConfigMerge()
+
+        // 如果合并成功，复制到模块目录
+        if (mergeSuccess) {
+            ConfigUtils.copyMergedConfigToModule()
+        }
+    }
+
+    /**
+     * 加载OplusFeature列表（用于补丁生成）
+     */
+    private suspend fun loadOplusFeatures(configPath: String): List<ConfigMergeManager.OplusFeature> = withContext(Dispatchers.IO) {
+        val file = File(configPath)
+        if (!file.exists()) return@withContext emptyList()
+
+        val features = mutableListOf<ConfigMergeManager.OplusFeature>()
+
+        try {
+            val factory = XmlPullParserFactory.newInstance()
+            val parser = factory.newPullParser()
+            parser.setInput(StringReader(file.readText()))
+
+            var eventType = parser.eventType
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    when (parser.name) {
+                        "oplus-feature" -> {
+                            val name = parser.getAttributeValue(null, "name") ?: ""
+                            features.add(ConfigMergeManager.OplusFeature.Standard(name))
+                        }
+                        "unavailable-oplus-feature" -> {
+                            val name = parser.getAttributeValue(null, "name") ?: ""
+                            features.add(ConfigMergeManager.OplusFeature.Unavailable(name))
+                        }
+                    }
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Exception) {
+            Log.e("XmlOplusFeatureRepository", "解析 oplus-feature.xml 失败", e)
+        }
+
+        return@withContext features
+    }
+
+    /**
+     * 将AppFeature转换为OplusFeature
+     */
+    private fun convertAppFeaturesToOplusFeatures(appFeatures: List<AppFeature>): List<ConfigMergeManager.OplusFeature> {
+        return appFeatures.map { appFeature ->
+            if (appFeature.enabled) {
+                ConfigMergeManager.OplusFeature.Standard(appFeature.name)
+            } else {
+                ConfigMergeManager.OplusFeature.Unavailable(appFeature.name)
+            }
+        }
     }
 
     /**

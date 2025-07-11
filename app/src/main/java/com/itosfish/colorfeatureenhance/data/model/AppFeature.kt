@@ -1,8 +1,11 @@
 package com.itosfish.colorfeatureenhance.data.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * 表示特性的子节点，如 <StringList args="xxx"/> 或 <StringList name="pkgs" args="xxx"/>
  */
+@Serializable
 data class FeatureSubNode(
     val type: String,  // 如 "StringList"
     val name: String?, // 如 "pkgs"，可能为空
