@@ -207,8 +207,8 @@ fun FeatureConfigScreen(
             ) {
                 FloatingActionButton(
                     onClick = { showAddDialog = true },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
