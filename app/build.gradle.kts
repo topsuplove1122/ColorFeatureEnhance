@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.itosfish.colorfeatureenhance"
-        minSdk = 35
+        minSdk = 34
         targetSdk = 36
         versionCode = 20250711
         versionName = "0.51"
