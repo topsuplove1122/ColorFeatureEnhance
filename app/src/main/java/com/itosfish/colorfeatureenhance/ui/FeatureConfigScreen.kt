@@ -496,24 +496,28 @@ private fun FeatureGroupItem(
             val hasBoolean = feature.args?.startsWith("boolean:") == true
             val isComplex = feature.isComplex
             val isUnavailable = currentMode == FeatureMode.OPLUS && feature.args == "unavailable"
+            val trailingModifier = Modifier.padding(start = 8.dp)
             if (isComplex) {
                 Text(
                     text = stringResource(id = R.string.complex_feature_indicator),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = trailingModifier
                 )
             } else if (isUnavailable) {
                 Text(
                     text = stringResource(id = R.string.unavailable_feature_indicator),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = trailingModifier
                 )
             } else if (currentMode == FeatureMode.APP && hasBoolean) {
                 Switch(
                     checked = group.isEnabled,
                     onCheckedChange = {
                         onToggle(group.withEnabled(it))
-                    }
+                    },
+                    modifier = trailingModifier
                 )
             }
         }
