@@ -263,6 +263,15 @@ fun EditFeatureDialog(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(onClick = {
+                        val intent = android.content.Intent(context, com.itosfish.colorfeatureenhance.ui.TextEditorActivity::class.java).apply {
+                            putExtra(com.itosfish.colorfeatureenhance.ui.TextEditorActivity.KEY_PATH, configPath)
+                        }
+                        context.startActivity(intent)
+                    }) {
+                        Text(text = "在内置编辑器中打开")
+                    }
                     // 复杂特性不显示参数编辑控件
                     return@Column
                 } else {
