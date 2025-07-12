@@ -175,7 +175,7 @@ object ConfigMergeManager {
                     when (patch?.action) {
                         OplusPatchAction.ENABLE -> PatchAction.MODIFY
                         OplusPatchAction.DISABLE -> PatchAction.MODIFY
-                        OplusPatchAction.REMOVE -> null // REMOVE状态的特性不会显示在列表中
+                        OplusPatchAction.REMOVE -> PatchAction.REMOVE // REMOVE状态显示为删除标识
                         null -> null
                     }
                 } else {
@@ -251,7 +251,7 @@ object ConfigMergeManager {
                             val action = when (patch.action) {
                                 OplusPatchAction.ENABLE -> PatchAction.MODIFY
                                 OplusPatchAction.DISABLE -> PatchAction.MODIFY
-                                OplusPatchAction.REMOVE -> return@mapNotNull null // REMOVE状态不返回
+                                OplusPatchAction.REMOVE -> PatchAction.REMOVE // REMOVE状态返回删除标识
                             }
                             patch.name to action
                         } else {
@@ -478,7 +478,7 @@ object ConfigMergeManager {
         }
     }
 
-    private fun loadOplusFeaturePatches(file: File): List<OplusFeaturePatch> {
+    fun loadOplusFeaturePatches(file: File): List<OplusFeaturePatch> {
         return try {
             val content = file.readText()
             json.decodeFromString<List<OplusFeaturePatch>>(content)

@@ -20,11 +20,33 @@ import java.io.StringReader
 class XmlOplusFeatureRepository : FeatureRepository {
 
     override suspend fun loadFeatures(configPath: String): List<AppFeature> = withContext(Dispatchers.IO) {
-        val file = File(configPath)
-        if (!file.exists()) return@withContext emptyList()
+        // 对于oplus特性，我们需要显示系统基线中的所有特性，并根据补丁状态设置enabled状态
+        val configPaths = ConfigUtils.getConfigPaths()
+        val systemBaselineFile = File(configPaths.systemBaselineDir, configPaths.oplusFeaturesFile)
 
-        val features = parseXmlFeatures(file)
-        features
+        if (!systemBaselineFile.exists()) return@withContext emptyList()
+
+        // 加载系统基线特性
+        val systemFeatures = parseXmlFeatures(systemBaselineFile)
+
+        // 加载用户补丁
+        val patchFile = File(configPaths.userPatchesDir, "oplus-features.patch.json")
+        val userPatches = if (patchFile.exists()) {
+            ConfigMergeManager.loadOplusFeaturePatches(patchFile)
+        } else {
+            emptyList()
+        }
+
+        // 根据补丁状态设置特性的enabled状态
+        val featuresWithPatchStatus = systemFeatures.map { feature ->
+            val patch = userPatches.find { it.name == feature.name }
+            when (patch?.action) {
+                ConfigMergeManager.OplusPatchAction.REMOVE -> feature.copy(enabled = false)
+                else -> feature.copy(enabled = true)
+            }
+        }
+
+        featuresWithPatchStatus
     }
 
     override suspend fun saveFeatures(configPath: String, features: List<AppFeature>): Unit = withContext(Dispatchers.IO) {
@@ -40,7 +62,8 @@ class XmlOplusFeatureRepository : FeatureRepository {
         Log.i("XmlOplusFeatureRepository", "开始保存oplus特性配置，原始特性数量: ${originalOplusFeatures.size}, 修改后特性数量: ${features.size}")
 
         // 将AppFeature转换为OplusFeature
-        val modifiedOplusFeatures = convertAppFeaturesToOplusFeatures(features.filter { it.enabled || it.args == "unavailable" })
+        // oplus开关控制删除：enabled=true保留特性，enabled=false删除特性
+        val modifiedOplusFeatures = convertAppFeaturesToOplusFeatures(features.filter { it.enabled })
         Log.i("XmlOplusFeatureRepository", "转换后的oplus特性数量: ${modifiedOplusFeatures.size}")
 
         // 生成并保存用户补丁
@@ -103,10 +126,11 @@ class XmlOplusFeatureRepository : FeatureRepository {
      */
     private fun convertAppFeaturesToOplusFeatures(appFeatures: List<AppFeature>): List<ConfigMergeManager.OplusFeature> {
         return appFeatures.map { appFeature ->
-            if (appFeature.enabled) {
-                ConfigMergeManager.OplusFeature.Standard(appFeature.name)
-            } else {
+            // 对于oplus特性，只保留启用的特性，根据原始类型决定是Standard还是Unavailable
+            if (appFeature.args == "unavailable") {
                 ConfigMergeManager.OplusFeature.Unavailable(appFeature.name)
+            } else {
+                ConfigMergeManager.OplusFeature.Standard(appFeature.name)
             }
         }
     }
