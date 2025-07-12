@@ -331,4 +331,21 @@
     <string name="export_logs_failed">日志导出失败</string>
     <string name="no_logs_to_export">暂无日志可导出</string>
     <string name="log_export_title">ColorFeatureEnhance 日志</string>
+
+    <!-- 新增 App 特性中文描述 (20250712) -->
+    <string name="feature_fullscreen_panoramic_aod">全天候全景息屏</string>
+    <string name="feature_gallery_gif_optimization">相册动图优化</string>
+    <string name="feature_jianying_asset_optimization">剪影素材优化</string>
+    <string name="feature_douyin_live_beauty">抖音直播美颜</string>
+    <string name="feature_game_assistant_body_sensation">游戏助手姿态调整</string>
+    <string name="feature_new_tips_page">新版使用技巧</string>
+    <string name="feature_launcher_breeeno_entry_indicator">系统桌面小布提示</string>
+    <string name="feature_hide_screenon_battery_stats">电池详情隐藏屏幕使用</string>
+    <!-- 新增 Oplus 特性中文描述 (20250712) -->
+    <string name="oplus_feature_radio_show_5g_nr_mode">[软] 5G网络模式切换</string>
+    <string name="oplus_feature_eyeprotect_paper_texture_support">[软] 纸质护眼</string>
+    <string name="oplus_feature_zoom_multi_mode">[软] 双小窗特性</string>
+    <string name="oplus_feature_dynamic_screen_bar_support">[软] 调整亮度条范围（开发者选项）</string>
+    <string name="oplus_feature_rhythm_eyeprotect_2_0_support">[软] 单扫护眼</string>
+    <string name="oplus_feature_super_volume_5x">[软] 超级音量（5×）</string>
 </resources>

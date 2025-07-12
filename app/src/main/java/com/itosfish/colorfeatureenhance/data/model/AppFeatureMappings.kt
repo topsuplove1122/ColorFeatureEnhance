@@ -78,7 +78,15 @@ class AppFeatureMappings private constructor() {
         "com.oplus.phonemanager.ai_voice_detect" to R.string.feature_ai_voice_detect,
         "oplus.appfeature.networkless_audiovolume_config" to R.string.feature_networkless_audiovolume_config,
         "os.graphic.gallery.os15_secrecy" to R.string.feature_os15_gallery_secrecy,
-        "speechassist.cui.device.info" to R.string.feature_speechassist_device_info
+        "speechassist.cui.device.info" to R.string.feature_speechassist_device_info,
+        "os.personalization.fullscreen_aod.enable" to R.string.feature_fullscreen_panoramic_aod,
+        "os.graphic.gallery.olive.edit.secret" to R.string.feature_gallery_gif_optimization,
+        "com.oplus.mediaturbo.jianying_optimize" to R.string.feature_jianying_asset_optimization,
+        "com.oplus.mediaturbo.douyin_live_beauty" to R.string.feature_douyin_live_beauty,
+        "com.coloros.gamespace_game_support_body_sensation" to R.string.feature_game_assistant_body_sensation,
+        "com.oplus.tips.os_recommend_page_index" to R.string.feature_new_tips_page,
+        "com.android.launcher.INDICATOR_BREENO_ENTRY_ENABLE" to R.string.feature_launcher_breeeno_entry_indicator,
+        "com.oplus.battery.phoneusage.screenon.hide" to R.string.feature_hide_screenon_battery_stats
     )
 
     /**

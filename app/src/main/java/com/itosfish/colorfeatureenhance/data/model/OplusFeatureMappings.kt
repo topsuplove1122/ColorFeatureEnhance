@@ -265,6 +265,12 @@ class OplusFeatureMappings private constructor() {
         "oplus.software.touch_preload" to R.string.oplus_feature_touch_preload,
         "oplus.software.view.rgbnormalize" to R.string.oplus_feature_view_rgbnormalize,
         "oplus.software.view.spring_over_scroller" to R.string.oplus_feature_view_spring_over_scroller,
+        "oplus.software.radio.show_5g_nr_mode" to R.string.oplus_feature_radio_show_5g_nr_mode,
+        "oplus.software.display.eyeprotect_paper_texture_support" to R.string.oplus_feature_eyeprotect_paper_texture_support,
+        "oplus.software.support.zoom.multi_mode" to R.string.oplus_feature_zoom_multi_mode,
+        "oplus.software.display.dynamic_screen_bar_support" to R.string.oplus_feature_dynamic_screen_bar_support,
+        "oplus.software.display.rhythm_eyeprotect_2.0_support" to R.string.oplus_feature_rhythm_eyeprotect_2_0_support,
+        "oplus.software.audio.super_volume_5x" to R.string.oplus_feature_super_volume_5x,
     )
 
     companion object {

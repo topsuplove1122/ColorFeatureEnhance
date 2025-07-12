@@ -271,4 +271,21 @@
     <string name="oplus_feature_touch_preload">[Software] Touch preload</string>
     <string name="oplus_feature_view_rgbnormalize">[Software] Screen RGB color consistency optimization</string>
     <string name="oplus_feature_view_spring_over_scroller">[Software] List spring over-scroller effect</string>
+
+    <!-- New App feature descriptions (20250712) -->
+    <string name="feature_fullscreen_panoramic_aod">All-day panoramic AOD</string>
+    <string name="feature_gallery_gif_optimization">Gallery GIF optimization</string>
+    <string name="feature_jianying_asset_optimization">Jianying asset optimization</string>
+    <string name="feature_douyin_live_beauty">Douyin live beauty</string>
+    <string name="feature_game_assistant_body_sensation">Game assistant body-sensation control</string>
+    <string name="feature_new_tips_page">New tips page</string>
+    <string name="feature_launcher_breeeno_entry_indicator">Breeeno entry indicator in launcher</string>
+    <string name="feature_hide_screenon_battery_stats">Hide screen-on stats in battery details</string>
+    <!-- New Oplus feature descriptions (20250712) -->
+    <string name="oplus_feature_radio_show_5g_nr_mode">[Soft] 5G NR mode switch</string>
+    <string name="oplus_feature_eyeprotect_paper_texture_support">[Soft] Paper-like eye-protection</string>
+    <string name="oplus_feature_zoom_multi_mode">[Soft] Dual floating-window feature</string>
+    <string name="oplus_feature_dynamic_screen_bar_support">[Soft] Dynamic brightness-bar range (Dev Options)</string>
+    <string name="oplus_feature_rhythm_eyeprotect_2_0_support">[Soft] One-swipe eye-protection 2.0</string>
+    <string name="oplus_feature_super_volume_5x">[Soft] Super volume (5×)</string>
 </resources>
