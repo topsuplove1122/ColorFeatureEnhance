@@ -1,0 +1,92 @@
+/my_product/etc/extension/com.oplus.app-features.xml
+
+# 开启AI图像引擎
+    <app_feature name="os.graphic.gallery.os15_secrecy" args="boolean:true"/>
+# AI帮写
+    <app_feature name="com.coloros.colordirectservice.cm_enable" args="boolean:true"/>
+# 全天侯全景息屏    
+    <app_feature name="os.personalization.fullscreen_aod.enable" args="boolean:true"/>
+# AI护眼
+    <app_feature name="com.oplus.eyeprotect.ai_intelligent_eye_protect_support"/>
+# 相册动图优化
+	<app_feature name="os.graphic.gallery.olive.edit.secret"/>
+# 剪影素材优化
+	<app_feature name="com.oplus.mediaturbo.jianying_optimize"/>
+# 抖音直播美颜
+	<app_feature name="com.oplus.mediaturbo.douyin_live_beauty"/>
+# 游戏AI 3.0	
+	<app_feature name="feature.support.game.AI_PLAY_version3"/>
+# 游戏4D震动模式
+	<app_feature name="com.coloros.gamespace_game_support_fourd_vibration"/>
+# 电话本触碰分享
+	<app_feature name="com.android.incallui.share_screen_and_touch_cmd_support" args="boolean:true"/>
+# AI聊天场景
+	<app_feature name="com.oplus.directservice.aitoolbox_enable"/>
+# 游戏助手姿态调整
+	<app_feature name="com.coloros.gamespace_game_support_body_sensation" args="boolean:true"/>
+# 游戏助手辅助
+	<app_feature name="feature.support.game.ASSIST_KEY"/>
+# 一碰互联IOS
+	<app_feature name="oplus.ptc.nfc.ios.settings" args="boolean:true"/>
+	<app_feature name="oplus.ptc.nfc.settings"/>
+# 合成语音识别
+	<app_feature name="com.oplus.phonemanager.ai_voice_detect" args="int:1"/>
+# 区域录屏
+	<app_feature name="com.oplus.screenrecorder.area_record" args="boolean:true"/>
+# 直播助手
+	<app_feature name="com.oplus.mediaturbo.game_live" args="boolean:true"/>
+# 点击屏幕唤醒息屏
+	<app_feature name="oplus.aod.wakebyclick.support" args="boolean:true"/>
+# 实况照片支持设置锁屏图片
+	<app_feature name="com.oplus.wallpapers.livephoto_wallpaper" args="boolean:true"/>
+# 全局AOD
+    <app_feature name="com.oplus.systemui.panoramic_aod.enable" args="boolean:true"/>
+# 分离样式通控面板图标可变形
+    <app_feature name="com.android.systemui.qs_deform_enable" args="boolean:true"/>
+# 电话触摸分享与屏幕共享
+    <app_feature name="com.android.incallui.share_screen_and_touch_cmd_support" args="boolean:true"/>
+# 游戏在开启风扇模式下火力模式
+    <app_feature name="feature.custom_heat_game.support" args="int:6"/>
+# 键盘NFC分享IOS控制中心界面
+    <app_feature name="oplus.ptc.nfc.ios.settings" args="boolean:true"/>
+# 游戏助手旁路供电
+    <app_feature name="com.oplus.games.show_bypass_charging_when_gameapps" args="boolean:true"/>
+# 侧边栏声音分轨助手
+    <app_feature name="com.oplus.smartmediacontroller.lss_assistant_enable" args="boolean:true"/>
+# 游戏助手夜晚护眼
+    <oplus-feature name="oplus.software.display.game_dark_eyeprotect_support"/>
+# 游戏变声回录
+    <oplus-feature name="oplus.software.audio.magicvoice_loopback_support"/>
+# 游戏支持vulkan渲染
+    <oplus-feature name="oplus.software.display.game.support_vulkan"/>
+# 游戏助手色彩增强2.0
+    <oplus-feature name="oplus.software.display.game_color_enhance_2.0"/>
+# AI游戏辅助4.0
+    <app_feature name="feature.support.game.AI_PLAY_version4_mlbb"/>
+    <app_feature name="feature.support.game.AI_PLAY_version4"/>
+    <app_feature name="feature.support.game.AI_PLAY_version4_audio"/>
+# 全场景旁路供电
+    <app_feature name="com.oplus.plc_charge.support">
+    <StringList args="true"/>
+</app_feature>
+    <app_feature name="com.oplus.fullscene_plc_charge.support" args="boolean:true"/>
+# 反向充电
+    <app_feature name="com.oplus.reversecharge" args="boolean:true"/>
+# 新版使用技巧
+    <app_feature name="com.oplus.tips.os_recommend_page_index" args="String:indexOS15_0_2_new"/>
+# 微信视频通话功能增强
+    <app_feature name="com.oplus.mediaturbo.wechat_videoCalling" args="boolean:true"/>
+# 侧边栏长话短说
+    <app_feature name="com.oplus.smartmediacontroller.lss_assistant_enable" args="boolean:true"/>
+# 系统桌面小布提示
+    <app_feature name="com.android.launcher.INDICATOR_BREENO_ENTRY_ENABLE" args="boolean:true"/>
+	
+	
+	
+	
+	
+	
+	
+	
+# 电池详情隐藏屏幕情况(不建议)
+	<app_feature name="com.oplus.battery.phoneusage.screenon.hide" args="boolean:true"/>

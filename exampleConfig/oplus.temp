@@ -1,0 +1,549 @@
+oplus.software.radio.comm_scene_switch_enable
+推测描述: [软] 通信场景智能切换
+理由: 根据不同使用场景(游戏、视频等)自动调整网络配置,提升稳定性与省电。
+
+oplus.software.radio.nwpower_linkpower
+推测描述: [软] 网络链路功耗管理
+理由: nwpower 表示网络功耗, linkpower 与链路层相关,用于降低数据传输时能耗。
+
+oplus.software.radio.sido_rat_enhance_nr_backoff_opt
+推测描述: [软] 5G弱信号回落4G
+理由: 在5G信号弱时智能回落4G,避免频繁切换造成体验下降。
+
+oplus.software.radio.sido_rat_enhance_lte_backoff_opt
+推测描述: [软] 4G若信号回落3G/2G
+理由: LTE信号弱时回落3G/2G策略,减少搜索能耗。
+
+oplus.software.radio.sido_inter_cell_coop_dual_cell_strong_sig_opt
+推测描述: [软] SIDO双小区强信号协同
+理由: 双卡双通时利用邻近小区协同,提升吞吐与稳定。
+
+oplus.software.radio.sido_inter_cell_coop_lte_rej_15_opt
+推测描述: [软] SIDO拒绝码15处理优化
+理由: 处理LTE网络拒绝码15问题,减少重复尝试。
+
+oplus.software.radio.sido_gw_lte_pingpong_lte_poor_signal_opt
+推测描述: [软] 防止弱信号基站快速切换
+理由: 防止弱信号时在两基站之间快速切换,减少掉线。
+
+oplus.software.radio.sido_nr_icon_pingpong_opt
+推测描述: [软] 5G图标稳定优化
+理由: 避免5G图标在边缘信号频繁闪烁。
+
+oplus.software.radio.enable_signal_map
+推测描述: [软] 后台收集信号强度数据
+理由: 后台收集信号强度数据,用于后续网络优化。
+
+oplus.software.radio.sido_lte_srv_poor_signal_ngbr_strong_opt
+推测描述: [软] SIDO邻区强信号快速切换
+理由: 当前小区弱且邻区强时加速切换至邻区。
+
+oplus.software.radio.sido_screen_on_no_service_opt
+推测描述: [软] 亮屏无服务快速恢复
+理由: 用户亮屏发现无网络时,提升搜索优先级。
+
+oplus.software.radio.sido_dual_sim_coop_no_service_opt
+推测描述: [软] 双卡协作恢复服务
+理由: 利用副卡网络信息帮助主卡恢复信号。
+
+oplus.software.radio.sido_screen_on_no_45g_opt
+推测描述: [软] 亮屏无4G/5G快速恢复
+理由: 加速4G/5G网络注册流程。
+
+oplus.software.radio.sido_dual_sim_coop_no4g_no5g_opt
+推测描述: [软] 双卡协作找回4/5G
+理由: 副卡辅助主卡搜索高速网络。
+
+oplus.software.radio.game_ims_reg
+推测描述: [软] 游戏场景通话优化
+理由: 游戏时优化IMS注册,保障VoLTE/VoNR通话。
+
+oplus.software.radio.enable_weak_signal_backoff
+推测描述: [软] 弱信号降频搜网省电
+理由: 信号极弱时降低搜索频率,减少发热耗电。
+
+oplus.software.radio.signal_recovery_enabled
+推测描述: [软] 信号快速恢复机制
+理由: 脱网后主动加快搜网与注册。
+
+oplus.software.radio.sim_detect_check_support
+推测描述: [软] SIM热插拔检测支持
+理由: 实时检测SIM状态变化并触发网络流程。
+
+oplus.software.radio.apn_recovery
+推测描述: [软] APN配置自动恢复
+理由: 当APN错误导致断网时,系统自动恢复默认配置。
+
+oplus.software.radio.qoe_network_recovery
+推测描述: [软] 网络QoE自动修复
+理由: 检测到QoE下降时触发重选网或参数优化。 
+
+oplus.software.radio.smart5g_thermal_nr_deprio
+推测描述: [软] 发热触发5G降级
+理由: 当设备温度过高时临时降低5G优先级以控制发热。
+
+oplus.software.radio.qct_smart_data_flow
+推测描述: [软] 高通智能数据流控
+理由: QCT代表高通平台,优化数据包调度提升效率。
+
+oplus.software.radio.sido_airplane_mode_low_power_opt
+推测描述: [软] 飞行模式关闭射频
+理由: 飞行模式下进一步关闭射频相关组件降低功耗。
+
+oplus.software.radio.sido_sim_tag_opt
+推测描述: [软] SIM卡标签识别优化
+理由: 精准识别不同运营商SIM标签以匹配最佳网络策略。
+
+oplus.software.radio.sido_mmr_reg_req_stuck_opt
+推测描述: [软] 网络位置更新卡死修复
+理由: 解决移动性管理注册(MMR)请求卡住导致无网。
+
+oplus.software.radio.nsa_signal_optim
+推测描述: [软] 5G NSA信号优化
+理由: 非独立组网环境下提升5G信号质量与稳定。
+
+oplus.software.radio.disable_5g_nr_5gdump
+推测描述: [软] 关闭5G调试转储
+理由: 禁止生成5G故障转储文件以节省存储并提升稳定。
+
+oplus.software.radio.nr_nrca_rus_control
+推测描述: [软] 5G载波聚合资源调度
+理由: 控制NR载波聚合资源单元调度策略。
+
+oplus.software.radio.nr_bwp_rus_control
+推测描述: [软] 5G带宽优化吞吐
+理由: 管理NR带宽部分(BWP)的资源分配以优化吞吐。
+
+oplus.software.radio.china_roaming
+推测描述: [软] 国内漫游优化
+理由: 针对中国运营商间漫游连接进行特定优化。
+
+oplus.software.radio.sim_overdue_opt
+推测描述: [软] SIM欠费场景优化
+理由: 当SIM因欠费被限制时调整网络搜索策略。
+
+oplus.software.radio.ul_priority_policy_one_vs_one
+推测描述: [软] 单对单上行优先策略
+理由: 在一对一通信场景提升上行带宽优先级。
+
+oplus.software.radio.cybersense_residence_enabled
+推测描述: [软] CyberSense驻留优化
+理由: CyberSense智能算法在驻留小区时优化信号与功耗。
+
+oplus.software.radio.smart5g_Low_Power_control
+推测描述: [软] 智能5G低功耗控制
+理由: 根据业务需求动态调整5G射频功耗。
+
+oplus.software.radio.sido_stamp_db
+推测描述: [软] 双卡信令时间戳数据库
+理由: 记录网络事件时间戳以供分析及优化。
+
+oplus.software.radio.sido_ss_update_abnormal_opt
+推测描述: [软] 服务状态异常更新优化
+理由: 减少服务状态异常导致的搜索风暴。
+
+oplus.software.radio.tcp_syn_timeout_tuning
+推测描述: [软] 优化TCP握手超时增强弱网连接
+理由: 优化TCP握手超时时间,提升弱网建立连接成功率。
+
+oplus.software.radio.tcp_congest_control
+推测描述: [软] TCP拥塞控制优化
+理由: 调整拥塞算法参数以提高吞吐并降低延迟。
+
+oplus.software.radio.enable_sido_rollback
+推测描述: [软] 启用双卡回滚策略
+理由: 网络异常时自动回滚到稳定配置保证连接。
+
+oplus.software.radio.use_customized_thresholds
+推测描述: [软] 使用自定义网络阈值
+理由: 允许运营商或系统设定定制化信号门限。
+
+oplus.software.radio.sido_roaming_fast_search_opt
+推测描述: [软] 双卡漫游快速搜网
+理由: 提升在漫游状态下快速注册本地网络能力。
+
+oplus.software.radio.sido_fence
+推测描述: [软] 双卡地理围栏优化
+理由: 根据位置信息调整双卡网络参数。
+
+oplus.software.radio.sido_lte_fast_return_to_nr_opt
+推测描述: [软] LTE快速返回5G优化
+理由: 加速从LTE回切至NR的时延,提高5G驻留率。
+
+oplus.software.radio.nwpower_power_recovery_switch_enable
+推测描述: [软] 功耗模式自动恢复策略
+理由: 当功耗模式触发后可自动恢复正常功耗策略。
+
+oplus.software.radio.nwpower_app_network_monitor_switch_enable
+推测描述: [软] 应用网络功耗监控
+理由: 对后台应用网络行为进行功耗监控与控制。
+
+oplus.software.radio.sido_lte_nr_pingpong_mitigation
+推测描述: [软] 减少4G/5G频繁切换
+理由: 减少频繁在LTE与NR之间切换造成的性能下降。
+
+oplus.software.radio.nwpower_proc_net_control_switch_enable
+推测描述: [软] 进程网络功耗限制
+理由: 基于进程维度限制网络功耗开关。
+
+oplus.software.radio.dual_ps
+推测描述: [软] 双卡同时数据信令支持
+理由: 支持双卡双待下同时保持数据与信令会话。
+
+oplus.software.radio.find_phone
+推测描述: [软] 查找手机
+理由: 通过网络信令协助Find My Phone等服务定位设备。
+
+oplus.software.radio.low_latency
+推测描述: [软] 网络低延迟支持
+理由: 针对游戏或实时通话降低排队和调度延迟。
+
+oplus.software.radio.low_latency_mode_de3
+推测描述: [软] 低延迟模式DE3
+理由: 第三代低延迟协议栈调度策略。
+
+oplus.software.radio.data_eval3
+推测描述: [软] 数据评估算法V3
+理由: 评估当前网络质量以做出策略调整。
+
+oplus.software.radio.data_eval4
+推测描述: [软] 数据评估算法V4
+理由: 升级版网络质量评估模型。
+
+oplus.software.radio.smart_data_eval
+推测描述: [软] 智能数据评估
+理由: AI算法实时评估数据链路状态优化路由。
+
+oplus.software.radio.stuck_analyse
+推测描述: [软] 网络卡顿分析
+理由: 捕获并分析网络卡顿事件提供自愈依据。
+
+oplus.software.radio.smart_commu
+推测描述: [软] 智能通信策略
+理由: 通过AI决定最佳通信制式和频段。
+
+oplus.software.radio.pull_wifi_cell
+推测描述: [软] 拉取WiFi小区信息
+理由: 获取附近WiFi信息辅助定位与网络优化。
+
+oplus.software.radio.subway_slow_recovery
+推测描述: [软] 地铁弱网快速恢复
+理由: 针对地铁环境信号衰减快速搜索恢复服务。
+
+oplus.software.radio.virtualmodem_support
+推测描述: [软] 虚拟Modem支持
+理由: 为虚拟化或eSIM场景提供软Modem接口。
+
+oplus.software.radio.ignore_stk_display_text
+推测描述: [软] 阻止运营商弹窗提升体验
+理由: 阻止部分运营商下发的弹窗以提升体验
+。
+oplus.software.radio.air_interface_detect_support
+推测描述: [软] 空口接口检测支持
+理由: 监测无线空口异常并触发恢复。
+
+oplus.software.radio.sido_airplane_mode_low_power_opt_v2
+推测描述: [软] 飞行模式低功耗优化V2
+理由: 第二版飞行模式功耗进一步降低射频漏电。
+
+oplus.software.radio.sido_elevator
+推测描述: [软] 电梯场景优化
+理由: 在电梯金属屏蔽环境下减少无效搜索省电。
+
+oplus.software.radio.sido_intelligent_recovery
+推测描述: [软] 双卡智能恢复
+理由: 异常掉网后利用副卡状态智能恢复主卡网络。
+
+oplus.software.radio.nwpower_supprese_signal_report_enable
+推测描述: [软] 抑制频繁信令上报
+理由: 降低功耗并减少网络侧负荷。
+
+oplus.software.radio.nwpower_amc
+推测描述: [软] 功耗自适应模组(AMC)
+理由: 动态调整射频功率与网络策略降低功耗。
+
+oplus.software.radio.nwpower_sys_net_control_switch_enable
+推测描述: [软] 系统级网络功耗控制
+理由: 系统级开关用于统一管理网络功耗策略。
+
+oplus.software.radio.nwpower_amc_airplanemode
+推测描述: [软] 飞行模式下AMC功耗控制
+理由: 飞行模式时进一步降低Modem待机功耗。
+
+oplus.software.radio.nwpower_amc_oossearch
+推测描述: [软] 无服务搜索功耗策略
+理由: 设备脱网时控制搜索频次降低功耗。
+
+oplus.software.radio.smart5g_speed_control
+推测描述: [软] 智能5G速率控制
+理由: 根据业务实时调整5G速率与功耗。
+
+oplus.software.radio.nwpower_bg_app_net_control_switch_enable
+推测描述: [软] 后台应用网络功耗控制
+理由: 限制后台应用高频网络访问降低功耗。
+
+oplus.software.pcconnect.support
+推测描述: [软] PC跨屏互联支持
+理由: 启用与PC的文件/屏幕共享及通知同步功能。
+
+oplus.software.pctelephone.support
+推测描述: [软] PC电话协同支持
+理由: 允许电脑端接听或拨打手机电话。
+
+oplus.software.radio.engnw_sts_interface_support
+推测描述: [软] 工程网络状态接口支持
+理由: 为工程模式或诊断工具提供网络状态接口。
+
+oplus.software.radio.support_r16
+推测描述: [软] 3GPP Release 16特性支持
+理由: 启用5G Rel-16规范中新增功能。
+
+oplus.software.radio.vonr_switch_enabled
+推测描述: [软] VoNR高清通话开关
+理由: 开启5G独立组网VoNR语音。
+
+oplus.software.radio.nwpower_network_disable_white_list
+推测描述: [软] 网络禁用白名单
+理由: 指定包名可在省电模式下继续使用网络。
+
+oplus.software.radio.custom_ecclist_writable
+推测描述: [软] 自定义紧急号码可写
+理由: 允许修改紧急呼叫列表用于本地化合规。
+
+oplus.software.radio.disabled_cached_uid
+推测描述: [软] 禁止缓存UID列表
+理由: 某些UID的网络缓存被禁用,确保实时数据。
+
+oplus.software.radio.sa_call_control_disabled
+推测描述: [软] SA语音呼叫控制禁用
+理由: 在独立组网下禁用某些语音呼叫控制逻辑用于兼容。
+
+oplus.software.radio.vonr_city_control
+推测描述: [软] 城市级VoNR控制
+理由: 根据城市网络覆盖情况动态开启VoNR。
+
+oplus.software.radio.silent_redial_supported
+推测描述: [软] 静默重拨支持
+理由: 断线后自动重拨提高通话成功率。
+
+oplus.software.radio.dds_switch
+推测描述: [软] 默认数据卡切换
+理由: 允许系统自动切换主数据SIM。
+
+oplus.software.radio.vowifi_city_control
+推测描述: [软] 城市级VoWiFi控制
+理由: 针对不同地区控制VoWiFi开关。
+
+oplus.software.radio.update_dcdc_sleep_state
+推测描述: [软] 电源管理芯片休眠
+理由: 优化电源管理芯片休眠状态降低待机功耗。
+
+oplus.software.radio.link_evaluation
+推测描述: [软] 链路质量评估
+理由: 实时评估上下行链路质量供调度决策。
+
+oplus.software.logkit.ocloud.support
+推测描述: [软] OppoCloud日志采集支持
+理由: 将关键网络日志上传云端供分析。
+
+oplus.software.radio.vendor_diag
+推测描述: [软] 厂商诊断通道
+理由: 开启射频厂商专用诊断接口。
+
+oplus.software.audio.voice_wakeup_support
+推测描述: [软] 语音唤醒功能
+理由: 支持离线“Hey Siri/Hey 小布”等语音唤醒。
+oplus.software.audio.voice_wakeup_xbxb_support
+推测描述: [软] 语音唤醒功能
+理由: 专为小布助手定制的语音唤醒。
+
+oplus.software.speechassist.oneshot.support
+推测描述: [软] 语音助手一键直达
+理由: 支持一次唤醒直接执行命令无需后续确认。
+
+oplus.software.radio.hyper_uplink_mode_enable
+推测描述: [软] 超级上行模式
+理由: 提升上传速率/时延,适合直播等场景。
+
+oplus.software.support_quick_launchapp
+推测描述: [软] 快速启动应用
+理由: 通过手势或常驻进程快速拉起指定应用。
+
+oplus.software.radio.cybersense_residence_v2_enabled
+推测描述: [软] CyberSense驻留优化V2
+理由: 第二代智能驻留算法提升5G/4G稳定性
+。
+oplus.software.radio.multi_task_multi_link_schedule
+推测描述: [软] 多任务多链路调度
+理由: 高并发场景同时管理蜂窝+WiFi链路。
+
+oplus.software.support_blockable_animation
+推测描述: [软] 可屏蔽动画开关支持
+理由: 在省电模式或无障碍场景关闭过度动画。
+
+oplus.velocitytracker.strategy.support
+推测描述: [软] 跟手性优化
+理由: 调整VelocityTracker算法提升滚动跟手。
+
+os.charge.endurance.mode.support
+推测描述: 长续航充电模式支持
+理由: endurance mode 表示通过优化充电策略延长电池寿命。
+
+oplus.software.aon_distance_detection_enable
+推测描述: [软] AON距离检测启用
+理由: 低功耗传感器检测人与手机距离用于息屏/亮屏。
+
+oplus.software.aon_phone_camera_gesture_recognition
+推测描述: [软] AON相机手势识别
+理由: 息屏状态下通过手势快速启动相机。
+
+oplus.software.aon_phone_enable
+推测描述: [软] AON手机感知启用
+理由: 开启Always-On传感器协处理器。
+
+oplus.software.aon_phone_mute
+推测描述: [软] AON手掌静音
+理由: 覆盖屏幕自动静音来电与通知。
+
+oplus.software.aon_pose_detection_enable
+推测描述: [软] AON姿态检测
+理由: 低功耗识别设备摆放角度用于翻转静音等功能。
+
+oplus.hardware.aon_enable
+推测描述: AON开关
+理由: 从硬件层面启用Always-On协处理器。
+oplus.software.aon_enable
+推测描述: AON开关
+理由: 软件层控制AON子系统的启停。
+
+oplus.software.radio.cybersense_travel_enabled
+推测描述: [软] 高铁场景网络优化
+理由: 针对高铁/高速场景提前预测信号变化降低卡顿。
+
+oplus.software.aon_pay_qrcode_enable
+推测描述: [软] AON快捷支付码
+理由: 息屏状态下快速亮屏并显示付款码。
+
+oplus.software.aon_sensorhub_enable
+推测描述: [软] AON SensorHub启用
+理由: 集成多传感器低功耗协处理。
+
+oplus.software.vibrator.kill_program_wave_support
+推测描述: [软] 结束进程振动支持
+理由: 任务结束或关闭应用时提供触感反馈。
+
+oplus.software.preload.camera
+推测描述: [软] 相机预加载
+理由: 提前加载相机服务缩短启动时间。
+
+oplus.software.joystick.game_joystick_support
+推测描述: [软] 游戏摇杆模式支持
+理由: 适配外接或屏下虚拟摇杆提升游戏操作。
+
+oplus.software.radio.smart_nw_data_low_latency
+推测描述: [软] 智能低延迟数据网络
+理由: AI动态调整QoS以降低时延。
+
+oplus.software.radio.nwpower_amc_mdwakeup_control
+推测描述: [软] Modem唤醒功耗控制
+理由: 控制Modem从低功耗到唤醒的策略。
+
+oplus.software.radio.sched_ppq
+推测描述: [软] PPQ吞吐优化
+理由: Packet Processing Queue优化提升吞吐。
+
+oplus.software.radio.nwpower_amc_lowmpss_recovery
+推测描述: [软] 网络低功耗平滑恢复
+理由: 从超低功耗状态平滑恢复正常网络。
+
+oplus.software.radio.support_vonr_plus
+推测描述: [软] VoNR+增强通话
+理由: 支持增强型5G语音通话技术。
+
+oplus.software.radio.ul_priority_policy_stream
+推测描述: [软] 流媒体上行优先策略
+理由: 针对直播/视频会议提升上行带宽优先。
+
+oplus.software.radio.ul_priority_policy_game_optimize
+推测描述: [软] 游戏上行优先优化
+理由: 游戏场景上行网络延迟更低。
+
+oplus.software.radio.power_save_dual_network_control
+推测描述: [软] 双网络省电控制
+理由: 双卡或蜂窝+WiFi同时在线时智能省电。
+
+oplus.software.radio.wifi_data_control
+推测描述: [软] WiFi数据调度控制
+理由: 优化WiFi链路的功耗与性能平衡。
+
+oplus.software.radio.wifi_force_rel_dual_data
+推测描述: [软] WiFi强制释放双数据
+理由: 同时连接双路WiFi时策略性释放一条以省电。
+
+oplus.hardware.display.low.blue.light
+推测描述: [硬] 硬件级低蓝光模式
+理由: 减少有害蓝光确保色彩准确。
+
+oplus.hardware.display.ultra_tr_diamond_screen
+推测描述: [硬] 超感钻石屏技术
+理由: 高端像素排列与材质提升亮度与寿命。
+
+oplus.software.radio.concert_detect_service
+推测描述: [软] 演唱会网络优化
+理由: 在密集人群场景智能检测并优化网络。
+
+oplus.software.radio.qoe_game_cell_suggest
+推测描述: [软] 游戏场景小区建议
+理由: 根据游戏QoE向Modem建议切换更优小区。
+
+oplus.hardware.display.no_classic_low_freq_strobe
+推测描述: [硬] 无低频闪烁屏幕
+理由: 消除PWM低频频闪减少眼疲劳。
+
+oplus.software.display.adfr_v32_lp
+推测描述: [软] 自适应刷新率v32低功耗
+理由: 动态切换刷新率降低功耗保持流畅。
+
+oplus.software.radio.enable_ct_network_scan
+推测描述: [软] 启用电信网络扫描
+理由: 针对中国电信专用扫描逻辑。
+
+oplus.hardware.pwd_attestation_locksettings
+推测描述: [硬] 密码认证安全锁
+理由: 在安全环境中完成密码证明流程增强安全。
+
+oplus.software.radio.subsystem_camera_service
+推测描述: [软] 相机子系统网络服务
+理由: 相机调用网络时的优先与功耗管理。
+
+oplus.software.radio.engnw_vsim_support
+推测描述: [软] 工程网络vSIM支持
+理由: 为工程测试提供虚拟SIM网络支持。
+
+oplus.software.radio.virtualmodem_cellinfo
+推测描述: [软] 虚拟Modem小区信息
+理由: 提供虚拟化环境下的小区状态供系统调用。
+
+oplus.software.radio.car_sharing_network
+推测描述: [软] 车载共享网络
+理由: 与车机共享蜂窝网络并优化带宽。
+
+oplus.software.radio.network_vip_task
+推测描述: [软] 网络VIP任务优先
+理由: 为关键前台应用预留网络资源。
+
+oplus.software.radio.enable_cmcc_nitz
+推测描述: [软] 启用移动NITZ同步
+理由: 中国移动NITZ时间同步支持。
+
+oplus.software.wlan.qoe_estimate
+推测描述: [软] WLAN QoE评估
+理由: 实时估算WiFi体验质量并调度。
+
+oplus.software.radio.smart5g_game_latency_check
+推测描述: [软] 游戏时延检测5G
+理由: 监控5G延迟并动态优化路由。
+
+oplus.software.radio.network_time_slice
+推测描述: [软] 网络时间片调度
+理由: 通过时间片分配多任务网络带宽,提升公平性。 
