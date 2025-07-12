@@ -99,20 +99,13 @@ class AppFeatureMappings private constructor() {
 
         /**
          * 获取特性的描述，支持三级优先级查询
-         * 优先级：UserFeatureMappings > CloudFeatureMappings > App内置资源
+         * 优先级：CloudFeatureMappings > App内置资源 > UserFeatureMappings
          * @param context 上下文
          * @param featureName 特性名称
          * @return 描述字符串
          */
         fun getLocalizedDescription(context: Context, featureName: String): String {
-            // 1. 最高优先级：用户自定义映射
-            val userMappings = UserFeatureMappings.getInstance(context)
-            val userDescription = userMappings.getDescription(featureName)
-            if (userDescription != null && userDescription.isNotEmpty()) {
-                return userDescription
-            }
-
-            // 2. 中等优先级：云端配置映射
+            // 1. 最高优先级：云端配置映射
             try {
                 val cloudMappings = CloudFeatureMappings.getInstance(context)
                 val currentLanguage = getCurrentLanguage(context)
@@ -124,14 +117,21 @@ class AppFeatureMappings private constructor() {
                 // 云端配置获取失败时静默忽略，继续使用应用内置资源
             }
 
-            // 3. 最低优先级：应用内置资源映射
+            // 2. 中等优先级：应用内置资源映射
             val resId = getInstance().getResId(featureName)
-            val result = if (resId == R.string.feature_unknown) {
-                featureName
-            } else {
-                context.getString(resId)
+            if (resId != R.string.feature_unknown) {
+                return context.getString(resId)
             }
-            return result
+
+            // 3. 最低优先级：用户自定义映射
+            val userMappings = UserFeatureMappings.getInstance(context)
+            val userDescription = userMappings.getDescription(featureName)
+            if (userDescription != null && userDescription.isNotEmpty()) {
+                return userDescription
+            }
+
+            // 4. 最终回退：特性名称本身
+            return featureName
         }
 
         /**
@@ -186,9 +186,24 @@ class AppFeatureMappings private constructor() {
         if (resId == R.string.feature_unknown) {
             return false
         }
-        
+
         // 比较预设描述和用户输入的描述
         val presetDescription = context.getString(resId)
         return presetDescription == description
+    }
+
+    /**
+     * 检查特性是否存在云端配置描述
+     * @param context 上下文
+     * @param name 特性名称
+     * @return 如果存在云端配置返回true，否则返回false
+     */
+    fun isMatchingCloudDescription(context: Context, name: String): Boolean {
+        return try {
+            val cloudMappings = CloudFeatureMappings.getInstance(context)
+            cloudMappings.hasMapping(name)
+        } catch (e: Exception) {
+            false
+        }
     }
 } 

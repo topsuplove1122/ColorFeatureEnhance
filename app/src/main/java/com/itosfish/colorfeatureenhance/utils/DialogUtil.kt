@@ -149,9 +149,24 @@ fun AddFeatureDialog(
                                 )
                             }
 
+                            // 检查是否存在云端配置
+                            val hasCloudConfig = if (currentMode == FeatureMode.APP) {
+                                AppFeatureMappings.getInstance().isMatchingCloudDescription(context, featureName)
+                            } else {
+                                OplusFeatureMappings.isMatchingCloudDescription(context, featureName)
+                            }
+
                             if (isPresetMatch) {
                                 // 显示提示对话框
                                 showPresetMatchDialog = true
+                            } else if (hasCloudConfig) {
+                                // 存在云端配置时，不保存用户映射，直接添加特性
+                                onConfirm(
+                                    featureName,
+                                    featureDescription,
+                                    featureEnabled,
+                                    if (argValue.isBlank()) null else argValue
+                                )
                             } else {
                                 // 保存用户自定义映射
                                 if (currentMode == FeatureMode.APP) {
@@ -242,12 +257,24 @@ fun EditFeatureDialog(
     var featureDescription by remember { mutableStateOf(originalDescription) }
     var featureEnabled by remember { mutableStateOf(originalEnabled) }
     var argValue by remember { mutableStateOf(originalArgs ?: "") }
+
+    // 检查是否为预设描述
     val isPresetDesc = if (currentMode == FeatureMode.APP) {
         AppFeatureMappings.getInstance()
             .isMatchingPresetDescription(context, originalName, originalDescription)
     } else {
         OplusFeatureMappings.isMatchingPresetDescription(context, originalName, originalDescription)
     }
+
+    // 检查是否存在云端配置描述
+    val hasCloudDesc = if (currentMode == FeatureMode.APP) {
+        AppFeatureMappings.getInstance().isMatchingCloudDescription(context, originalName)
+    } else {
+        OplusFeatureMappings.isMatchingCloudDescription(context, originalName)
+    }
+
+    // 当存在预设描述或云端配置时，禁用描述输入框
+    val isDescriptionDisabled = isPresetDesc || hasCloudDesc
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -256,11 +283,11 @@ fun EditFeatureDialog(
             Column {
                 OutlinedTextField(
                     value = featureDescription,
-                    onValueChange = { if (!isPresetDesc) featureDescription = it },
+                    onValueChange = { if (!isDescriptionDisabled) featureDescription = it },
                     label = { Text(stringResource(id = R.string.feature_description)) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !isPresetDesc,
-                    readOnly = isPresetDesc
+                    enabled = !isDescriptionDisabled,
+                    readOnly = isDescriptionDisabled
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
@@ -321,7 +348,7 @@ fun EditFeatureDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                // 若描述修改为空，则检查预设映射
+                // 若描述修改为空，则删除用户映射
                 if (featureDescription.isEmpty()) {
                     if (currentMode == FeatureMode.APP) {
                         AppFeatureMappings.getInstance().removeUserMapping(context, featureName)
@@ -329,6 +356,7 @@ fun EditFeatureDialog(
                         OplusFeatureMappings.removeUserMapping(context, featureName)
                     }
                 } else {
+                    // 检查是否与预设映射匹配
                     val matchPreset = if (currentMode == FeatureMode.APP) {
                         AppFeatureMappings.getInstance()
                             .isMatchingPresetDescription(context, featureName, featureDescription)
@@ -339,7 +367,16 @@ fun EditFeatureDialog(
                             featureDescription
                         )
                     }
-                    if (!matchPreset) {
+
+                    // 检查是否存在云端配置
+                    val hasCloudConfig = if (currentMode == FeatureMode.APP) {
+                        AppFeatureMappings.getInstance().isMatchingCloudDescription(context, featureName)
+                    } else {
+                        OplusFeatureMappings.isMatchingCloudDescription(context, featureName)
+                    }
+
+                    // 只有在不匹配预设描述且不存在云端配置时才保存用户映射
+                    if (!matchPreset && !hasCloudConfig) {
                         if (currentMode == FeatureMode.APP) {
                             AppFeatureMappings.getInstance()
                                 .saveUserMapping(context, featureName, featureDescription)
