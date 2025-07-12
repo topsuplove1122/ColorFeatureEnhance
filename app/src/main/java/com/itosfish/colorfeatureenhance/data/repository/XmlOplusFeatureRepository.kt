@@ -20,14 +20,16 @@ import java.io.StringReader
 class XmlOplusFeatureRepository : FeatureRepository {
 
     override suspend fun loadFeatures(configPath: String): List<AppFeature> = withContext(Dispatchers.IO) {
-        // 对于oplus特性，我们需要显示系统基线中的所有特性，并根据补丁状态设置enabled状态
+        // 对于oplus特性，我们需要显示所有特性（系统基线+用户新增），并根据补丁状态设置enabled状态
         val configPaths = ConfigUtils.getConfigPaths()
         val systemBaselineFile = File(configPaths.systemBaselineDir, configPaths.oplusFeaturesFile)
 
-        if (!systemBaselineFile.exists()) return@withContext emptyList()
-
-        // 加载系统基线特性
-        val systemFeatures = parseXmlFeatures(systemBaselineFile)
+        // 加载系统基线特性（转换为OplusFeature）
+        val systemOplusFeatures = if (systemBaselineFile.exists()) {
+            loadOplusFeatures(systemBaselineFile.absolutePath)
+        } else {
+            emptyList()
+        }
 
         // 加载用户补丁
         val patchFile = File(configPaths.userPatchesDir, "oplus-features.patch.json")
@@ -37,16 +39,35 @@ class XmlOplusFeatureRepository : FeatureRepository {
             emptyList()
         }
 
-        // 根据补丁状态设置特性的enabled状态
-        val featuresWithPatchStatus = systemFeatures.map { feature ->
-            val patch = userPatches.find { it.name == feature.name }
-            when (patch?.action) {
-                ConfigMergeManager.OplusPatchAction.REMOVE -> feature.copy(enabled = false)
-                else -> feature.copy(enabled = true)
+        // 应用补丁到系统特性，得到最终的OplusFeature列表
+        val mergedOplusFeatures = ConfigMergeManager.applyOplusFeaturePatches(systemOplusFeatures, userPatches)
+
+        // 将OplusFeature转换为AppFeature，并设置enabled状态
+        val finalFeatures = mutableListOf<AppFeature>()
+
+        // 添加合并后的特性（这些是启用的特性）
+        mergedOplusFeatures.forEach { oplusFeature ->
+            val appFeature = when (oplusFeature) {
+                is ConfigMergeManager.OplusFeature.Standard -> AppFeature(oplusFeature.name, enabled = true)
+                is ConfigMergeManager.OplusFeature.Unavailable -> AppFeature(oplusFeature.name, enabled = true, args = "unavailable")
+            }
+            finalFeatures.add(appFeature)
+        }
+
+        // 添加被删除的特性（显示为disabled状态）
+        userPatches.filter { it.action == ConfigMergeManager.OplusPatchAction.REMOVE }.forEach { removePatch ->
+            // 只有当该特性在系统基线中存在时，才显示为删除状态
+            val originalFeature = systemOplusFeatures.find { it.name == removePatch.name }
+            if (originalFeature != null) {
+                val appFeature = when (originalFeature) {
+                    is ConfigMergeManager.OplusFeature.Standard -> AppFeature(originalFeature.name, enabled = false)
+                    is ConfigMergeManager.OplusFeature.Unavailable -> AppFeature(originalFeature.name, enabled = false, args = "unavailable")
+                }
+                finalFeatures.add(appFeature)
             }
         }
 
-        featuresWithPatchStatus
+        finalFeatures
     }
 
     override suspend fun saveFeatures(configPath: String, features: List<AppFeature>): Unit = withContext(Dispatchers.IO) {

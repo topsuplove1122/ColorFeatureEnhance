@@ -173,8 +173,18 @@ object ConfigMergeManager {
                     val patch = patches.find { it.name == featureName }
                     // 将OplusPatchAction转换为PatchAction
                     when (patch?.action) {
-                        OplusPatchAction.ENABLE -> PatchAction.MODIFY
-                        OplusPatchAction.DISABLE -> PatchAction.MODIFY
+                        OplusPatchAction.ENABLE -> {
+                            // 检查是否为新增特性：在系统基线中不存在
+                            if (isFeatureInSystemBaseline(featureName, false)) {
+                                PatchAction.MODIFY // 系统基线中存在，是修改
+                            } else {
+                                PatchAction.ADD // 系统基线中不存在，是新增
+                            }
+                        }
+                        OplusPatchAction.DISABLE -> {
+                            // DISABLE总是修改操作（将Standard改为Unavailable）
+                            PatchAction.MODIFY
+                        }
                         OplusPatchAction.REMOVE -> PatchAction.REMOVE // REMOVE状态显示为删除标识
                         null -> null
                     }
@@ -249,8 +259,18 @@ object ConfigMergeManager {
                     patches.mapNotNull { patch ->
                         if (patch.name in featureNames) {
                             val action = when (patch.action) {
-                                OplusPatchAction.ENABLE -> PatchAction.MODIFY
-                                OplusPatchAction.DISABLE -> PatchAction.MODIFY
+                                OplusPatchAction.ENABLE -> {
+                                    // 检查是否为新增特性：在系统基线中不存在
+                                    if (isFeatureInSystemBaseline(patch.name, false)) {
+                                        PatchAction.MODIFY // 系统基线中存在，是修改
+                                    } else {
+                                        PatchAction.ADD // 系统基线中不存在，是新增
+                                    }
+                                }
+                                OplusPatchAction.DISABLE -> {
+                                    // DISABLE总是修改操作（将Standard改为Unavailable）
+                                    PatchAction.MODIFY
+                                }
                                 OplusPatchAction.REMOVE -> PatchAction.REMOVE // REMOVE状态返回删除标识
                             }
                             patch.name to action
@@ -526,7 +546,7 @@ object ConfigMergeManager {
         return result
     }
 
-    private fun applyOplusFeaturePatches(systemFeatures: List<OplusFeature>, patches: List<OplusFeaturePatch>): List<OplusFeature> {
+    fun applyOplusFeaturePatches(systemFeatures: List<OplusFeature>, patches: List<OplusFeaturePatch>): List<OplusFeature> {
         val result = systemFeatures.toMutableList()
 
         patches.forEach { patch ->
@@ -697,19 +717,25 @@ object ConfigMergeManager {
     private fun generateOplusFeaturePatches(original: List<OplusFeature>, modified: List<OplusFeature>): List<OplusFeaturePatch> {
         val patches = mutableListOf<OplusFeaturePatch>()
 
+        // 检测可能的name修改：如果数量相同且只有一个name变化，视为修改而非删除+新增
+        val nameChanges = detectOplusFeatureNameChanges(original, modified)
+
         // 检查修改和新增
         modified.forEach { modifiedFeature ->
             val originalFeature = original.find { it.name == modifiedFeature.name }
 
-            if (originalFeature == null) {
-                // 新增特性
+            // 检查是否是name修改的目标特性
+            val isNameChangeTarget = nameChanges.values.contains(modifiedFeature.name)
+
+            if (originalFeature == null && !isNameChangeTarget) {
+                // 真正的新增特性（不是name修改的结果）
                 val action = when (modifiedFeature) {
                     is OplusFeature.Standard -> OplusPatchAction.ENABLE
                     is OplusFeature.Unavailable -> OplusPatchAction.DISABLE
                 }
                 patches.add(OplusFeaturePatch(modifiedFeature.name, action))
-            } else if (originalFeature::class != modifiedFeature::class) {
-                // 类型变更
+            } else if (originalFeature != null && originalFeature::class != modifiedFeature::class) {
+                // 类型变更（Standard ↔ Unavailable）
                 val action = when (modifiedFeature) {
                     is OplusFeature.Standard -> OplusPatchAction.ENABLE
                     is OplusFeature.Unavailable -> OplusPatchAction.DISABLE
@@ -718,9 +744,22 @@ object ConfigMergeManager {
             }
         }
 
-        // 检查删除
+        // 处理name修改：为新name生成MODIFY补丁
+        nameChanges.forEach { (_, newName) ->
+            val modifiedFeature = modified.find { it.name == newName }
+            if (modifiedFeature != null) {
+                val action = when (modifiedFeature) {
+                    is OplusFeature.Standard -> OplusPatchAction.ENABLE
+                    is OplusFeature.Unavailable -> OplusPatchAction.DISABLE
+                }
+                patches.add(OplusFeaturePatch(newName, action))
+            }
+        }
+
+        // 检查删除（排除name修改的情况）
         original.forEach { originalFeature ->
-            if (modified.none { it.name == originalFeature.name }) {
+            val isNameChangeSource = nameChanges.containsKey(originalFeature.name)
+            if (!isNameChangeSource && modified.none { it.name == originalFeature.name }) {
                 patches.add(OplusFeaturePatch(
                     name = originalFeature.name,
                     action = OplusPatchAction.REMOVE
@@ -729,5 +768,37 @@ object ConfigMergeManager {
         }
 
         return patches
+    }
+
+    /**
+     * 检测oplus特性的name修改
+     * 如果数量相同且只有一个name变化，视为修改而非删除+新增
+     */
+    private fun detectOplusFeatureNameChanges(original: List<OplusFeature>, modified: List<OplusFeature>): Map<String, String> {
+        // 只有在数量相同时才考虑name修改
+        if (original.size != modified.size) return emptyMap()
+
+        val originalNames = original.map { it.name }.toSet()
+        val modifiedNames = modified.map { it.name }.toSet()
+
+        val removedNames = originalNames - modifiedNames
+        val addedNames = modifiedNames - originalNames
+
+        // 只有当恰好有一个name被移除和一个name被添加时，才视为name修改
+        if (removedNames.size == 1 && addedNames.size == 1) {
+            val oldName = removedNames.first()
+            val newName = addedNames.first()
+
+            // 确保类型匹配（Standard对Standard，Unavailable对Unavailable）
+            val originalFeature = original.find { it.name == oldName }
+            val modifiedFeature = modified.find { it.name == newName }
+
+            if (originalFeature != null && modifiedFeature != null &&
+                originalFeature::class == modifiedFeature::class) {
+                return mapOf(oldName to newName)
+            }
+        }
+
+        return emptyMap()
     }
 }
