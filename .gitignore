@@ -54,9 +54,9 @@ Thumbs.db
 
 
 # Gradle files
-gradlew
-gradlew.bat
-gradle-wrapper.jar
+# gradlew
+# gradlew.bat
+# gradle-wrapper.jar
 
 # Keystore files
 *.keystore
