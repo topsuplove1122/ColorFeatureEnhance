@@ -1,5 +1,6 @@
 package com.itosfish.colorfeatureenhance.ui
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -304,7 +305,23 @@ fun FeatureConfigScreen(
                         }
                     },
                     onLongPress = {
-                        groupToDelete = group
+                        // 仅允许删除用户新增的特性
+                        val firstName = group.features.first().name
+                        val action = patchActions[firstName]
+                        Log.d("FeatureDelete", "LongPress: name=$firstName, mode=$currentMode, action=$action")
+
+                        if (currentMode == FeatureMode.OPLUS) {
+                            if (action == ConfigMergeManager.PatchAction.ADD) {
+                                Log.d("FeatureDelete", "User added feature, show delete dialog")
+                                groupToDelete = group
+                            } else {
+                                Log.d("FeatureDelete", "System feature, skip delete dialog")
+                                // 系统已有特性：不允许删除且不做提示
+                            }
+                        } else {
+                            Log.d("FeatureDelete", "APP mode, allow delete dialog")
+                            groupToDelete = group
+                        }
                     },
                     onClick = {
                         if (group.features.size == 1) {
@@ -383,6 +400,7 @@ fun FeatureConfigScreen(
 
         // 删除确认对话框
         groupToDelete?.let { deleting ->
+            Log.d("FeatureDelete", "Show dialog for group: ${deleting.features.map { it.name }}")
             val label = if (deleting.nameResId == R.string.feature_unknown) {
                 deleting.features.firstOrNull()?.name ?: "Unknown"
             } else stringResource(id = deleting.nameResId)
@@ -607,11 +625,12 @@ private fun FeatureGroupItem(
             }
 
             val feature = group.features.first()
-            val hasBoolean = feature.args?.startsWith("boolean:") == true
+            feature.args?.startsWith("boolean:") == true
             val isComplex = feature.isComplex
             val isUnavailable = currentMode == FeatureMode.OPLUS && feature.args == "unavailable"
             val trailingModifier = Modifier.padding(start = 8.dp)
-            if (currentMode == FeatureMode.OPLUS) {
+            // 仅当 OPLUS 模式且该特性不是用户新增（PATCH_ACTION != ADD）时显示开关
+            if (currentMode == FeatureMode.OPLUS && patchAction != ConfigMergeManager.PatchAction.ADD) {
                 Switch(
                     checked = group.isEnabled,
                     onCheckedChange = {
