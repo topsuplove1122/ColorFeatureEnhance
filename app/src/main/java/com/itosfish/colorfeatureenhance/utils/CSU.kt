@@ -1,6 +1,5 @@
 package com.itosfish.colorfeatureenhance.utils
 
-import android.util.Log
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
@@ -76,7 +75,7 @@ object CSU {
         val output = StringBuilder()
         var exitCode = -1
         try {
-            Log.i("APP_SHELL", "准备以root权限执行命令: $cmd")
+            CLog.i("APP_SHELL", "准备以root权限执行命令: $cmd")
             // 启动 su 进程
             val process = Runtime.getRuntime().exec("su")
 
@@ -87,7 +86,7 @@ object CSU {
             BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
-                    Log.d("APP_SHELL_OUTPUT", line!!)
+                    CLog.d("APP_SHELL_OUTPUT", line!!)
                     output.append(line).append("\n")
                 }
             }
@@ -96,24 +95,24 @@ object CSU {
             BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
-                    Log.e("APP_SHELL_ERROR", line!!)
+                    CLog.e("APP_SHELL_ERROR", line!!)
                 }
             }
 
             // 等待进程结束
             exitCode = process.waitFor()
-            Log.i("APP_SHELL", "命令执行结束，退出码: $exitCode")
+            CLog.i("APP_SHELL", "命令执行结束，退出码: $exitCode")
         } catch (e: Exception) {
-            Log.e("APP_SHELL", "执行 Shell 命令失败: ${e.message}")
+            CLog.e("APP_SHELL", "执行 Shell 命令失败: ${e.message}")
         }
-        Log.i("APP_SHELL", "命令输出: $output")
+        CLog.i("APP_SHELL", "命令输出: $output")
         return ShellResult(output = output.toString(), exitCode = exitCode)
     }
 
     fun checkRoot() {
         val isRooted = isRooted()
         if (!isRooted) {
-            Log.i("MainActivity", "Device not rooted")
+            CLog.i("MainActivity", "Device not rooted")
             MaterialAlertDialogBuilder(app)
                 .setTitle(R.string.root_permission_title)
                 .setMessage(R.string.root_permission_message)
@@ -140,7 +139,7 @@ object CSU {
     private fun runShellScript(process: Process, cmd: String) {
         try {
             DataOutputStream(process.outputStream).use { outputStream ->
-                Log.i("APP_SHELL", "Cmd :$cmd")
+                CLog.i("APP_SHELL", "Cmd :$cmd")
                 // 写入命令，可以包含多个命令，用分号或换行符分隔
                 outputStream.writeBytes("$cmd\n")
                 // 写入 exit 命令以结束 su 会话
@@ -148,7 +147,7 @@ object CSU {
                 outputStream.flush()
             }
         } catch (e: Exception) {
-            Log.e("APP_SHELL", "运行 Shell 脚本失败，错误信息: ${e.message}")
+            CLog.e("APP_SHELL", "运行 Shell 脚本失败，错误信息: ${e.message}")
         }
     }
 }

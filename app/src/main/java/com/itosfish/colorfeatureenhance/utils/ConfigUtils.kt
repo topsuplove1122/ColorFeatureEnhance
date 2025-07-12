@@ -258,7 +258,7 @@ object ConfigUtils {
             val output = CSU.runWithSu("grep '^version=' \"$modulePropsPath\" | cut -d'=' -f2").output
             output.trim().takeIf { it.isNotEmpty() }
         } catch (e: Exception) {
-            Log.e(TAG, "获取模块版本失败", e)
+            CLog.e(TAG, "获取模块版本失败", e)
             null
         }
     }
@@ -269,10 +269,10 @@ object ConfigUtils {
      */
     fun copyMergedConfigToModule(): Boolean {
         try {
-            Log.i(TAG, "开始复制合并配置到模块目录")
+            CLog.i(TAG, "开始复制合并配置到模块目录")
 
             val configPaths = getConfigPaths()
-            Log.d(TAG, "配置路径: mergedOutputDir=${configPaths.mergedOutputDir}")
+            CLog.d(TAG, "配置路径: mergedOutputDir=${configPaths.mergedOutputDir}")
 
             val moduleBase = "/data/adb/modules/ColorOSFeaturesEnhance"
             val moduleDirs = listOf(
@@ -291,44 +291,44 @@ object ConfigUtils {
 
             // 复制app-features.xml
             val appFeaturesSource = "${configPaths.mergedOutputDir}/${configPaths.appFeaturesFile}"
-            Log.d(TAG, "检查源文件: $appFeaturesSource")
+            CLog.d(TAG, "检查源文件: $appFeaturesSource")
             if (File(appFeaturesSource).exists()) {
-                Log.i(TAG, "源文件存在，准备复制 app-features.xml")
+                CLog.i(TAG, "源文件存在，准备复制 app-features.xml")
                 moduleDirs.forEach { dir ->
                     shellCmd.append("cp \"$appFeaturesSource\" \"$dir/\" && ")
                 }
                 hasFilesToCopy = true
             } else {
-                Log.w(TAG, "源文件不存在: $appFeaturesSource")
+                CLog.w(TAG, "源文件不存在: $appFeaturesSource")
             }
 
             // 复制oplus-feature.xml
             val oplusFeaturesSource = "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
-            Log.d(TAG, "检查源文件: $oplusFeaturesSource")
+            CLog.d(TAG, "检查源文件: $oplusFeaturesSource")
             if (File(oplusFeaturesSource).exists()) {
-                Log.i(TAG, "源文件存在，准备复制 oplus-feature.xml")
+                CLog.i(TAG, "源文件存在，准备复制 oplus-feature.xml")
                 moduleDirs.forEach { dir ->
                     shellCmd.append("cp \"$oplusFeaturesSource\" \"$dir/\" && ")
                 }
                 hasFilesToCopy = true
             } else {
-                Log.w(TAG, "源文件不存在: $oplusFeaturesSource")
+                CLog.w(TAG, "源文件不存在: $oplusFeaturesSource")
             }
 
             if (!hasFilesToCopy) {
-                Log.e(TAG, "没有找到任何需要复制的文件")
+                CLog.e(TAG, "没有找到任何需要复制的文件")
                 return false
             }
 
             // 移除最后的 &&
             val finalCmd = shellCmd.toString().removeSuffix(" && ")
-            Log.d(TAG, "执行Shell命令: $finalCmd")
+            CLog.d(TAG, "执行Shell命令: $finalCmd")
 
             if (finalCmd.isNotEmpty()) {
                 val result = CSU.runWithSu(finalCmd).output
-                Log.d(TAG, "Shell命令执行结果: $result")
+                CLog.d(TAG, "Shell命令执行结果: $result")
             } else {
-                Log.w(TAG, "没有Shell命令需要执行")
+                CLog.w(TAG, "没有Shell命令需要执行")
             }
 
             // 设置模块目录权限为644
@@ -339,7 +339,7 @@ object ConfigUtils {
             moduleDirs.forEach { dir ->
                 val appExists = CSU.fileExists("$dir/${configPaths.appFeaturesFile}")
                 val oplusExists = CSU.fileExists("$dir/${configPaths.oplusFeaturesFile}")
-                Log.d(TAG, "目录 $dir: app-features存在=$appExists, oplus-feature存在=$oplusExists")
+                CLog.d(TAG, "目录 $dir: app-features存在=$appExists, oplus-feature存在=$oplusExists")
                 if (appExists || oplusExists) {
                     successCount++
                 }
@@ -347,15 +347,15 @@ object ConfigUtils {
 
             val success = successCount > 0
             if (success) {
-                Log.i(TAG, "配置文件复制到模块目录成功 ($successCount/${moduleDirs.size} 个目录)")
+                CLog.i(TAG, "配置文件复制到模块目录成功 ($successCount/${moduleDirs.size} 个目录)")
             } else {
-                Log.e(TAG, "配置文件复制到模块目录失败，所有目录都没有文件")
+                CLog.e(TAG, "配置文件复制到模块目录失败，所有目录都没有文件")
             }
 
             return success
 
         } catch (e: Exception) {
-            Log.e(TAG, "复制配置到模块目录时发生异常", e)
+            CLog.e(TAG, "复制配置到模块目录时发生异常", e)
             return false
         }
     }
@@ -366,7 +366,7 @@ object ConfigUtils {
      */
     private fun setModulePermissions(moduleBase: String) {
         try {
-            Log.i(TAG, "开始设置模块目录权限")
+            CLog.i(TAG, "开始设置模块目录权限")
 
             val targetDirs = listOf(
                 "$moduleBase/anymount",
@@ -377,28 +377,28 @@ object ConfigUtils {
 
             targetDirs.forEach { dir ->
                 if (CSU.dirExists(dir)) {
-                    Log.d(TAG, "设置目录权限: $dir")
+                    CLog.d(TAG, "设置目录权限: $dir")
                     // 设置目录及其所有子目录和文件的权限为644
                     permissionCmd.append("chmod -R 644 \"$dir\" && ")
                 } else {
-                    Log.d(TAG, "目录不存在，跳过权限设置: $dir")
+                    CLog.d(TAG, "目录不存在，跳过权限设置: $dir")
                 }
             }
 
             if (permissionCmd.isNotEmpty()) {
                 // 移除最后的 &&
                 val finalPermissionCmd = permissionCmd.toString().removeSuffix(" && ")
-                Log.d(TAG, "执行权限设置命令: $finalPermissionCmd")
+                CLog.d(TAG, "执行权限设置命令: $finalPermissionCmd")
 
                 val result = CSU.runWithSu(finalPermissionCmd).output
-                Log.d(TAG, "权限设置命令执行结果: $result")
-                Log.i(TAG, "模块目录权限设置完成")
+                CLog.d(TAG, "权限设置命令执行结果: $result")
+                CLog.i(TAG, "模块目录权限设置完成")
             } else {
-                Log.w(TAG, "没有需要设置权限的目录")
+                CLog.w(TAG, "没有需要设置权限的目录")
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "设置模块目录权限时发生异常", e)
+            CLog.e(TAG, "设置模块目录权限时发生异常", e)
         }
     }
 }

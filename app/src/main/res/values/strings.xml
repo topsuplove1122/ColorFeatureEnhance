@@ -313,4 +313,12 @@
     <string name="oplus_feature_touch_preload">[软] 触摸预加载</string>
     <string name="oplus_feature_view_rgbnormalize">[软] 屏幕RGB色彩一致性优化</string>
     <string name="oplus_feature_view_spring_over_scroller">[软] 列表弹性滑动阻尼效果</string>
+
+    <!-- 新增的日志导出和更多菜单相关字符串 -->
+    <string name="more_menu">更多</string>
+    <string name="export_logs">导出日志</string>
+    <string name="export_logs_success">日志导出成功</string>
+    <string name="export_logs_failed">日志导出失败</string>
+    <string name="no_logs_to_export">暂无日志可导出</string>
+    <string name="log_export_title">ColorFeatureEnhance 日志</string>
 </resources>

@@ -2,7 +2,6 @@ package com.itosfish.colorfeatureenhance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +19,7 @@ import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepositor
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
+import com.itosfish.colorfeatureenhance.utils.CLog
 import com.itosfish.colorfeatureenhance.utils.CSU
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import kotlinx.coroutines.CoroutineScope
@@ -77,37 +77,37 @@ class MainActivity : ComponentActivity() {
             val installSuccess = ConfigUtils.installModule()
             if (installSuccess) {
                 Toast.makeText(app, app.getString(R.string.module_install_success), Toast.LENGTH_SHORT).show()
-                Log.i("MainActivity", "模块安装成功")
+                CLog.i("MainActivity", "模块安装成功")
             } else {
                 MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.module_install_fail_title)
                     .setMessage(R.string.module_install_fail_message)
                     .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
                     .show()
-                Log.e("MainActivity", "模块安装失败")
+                CLog.e("MainActivity", "模块安装失败")
             }
         }
 
         // 初始化新的配置管理系统
         val initSuccess = ConfigUtils.initializeConfigSystem()
         if (initSuccess) {
-            Log.i("MainActivity", "配置系统初始化成功")
+            CLog.i("MainActivity", "配置系统初始化成功")
 
             // 异步执行配置合并
             CoroutineScope(Dispatchers.Main).launch {
                 try {
                     val mergeSuccess = ConfigMergeManager.performConfigMerge()
                     if (mergeSuccess) {
-                        Log.i("MainActivity", "配置合并完成")
+                        CLog.i("MainActivity", "配置合并完成")
                     } else {
-                        Log.w("MainActivity", "配置合并失败")
+                        CLog.w("MainActivity", "配置合并失败")
                     }
                 } catch (e: Exception) {
-                    Log.e("MainActivity", "配置合并过程中发生异常", e)
+                    CLog.e("MainActivity", "配置合并过程中发生异常", e)
                 }
             }
         } else {
-            Log.e("MainActivity", "配置系统初始化失败")
+            CLog.e("MainActivity", "配置系统初始化失败")
         }
 
     }

@@ -6,6 +6,7 @@ import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
+import com.itosfish.colorfeatureenhance.utils.CLog
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -136,7 +137,7 @@ class XmlOplusFeatureRepository : FeatureRepository {
                 eventType = parser.next()
             }
         } catch (e: Exception) {
-            Log.e("XmlOplusFeatureRepository", "解析 oplus-feature.xml 失败", e)
+            CLog.e("XmlOplusFeatureRepository", "解析 oplus-feature.xml 失败", e)
         }
 
         return@withContext features
