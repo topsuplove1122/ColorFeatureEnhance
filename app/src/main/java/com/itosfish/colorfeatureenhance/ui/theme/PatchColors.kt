@@ -40,10 +40,9 @@ object PatchColors {
                 )
             }
             PatchAction.REMOVE -> {
-                // REMOVE状态的特性不会显示在列表中，所以这个分支不应该被执行
-                // 但为了代码完整性，返回默认颜色
+                // 红色 - 删除特性
                 CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = if (isDark) PatchRemoveDark else PatchRemoveLight,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -67,7 +66,7 @@ object PatchColors {
         return when (patchAction) {
             PatchAction.ADD -> PatchAddBorder
             PatchAction.MODIFY -> PatchModifyBorder
-            PatchAction.REMOVE -> null // REMOVE状态不显示
+            PatchAction.REMOVE -> PatchRemoveBorder
             null -> null
         }
     }
@@ -82,7 +81,7 @@ object PatchColors {
         return when (patchAction) {
             PatchAction.ADD -> PatchAddBorder
             PatchAction.MODIFY -> PatchModifyBorder
-            PatchAction.REMOVE -> null // REMOVE状态不显示
+            PatchAction.REMOVE -> PatchRemoveBorder
             null -> null
         }
     }
@@ -97,7 +96,7 @@ object PatchColors {
         return when (patchAction) {
             PatchAction.ADD -> stringResource(R.string.patch_status_add)
             PatchAction.MODIFY -> stringResource(R.string.patch_status_modify)
-            PatchAction.REMOVE -> "" // REMOVE状态不显示描述
+            PatchAction.REMOVE -> stringResource(R.string.patch_status_remove)
             null -> ""
         }
     }

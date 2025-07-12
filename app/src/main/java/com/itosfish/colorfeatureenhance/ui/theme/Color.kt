@@ -20,3 +20,8 @@ val PatchAddBorder = Color(0xFF4CAF50)     // 绿色边框/指示器
 val PatchModifyLight = Color(0xFFF3E5F5)   // 浅紫色背景 (浅色模式)
 val PatchModifyDark = Color(0xFF4A148C)    // 深紫色背景 (暗色模式)
 val PatchModifyBorder = Color(0xFF9C27B0)  // 紫色边框/指示器
+
+// REMOVE - 红色系
+val PatchRemoveLight = Color(0xFFFFEBEE)   // 浅红色背景 (浅色模式)
+val PatchRemoveDark = Color(0xFFB71C1C)    // 深红色背景 (暗色模式)
+val PatchRemoveBorder = Color(0xFFF44336) // 红色边框/指示器
