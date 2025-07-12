@@ -98,9 +98,8 @@ com.itosfish.colorfeatureenhance/
 ## 🚀 编译与运行
 
 ### 环境要求
-- **目标设备**: Android 14 (API 34) 及以上，**需要 Root 权限**
-- **推荐版本**: Android 15+ (API 35+) 以获得最佳体验
-- **Root 管理器**: 支持 Magisk，不支持原版 KernelSU
+- **系统**: 支持任何基于 ColorOS 14/15 的系统，**需要 Root 权限**
+- **Root 管理器**: 支持多种 Root 管理器，**不支持 overlayfs 挂载**
 
 ### 快速开始
 1. **克隆仓库**
@@ -116,7 +115,7 @@ com.itosfish.colorfeatureenhance/
 3. **准备设备**
    - 连接已 Root 的 Android 设备
    - 启用 USB 调试模式
-   - 确保设备已安装 Magisk（不支持原版 KernelSU）
+   - 确保设备已安装 Magisk/KernelSU/APatch（**不支持 overlayfs 挂载**）
 
 4. **安装运行**
    - 点击 Run ▶️ 按钮编译并安装应用
@@ -158,7 +157,7 @@ com.itosfish.colorfeatureenhance/
 ### 开发工具
 - **构建工具**: Android Gradle Plugin 8.10.1
 - **代码混淆**: ProGuard + R8 优化
-- **多架构支持**: ARM64-v8a + ARMv7
+- **多架构支持**: ARM64-v8a
 
 ---
 
@@ -191,7 +190,7 @@ com.itosfish.colorfeatureenhance/
 
 ### 开发环境
 - 使用最新版 Android Studio
-- 确保有 Root 设备用于测试
+- 确保有已 Root 的且搭载基于 ColorOS 14/15 的系统的设备用于测试
 - 熟悉 Magisk 模块开发（如需修改模块部分）
 
 ---
