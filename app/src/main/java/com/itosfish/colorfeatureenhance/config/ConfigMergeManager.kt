@@ -489,7 +489,7 @@ object ConfigMergeManager {
     
     // ========== 私有辅助方法（待实现） ==========
     
-    private fun loadAppFeaturePatches(file: File): List<AppFeaturePatch> {
+    fun loadAppFeaturePatches(file: File): List<AppFeaturePatch> {
         return try {
             val content = file.readText()
             json.decodeFromString<List<AppFeaturePatch>>(content)

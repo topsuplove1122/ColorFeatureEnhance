@@ -311,16 +311,56 @@ fun FeatureConfigScreen(
                         Log.d("FeatureDelete", "LongPress: name=$firstName, mode=$currentMode, action=$action")
 
                         if (currentMode == FeatureMode.OPLUS) {
+                            // OPLUS 模式下仍维持原有逻辑
                             if (action == ConfigMergeManager.PatchAction.ADD) {
-                                Log.d("FeatureDelete", "User added feature, show delete dialog")
                                 groupToDelete = group
-                            } else {
-                                Log.d("FeatureDelete", "System feature, skip delete dialog")
-                                // 系统已有特性：不允许删除且不做提示
                             }
                         } else {
-                            Log.d("FeatureDelete", "APP mode, allow delete dialog")
-                            groupToDelete = group
+                            // APP 模式
+                            when (action) {
+                                ConfigMergeManager.PatchAction.REMOVE -> {
+                                    // 已删除状态 -> 恢复（移除补丁）
+                                    scope.launch {
+                                        // 1. 读取系统基线，找到原始特性
+                                        val configPaths = com.itosfish.colorfeatureenhance.utils.ConfigUtils.getConfigPaths()
+                                        val baselineFile = java.io.File(configPaths.systemBaselineDir, configPaths.appFeaturesFile)
+                                        val baselineList = if (baselineFile.exists()) {
+                                            XmlFeatureRepository().loadFeatures(baselineFile.absolutePath)
+                                        } else emptyList()
+
+                                        // 2. 生成恢复后的列表
+                                        val restoredFeatures = features.map { ft ->
+                                            if (group.features.any { it.name == ft.name }) {
+                                                baselineList.find { it.name == ft.name } ?: ft.copy(enabled = true)
+                                            } else ft
+                                        }
+
+                                        // 3. 更新 UI
+                                        features = emptyList()
+                                        features = restoredFeatures
+
+                                        // 4. 保存补丁并重新合并
+                                        repository.saveFeatures(configPath, restoredFeatures)
+
+                                        // 5. 重新加载最终配置
+                                        val reloaded = repository.loadFeatures(configPath)
+                                        features = reloaded
+
+                                        if (reloaded.isNotEmpty()) {
+                                            val names = reloaded.map { it.name }
+                                            patchActions = ConfigMergeManager.getFeaturesPatchActions(
+                                                names,
+                                                true
+                                            )
+                                        }
+                                        refreshTrigger++
+                                    }
+                                }
+                                else -> {
+                                    // 其余情况仍弹出删除确认
+                                    groupToDelete = group
+                                }
+                            }
                         }
                     },
                     onClick = {
@@ -411,20 +451,29 @@ fun FeatureConfigScreen(
                 text = { Text(text = stringResource(id = R.string.delete_confirm_message, label)) },
                 confirmButton = {
                     TextButton(onClick = {
-                        // 删除并保存
-                        val updatedFeatures = features.filterNot { feature ->
-                            deleting.features.any { it.name == feature.name }
-                        }
-                        // 强制触发重组，确保UI立即更新
-                        features = emptyList()
-                        features = updatedFeatures
-                        
-                        // 删除用户映射
+                        // 1. 准备删除名称列表
                         val namesToDelete = deleting.features.map { it.name }
+
+                        // 2. UI 保留条目，但标记为禁用（删除态）
+                        val displayList = features.map { ft ->
+                            if (namesToDelete.contains(ft.name)) ft.copy(enabled = false) else ft
+                        }
+
+                        // 3. 保存用列表：真正从配置中移除，生成 REMOVE 补丁
+                        val saveList = features.filterNot { namesToDelete.contains(it.name) }
+
+                        // 4. 立即更新界面，避免闪烁
+                        features = displayList
+
+                        // 同步更新临时 patchActions，保证指示器立即出现
+                        patchActions = patchActions + namesToDelete.associateWith { ConfigMergeManager.PatchAction.REMOVE }
+
+                        // 5. 删除用户映射（保持原来逻辑）
                         AppFeatureMappings.getInstance().removeUserMappings(context, namesToDelete)
-                        
+
+                        // 6. 异步保存 & 刷新
                         scope.launch {
-                            repository.saveFeatures(configPath, updatedFeatures)
+                            repository.saveFeatures(configPath, saveList)
 
                             // 重新加载配置文件以获取最新的合并结果
                             val reloadedFeatures = repository.loadFeatures(configPath)

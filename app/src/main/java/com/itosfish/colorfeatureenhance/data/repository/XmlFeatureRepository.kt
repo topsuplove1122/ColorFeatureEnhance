@@ -14,13 +14,57 @@ import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 
 class XmlFeatureRepository : FeatureRepository {
 
+    /**
+     * 加载 app-feature 列表。
+     * 新增能力：当某个特性处于 "删除" 补丁状态 (PatchAction.REMOVE) 时，依旧在列表中显示，
+     *           但标记为已删除 (enabled = false)。
+     */
     override suspend fun loadFeatures(configPath: String): List<AppFeature> = withContext(Dispatchers.IO) {
-        val file = File(configPath)
-        if (!file.exists()) return@withContext emptyList()
+        val configPaths = ConfigUtils.getConfigPaths()
 
-        val features = parseXmlFeatures(file)
+        // 1. 已合并后的配置（不包含被 REMOVE 的特性）
+        val mergedFile = File(configPath)
+        val mergedFeatures = if (mergedFile.exists()) {
+            parseXmlFeatures(mergedFile)
+        } else emptyList()
+
+        // 2. 系统基线配置，用于恢复被删除特性的原始信息
+        val systemBaselineFile = File(configPaths.systemBaselineDir, configPaths.appFeaturesFile)
+        val systemBaselineFeatures = if (systemBaselineFile.exists()) {
+            parseXmlFeatures(systemBaselineFile)
+        } else emptyList()
+
+        // 3. 用户补丁，检查 REMOVE 项
+        val patchFile = File(configPaths.userPatchesDir, "app-features.patch.json")
+        val removedPatches = if (patchFile.exists()) {
+            ConfigMergeManager.loadAppFeaturePatches(patchFile)
+                .filter { it.action == ConfigMergeManager.PatchAction.REMOVE }
+        } else emptyList()
+
+        // 4. 将被删除的特性重新加入展示列表（标记为 disabled）
+        val finalFeatures = mergedFeatures.toMutableList()
+        removedPatches.forEach { patch ->
+            // 仅当系统基线存在该特性时，才显示删除标记
+            val original = systemBaselineFeatures.find { it.name == patch.name }
+            original?.let { orig ->
+                // 若列表中已存在同名项（理论上不会），先去重
+                finalFeatures.removeAll { it.name == orig.name }
+
+                // 添加禁用状态的特性用于 UI 展示
+                val disabledFeature = orig.copy(enabled = false)
+                finalFeatures.add(disabledFeature)
+            }
+        }
+
         // 去重：同名特性仅保留一项，启用状态以至少一个 true 为准
-        features
+        return@withContext finalFeatures
+            .groupBy { it.name }
+            .map { (_, list) ->
+                val first = list.first()
+                val enabled = list.any { it.enabled }
+                val subNodes = list.flatMap { it.subNodes }.distinctBy { it.args }
+                AppFeature(first.name, enabled, first.args, subNodes)
+            }
     }
 
     override suspend fun saveFeatures(configPath: String, features: List<AppFeature>): Unit = withContext(Dispatchers.IO) {
