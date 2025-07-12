@@ -98,21 +98,33 @@ class AppFeatureMappings private constructor() {
         }
 
         /**
-         * 获取特性的描述资源ID，优先从用户自定义映射中查找
+         * 获取特性的描述，支持三级优先级查询
+         * 优先级：UserFeatureMappings > CloudFeatureMappings > App内置资源
          * @param context 上下文
          * @param featureName 特性名称
          * @return 描述字符串
          */
         fun getLocalizedDescription(context: Context, featureName: String): String {
-            // 先查找用户自定义映射
+            // 1. 最高优先级：用户自定义映射
             val userMappings = UserFeatureMappings.getInstance(context)
             val userDescription = userMappings.getDescription(featureName)
-            // 如果用户描述存在且不为空，则使用用户描述
             if (userDescription != null && userDescription.isNotEmpty()) {
                 return userDescription
             }
-            
-            // 再查找预设映射
+
+            // 2. 中等优先级：云端配置映射
+            try {
+                val cloudMappings = CloudFeatureMappings.getInstance(context)
+                val currentLanguage = getCurrentLanguage(context)
+                val cloudDescription = cloudMappings.getDescription(featureName, currentLanguage)
+                if (cloudDescription != null && cloudDescription.isNotEmpty()) {
+                    return cloudDescription
+                }
+            } catch (e: Exception) {
+                // 云端配置获取失败时静默忽略，继续使用应用内置资源
+            }
+
+            // 3. 最低优先级：应用内置资源映射
             val resId = getInstance().getResId(featureName)
             val result = if (resId == R.string.feature_unknown) {
                 featureName
@@ -120,6 +132,20 @@ class AppFeatureMappings private constructor() {
                 context.getString(resId)
             }
             return result
+        }
+
+        /**
+         * 获取当前语言代码
+         * @param context 上下文
+         * @return 语言代码
+         */
+        private fun getCurrentLanguage(context: Context): String {
+            val locale = context.resources.configuration.locales[0]
+            return when (locale.language.lowercase()) {
+                "zh" -> "zh"
+                "en" -> "en"
+                else -> "en"
+            }
         }
     }
 

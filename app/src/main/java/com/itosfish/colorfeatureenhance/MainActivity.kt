@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
+import com.itosfish.colorfeatureenhance.data.remote.RemoteConfigManager
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
@@ -93,15 +94,39 @@ class MainActivity : ComponentActivity() {
         if (initSuccess) {
             CLog.i("MainActivity", "配置系统初始化成功")
 
-            // 异步执行配置合并
+            // 异步执行配置合并和云端配置更新
             CoroutineScope(Dispatchers.Main).launch {
                 try {
+                    // 1. 先执行配置合并
                     val mergeSuccess = ConfigMergeManager.performConfigMerge()
                     if (mergeSuccess) {
                         CLog.i("MainActivity", "配置合并完成")
                     } else {
                         CLog.w("MainActivity", "配置合并失败")
                     }
+
+                    // 2. 异步检查云端配置更新（不阻塞主流程）
+                    launch(Dispatchers.IO) {
+                        try {
+                            val remoteConfigManager = RemoteConfigManager.getInstance(this@MainActivity)
+                            val updateResult = remoteConfigManager.checkAndUpdateConfig()
+
+                            when (updateResult) {
+                                is RemoteConfigManager.UpdateResult.Success -> {
+                                    CLog.i("MainActivity", "云端配置更新成功")
+                                }
+                                is RemoteConfigManager.UpdateResult.NoUpdate -> {
+                                    CLog.d("MainActivity", "云端配置无需更新")
+                                }
+                                is RemoteConfigManager.UpdateResult.Error -> {
+                                    CLog.w("MainActivity", "云端配置更新失败: ${updateResult.message}")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            CLog.w("MainActivity", "云端配置更新过程中发生异常", e)
+                        }
+                    }
+
                 } catch (e: Exception) {
                     CLog.e("MainActivity", "配置合并过程中发生异常", e)
                 }

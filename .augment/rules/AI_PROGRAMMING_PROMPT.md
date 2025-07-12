@@ -6,36 +6,53 @@ type: "always_apply"
 
 ## 项目概述
 
-**项目名称**: ColorFeatureEnhance (ColorOS特性补全)  
-**包名**: com.itosfish.colorfeatureenhance  
-**版本**: 0.31 (versionCode: 20250710)  
-**目标**: 为ColorOS系统提供特性配置管理工具，支持启用/禁用系统隐藏功能
+**项目名称**: ColorFeatureEnhance (ColorOS特性补全)
+**包名**: com.itosfish.colorfeatureenhance
+**版本**: 0.54 (versionCode: 20250712)
+**目标**: 为ColorOS系统提供特性配置管理工具，支持启用/禁用系统隐藏功能，采用基线+补丁配置管理架构
 
 ## 核心架构
 
 ### 技术栈
 - **语言**: Kotlin 100%
-- **UI框架**: Jetpack Compose (Material 3)
-- **架构模式**: Repository Pattern + Domain Layer
+- **UI框架**: Jetpack Compose (Material 3 Expressive)
+- **架构模式**: Repository Pattern + Domain Layer + 分层架构
 - **依赖注入**: 无（使用简单工厂模式）
 - **异步处理**: Kotlin Coroutines
-- **数据存储**: SharedPreferences + XML文件操作
-- **权限管理**: Root权限 (通过su命令)
+- **数据存储**: SharedPreferences + XML文件操作 + JSON补丁文件
+- **权限管理**: Root权限 (通过su命令，支持Magisk，不支持原版KernelSU)
+- **日志系统**: 统一CLog日志管理，支持内存存储和导出
+- **国际化**: 支持中文/英文双语界面
 
 ### 项目结构
 ```
 com.itosfish.colorfeatureenhance/
+├── config/              # 配置管理核心
+│   └── ConfigMergeManager.kt  # 配置合并与补丁管理
 ├── data/
-│   ├── model/           # 数据模型
+│   ├── model/           # 数据模型 (AppFeature, OplusFeature, FeatureGroup)
 │   └── repository/      # 数据仓库实现
+│       ├── XmlFeatureRepository.kt      # App-Features 仓库
+│       └── XmlOplusFeatureRepository.kt # Oplus-Features 仓库
 ├── domain/              # 业务逻辑接口
+│   └── FeatureRepository.kt   # 领域层接口，抽象数据操作
 ├── ui/
 │   ├── components/      # 可复用UI组件
-│   ├── screens/         # 屏幕级组件
+│   │   ├── SearchBar.kt       # 搜索栏组件
+│   │   ├── HighlightedText.kt # 高亮文本组件
+│   │   └── TopAppBarComponent.kt # 顶部应用栏
 │   ├── search/          # 搜索功能
-│   └── theme/           # 主题配置
+│   │   └── SearchLogic.kt     # 搜索算法实现
+│   ├── theme/           # Material 3 主题定义
+│   ├── FeatureConfigScreen.kt # 主配置界面
+│   └── TextEditorActivity.kt  # 内置文本编辑器
 ├── utils/               # 工具类
-└── navigation/          # 导航配置
+│   ├── ConfigUtils.kt         # 配置文件工具类
+│   ├── DialogUtil.kt          # 对话框工具
+│   ├── CLog.kt               # 统一日志系统
+│   └── CSU.kt                # Shell 命令工具
+├── FeatureMode.kt             # 编辑模式枚举
+└── MainActivity.kt            # 应用入口
 ```
 
 ## 核心业务逻辑
@@ -44,14 +61,26 @@ com.itosfish.colorfeatureenhance/
 - **APP模式**: 管理 `com.oplus.app-features.xml` (应用级特性)
 - **OPLUS模式**: 管理 `com.oplus.oplus-feature.xml` (系统级特性)
 
-### 2. 特性数据模型
+### 2. 新架构配置管理系统
+- **基线+补丁模式**: 系统配置与用户修改分离，支持OTA更新
+- **三层目录结构**:
+  - `system_baseline/`: 系统基线配置文件
+  - `user_patches/`: 用户修改补丁文件 (JSON格式)
+  - `merged_output/`: 合并后的最终配置文件
+- **智能合并**: 自动检测配置变更，仅在必要时执行合并操作
+- **多级回退**: 支持系统基线 → 直接系统路径的多级配置源回退
+
+### 3. 特性数据模型
 ```kotlin
 data class AppFeature(
     val name: String,           // 特性名称
     val enabled: Boolean,       // 启用状态
     val args: String?,          // 参数值 (如 "boolean:true", "int:1")
     val subNodes: List<FeatureSubNode> = emptyList() // 复杂特性子节点
-)
+) {
+    val isComplex: Boolean get() = subNodes.isNotEmpty()
+    val isSimple: Boolean get() = !isComplex
+}
 ```
 
 ### 3. XML配置格式
@@ -242,14 +271,21 @@ AppFeature(
 
 ## 开发调试指南
 
-### 1. 日志输出
+### 1. 统一日志系统 (CLog)
 ```kotlin
-Log.i("APP_SHELL", "准备以root权限执行命令: $cmd")
-Log.d("APP_SHELL_OUTPUT", line)
-Log.e("APP_SHELL_ERROR", line)
+// 使用统一的CLog系统替代原生Log
+CLog.i("TAG", "信息级别日志")
+CLog.e("TAG", "错误级别日志")
+CLog.e("TAG", "错误级别日志", throwable)
+CLog.d("TAG", "调试级别日志")
+CLog.w("TAG", "警告级别日志")
+
+// 日志导出功能
+val logs = CLog.getFormattedLogs()  // 获取格式化日志文本
+CLog.clearLogs()  // 清空日志记录
 ```
 
-### 2. 权限检查
+### 2. 权限检查与KSU检测
 ```kotlin
 if (!CSU.isRooted()) {
     // 显示权限提示对话框
@@ -257,7 +293,8 @@ if (!CSU.isRooted()) {
 }
 
 if (CSU.isKSU()) {
-    // 检测到KernelSU，显示不支持提示
+    // 检测到原版KernelSU，显示不支持提示
+    // 仅支持Magisk Mount版本的KernelSU
 }
 ```
 

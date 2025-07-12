@@ -65,5 +65,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    // 网络请求依赖，用于云端配置下载
+    implementation(libs.okhttp)
+
 //    implementation(libs.androidx.material.icons.extended)
 }

@@ -1,6 +1,6 @@
 # ColorOS Feature Enhance 可视化编辑器
 
-一个用于 **可视化编辑与管理 ColorOS 特性开关**（如 `com.oplus.app-features.xml` 与 `com.oplus.oplus-feature.xml`）的开源工具，使用 **Kotlin + Jetpack Compose** 开发，遵循 **Material 3** 设计规范。
+一个用于 **可视化编辑与管理 ColorOS 特性开关**（如 `com.oplus.app-features.xml` 与 `com.oplus.oplus-feature.xml`）的开源工具，使用 **Kotlin + Jetpack Compose** 开发，遵循 **Material 3 Expressive** 设计规范。
 
 > ⚠️ 本应用 **需要 Root 权限** 才能正常读写系统配置文件，请确保目标设备已 Root。
 
@@ -10,16 +10,18 @@
 
 ### 🎯 核心特性
 - **双模式编辑**：一键在 *App-Features* 与 *Oplus-Features* 模式之间切换
-- **智能配置管理**：支持模块化配置文件管理，兼容 OTA 更新
+- **智能配置管理**：支持模块化配置文件管理，兼容 OTA 更新，采用基线+补丁架构
 - **实时可视化**：按照「描述 → 分组 → 开关」层级展现所有特性，所见即所得
 - **搜索 & 高亮**：支持按名称/描述高速模糊搜索并自动高亮匹配关键字
 - **分组折叠**：同一描述的特性自动归为同组，可展开/折叠查看
+- **补丁状态显示**：直观显示特性的修改状态（新增/修改/删除）
 
 ### 🛠️ 编辑功能
 - **快速增删改**：长按列表项可删除，悬浮按钮（FAB）可新增，开关即改值
 - **复杂特性支持**：支持带参数和子节点的复杂特性配置
 - **文本编辑模式**：内置纯文本编辑器，可直接查看/编辑原始 XML
 - **配置合并**：智能合并系统基线配置与用户自定义补丁
+- **统一日志系统**：内置 CLog 日志管理，支持日志导出和调试
 
 ### 🌐 用户体验
 - **国际化**：内置简体中文、英语双语支持
@@ -79,17 +81,26 @@ com.itosfish.colorfeatureenhance/
 - **模块化设计**：内置 Magisk 模块，实现系统级配置应用
 
 ### 配置管理流程
-1. **系统配置复制**：从系统路径复制基线配置到应用目录
-2. **用户补丁生成**：根据用户修改生成增量补丁文件
-3. **配置合并**：将基线配置与用户补丁合并生成最终配置
+1. **系统配置复制**：从系统路径复制基线配置到应用目录 (`system_baseline/`)
+2. **用户补丁生成**：根据用户修改生成增量补丁文件 (`user_patches/`)
+3. **配置合并**：将基线配置与用户补丁合并生成最终配置 (`merged_output/`)
 4. **模块同步**：将合并后的配置同步到 Magisk 模块目录
+5. **权限设置**：自动设置模块目录权限为 644
+
+### 新架构特点
+- **基线+补丁模式**：系统配置与用户修改分离，支持 OTA 更新
+- **智能合并**：自动检测配置变更，仅在必要时执行合并操作
+- **多级回退**：支持系统基线 → 直接系统路径的多级配置源回退
+- **日志追踪**：完整的配置管理操作日志，便于问题排查
 
 ---
 
 ## 🚀 编译与运行
 
 ### 环境要求
-- **目标设备**: Android 15 (API 35) 及以上，**需要 Root 权限**
+- **目标设备**: Android 14 (API 34) 及以上，**需要 Root 权限**
+- **推荐版本**: Android 15+ (API 35+) 以获得最佳体验
+- **Root 管理器**: 支持 Magisk，不支持原版 KernelSU
 
 ### 快速开始
 1. **克隆仓库**
@@ -105,7 +116,7 @@ com.itosfish.colorfeatureenhance/
 3. **准备设备**
    - 连接已 Root 的 Android 设备
    - 启用 USB 调试模式
-   - 确保设备已安装 Magisk
+   - 确保设备已安装 Magisk（不支持原版 KernelSU）
 
 4. **安装运行**
    - 点击 Run ▶️ 按钮编译并安装应用
@@ -125,21 +136,24 @@ com.itosfish.colorfeatureenhance/
 ### 核心技术
 - **开发语言**: Kotlin 2.0.21 (100% Kotlin)
 - **UI 框架**: Jetpack Compose + Material 3 Expressive
-- **架构模式**: Repository Pattern + Domain Layer
+- **架构模式**: Repository Pattern + Domain Layer + 分层架构
 - **序列化**: Kotlinx Serialization JSON
+- **日志系统**: 统一 CLog 日志管理，支持内存存储和导出
 
 ### Android 组件
 - **最低 SDK**: Android 14 (API 34)
 - **目标 SDK**: Android 16 (API 36)
+- **版本号**: v0.54 (Build 20250712)
 - **Compose BOM**: 2025.06.01
 - **Navigation**: Compose Navigation 2.9.1
 - **生命周期**: Lifecycle Runtime KTX 2.9.1
 
 ### 系统集成
 - **权限管理**: Root 权限 (通过 su 命令)
-- **模块系统**: Magisk 模块集成
+- **模块系统**: Magisk 模块集成，不支持原版 KernelSU
 - **文件操作**: XML Pull 解析 + 文件 I/O
 - **数据持久化**: SharedPreferences + JSON 配置文件
+- **国际化**: 支持中文/英文双语界面
 
 ### 开发工具
 - **构建工具**: Android Gradle Plugin 8.10.1

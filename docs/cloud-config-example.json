@@ -1,0 +1,58 @@
+{
+  "com.oplus.new_feature": {
+    "zh": "全新特性描述",
+    "en": "New feature description"
+  },
+  "com.oplus.new_feature2": {
+    "zh": "全新特性描述2",
+    "en": "New feature description2"
+  },
+  "com.oplus.directservice.aitoolbox_enable": {
+    "zh": "AI 聊天场景增强版",
+    "en": "Enhanced AI Chat Scene"
+  },
+  "com.oplus.mediaturbo.game_live": {
+    "zh": "直播助手专业版",
+    "en": "Professional Live Assistant"
+  },
+  "oplus.aod.wakebyclick.support": {
+    "zh": "点击屏幕唤醒息屏功能",
+    "en": "Tap to Wake Screen Feature"
+  },
+  "com.oplus.wallpapers.livephoto_wallpaper": {
+    "zh": "实况照片锁屏壁纸支持",
+    "en": "Live Photo Lock Screen Wallpaper Support"
+  },
+  "com.oplus.systemui.panoramic_aod.enable": {
+    "zh": "全局息屏显示功能",
+    "en": "Global Always-On Display Feature"
+  },
+  "com.android.systemui.qs_deform_enable": {
+    "zh": "通控面板图标变形效果",
+    "en": "Quick Settings Icon Deformation Effect"
+  },
+  "com.oplus.screenrecorder.area_record": {
+    "zh": "区域录屏功能",
+    "en": "Area Screen Recording Feature"
+  },
+  "oplus.software.systemui.navbar_pick_color": {
+    "zh": "[软] 导航栏取色优化",
+    "en": "[Software] Navigation Bar Color Picking Optimization"
+  },
+  "oplus.software.string_gc_support": {
+    "zh": "[软] 字符串垃圾回收支持",
+    "en": "[Software] String Garbage Collection Support"
+  },
+  "com.oplus.eyeprotect.ai_intelligent_eye_protect_support": {
+    "zh": "AI 智能护眼功能",
+    "en": "AI Intelligent Eye Protection Feature"
+  },
+  "oplus.software.radio.tt_satellite_support": {
+    "zh": "[软] 卫星通信支持",
+    "en": "[Software] Satellite Communication Support"
+  },
+  "oplus.software.radio.smart_game_qoe_recovery": {
+    "zh": "[软] 智能游戏网络优化",
+    "en": "[Software] Smart Game Network Optimization"
+  }
+}

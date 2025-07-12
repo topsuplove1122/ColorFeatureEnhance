@@ -39,6 +39,16 @@
     <string name="select_feature_to_edit">Select feature to edit</string>
     <string name="mode_app">App Features</string>
     <string name="mode_oplus">Oplus Features</string>
+
+    <!-- Cloud configuration related strings -->
+    <string name="cloud_config_update_success">Cloud configuration updated successfully</string>
+    <string name="cloud_config_update_failed">Cloud configuration update failed</string>
+    <string name="cloud_config_no_update">Cloud configuration is up to date</string>
+    <string name="cloud_config_downloading">Downloading cloud configuration…</string>
+    <string name="cloud_config_parsing">Parsing cloud configuration…</string>
+    <string name="cloud_config_error_network">Network connection failed</string>
+    <string name="cloud_config_error_parse">Configuration parsing failed</string>
+    <string name="cloud_config_stats">Cloud Configuration Stats</string>
     <!-- Oplus features preset descriptions -->
     <string name="oplus_feature_compatibility_code">Compatibility Code</string>
     <string name="oplus_feature_ai_eye_protect">AI Eye Protect</string>
