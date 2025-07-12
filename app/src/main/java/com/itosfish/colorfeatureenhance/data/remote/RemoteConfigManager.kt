@@ -68,6 +68,16 @@ class RemoteConfigManager private constructor(private val context: Context) {
         data class Error(val message: String, val exception: Throwable? = null) : UpdateResult()
     }
     
+    // 在请求 URL 中附加时间戳，避免缓存
+    private fun buildUrlWithTimestamp(baseUrl: String): String {
+        val timestamp = System.currentTimeMillis()
+        return if (baseUrl.contains("?")) {
+            "$baseUrl&ts=$timestamp"
+        } else {
+            "$baseUrl?ts=$timestamp"
+        }
+    }
+
     /**
      * 检查并更新云端配置
      * @param configUrl 配置文件URL，如果为null则使用默认URL
@@ -78,7 +88,9 @@ class RemoteConfigManager private constructor(private val context: Context) {
             CLog.i(TAG, "开始检查云端配置更新")
             
             val url = configUrl ?: DEFAULT_CONFIG_URL
-            val configData = downloadConfig(url)
+            // 在 URL 末尾追加时间戳，避免命中缓存
+            val finalUrl = buildUrlWithTimestamp(url)
+            val configData = downloadConfig(finalUrl)
             
             if (configData == null) {
                 CLog.w(TAG, "下载配置失败或配置为空")
