@@ -1,8 +1,30 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "1.9.10"
+}
+
+val ksFile = rootProject.file("signing.properties")
+val props = Properties()
+if (ksFile.canRead()) {
+    props.load(FileInputStream(ksFile))
+    android.signingConfigs.create("sign").apply {
+        storeFile = file(props["KEYSTORE_FILE"] as String)
+        storePassword = props["KEYSTORE_PASSWORD"] as String
+        keyAlias = props["KEYSTORE_ALIAS"] as String
+        keyPassword = props["KEYSTORE_ALIAS_PASSWORD"] as String
+    }
+} else {
+    android.signingConfigs.create("sign").apply {
+        storeFile = android.signingConfigs.getByName("debug").storeFile
+        storePassword = android.signingConfigs.getByName("debug").storePassword
+        keyAlias = android.signingConfigs.getByName("debug").keyAlias
+        keyPassword = android.signingConfigs.getByName("debug").keyPassword
+    }
 }
 
 android {
@@ -30,6 +52,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("sign")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("sign")
         }
     }
     packaging {
@@ -50,6 +76,28 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    applicationVariants.all {
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = "ColorFeatureEnhance-v${versionName}-${name}.apk"
+            assembleProvider.get().doLast {
+                val outDir = File(rootDir, "out")
+                val mappingDir = File(outDir, "mapping").absolutePath
+                val apkDir = File(outDir, "apk").absolutePath
+
+                if (buildType.isMinifyEnabled) {
+                    copy {
+                        from(mappingFileProvider.get())
+                        into(mappingDir)
+                        rename { _ -> "mapping-${versionName}.txt" }
+                    }
+                    copy {
+                        from(outputFile)
+                        into(apkDir)
+                    }
+                }
+            }
+        }
     }
 }
 
