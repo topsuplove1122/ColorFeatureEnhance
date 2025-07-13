@@ -200,3 +200,7 @@ com.itosfish.colorfeatureenhance/
 - [Shizuku](https://github.com/RikkaApps/Shizuku) - 提供 关于弹窗 布局文件
 
 ---
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ItosEO/ColorFeatureEnhance&type=Date)](https://www.star-history.com/#ItosEO/ColorFeatureEnhance&Date)
