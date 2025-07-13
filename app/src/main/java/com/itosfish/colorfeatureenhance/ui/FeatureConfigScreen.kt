@@ -2,11 +2,7 @@ package com.itosfish.colorfeatureenhance.ui
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,10 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -131,7 +124,7 @@ fun FeatureConfigScreen(
     var featureToEdit by remember { mutableStateOf<Pair<AppFeature, String>?>(null) } // feature and description
     var chooseFromGroup by remember { mutableStateOf<FeatureGroup?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var fabVisible by remember { mutableStateOf(true) }
+
     
     // 复杂特性对话框状态
     var showComplexFeatureDialog by remember { mutableStateOf(false) }
@@ -156,20 +149,7 @@ fun FeatureConfigScreen(
         }
     }
 
-    // 检测滚动方向的 NestedScrollConnection - 隐藏/显示浮动按钮
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // 向下滚动时隐藏FAB，向上滚动时显示FAB
-                if (available.y < -10) { // 向上拖动（列表向下滚动）
-                    fabVisible = false
-                } else if (available.y > 10) { // 向下拖动（列表向上滚动）
-                    fabVisible = true
-                }
-                return Offset.Zero
-            }
-        }
-    }
+
 
     // 首次进入或配置路径变化时，自动执行一次合并再加载，避免出现空列表
     LaunchedEffect(configPath) {
@@ -225,30 +205,22 @@ fun FeatureConfigScreen(
                 )
             }
         },
-        // 仅添加按钮浮动
+        // 添加按钮浮动（常驻显示）
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = fabVisible,
-                enter = slideInVertically(initialOffsetY = { it * 2 }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it * 2 }) + fadeOut()
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) {
-                FloatingActionButton(
-                    onClick = { showAddDialog = true },
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(id = R.string.add_feature)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.add_feature)
+                )
             }
         }
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .nestedScroll(nestedScrollConnection),
+            modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
         ) {
