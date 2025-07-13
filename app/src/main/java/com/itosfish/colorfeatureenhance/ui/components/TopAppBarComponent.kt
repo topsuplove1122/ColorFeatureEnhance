@@ -3,6 +3,8 @@ package com.itosfish.colorfeatureenhance.ui.components
 import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -21,8 +23,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 import com.itosfish.colorfeatureenhance.FeatureMode
 import com.itosfish.colorfeatureenhance.R
 import com.itosfish.colorfeatureenhance.utils.CLog
@@ -44,6 +51,15 @@ fun ColorOSTopAppBar(
 ) {
     val context = LocalContext.current
     var showMoreMenu by remember { mutableStateOf(false) }
+
+    // 动态计算菜单宽度：半屏宽度 + 10dp
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val menuWidth = remember(windowInfo.containerSize.width) {
+        with(density) {
+            (windowInfo.containerSize.width.toDp() / 2) + 10.dp
+        }
+    }
 
     TopAppBar(
         title = { Text(title) },
@@ -79,26 +95,42 @@ fun ColorOSTopAppBar(
                     )
                 }
 
-                // 下拉菜单
+                // 下拉菜单 - 覆盖TopAppBar
                 DropdownMenu(
                     expanded = showMoreMenu,
-                    onDismissRequest = { showMoreMenu = false }
+                    onDismissRequest = { showMoreMenu = false },
+                    offset = DpOffset(
+                        x = 0.dp,
+                        y = -TopAppBarDefaults.TopAppBarExpandedHeight
+                    ), // 向上偏移TopAppBar高度
+                    shape = RoundedCornerShape(8.dp), // 增大圆角
+                    modifier = Modifier.width(menuWidth) // 动态菜单宽度：半屏+10dp
                 ) {
-                    // 关于选项
-                    DropdownMenuItem(
-                        text = { Text(stringResource(id = R.string.about)) },
-                        onClick = {
-                            showMoreMenu = false
-                            showAboutDialog(context as Activity)
-                        }
-                    )
-
                     // 导出日志选项
                     DropdownMenuItem(
-                        text = { Text("导出日志") },
+                        text = {
+                            Text(
+                                text = "导出日志",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
                         onClick = {
                             showMoreMenu = false
                             exportLogs(context as Activity)
+                        }
+                    )
+
+                    // 关于选项
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.about),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        onClick = {
+                            showMoreMenu = false
+                            showAboutDialog(context as Activity)
                         }
                     )
                 }
