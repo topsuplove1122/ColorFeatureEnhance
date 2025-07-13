@@ -111,7 +111,11 @@ class MainActivity : ComponentActivity() {
         if (!ConfigUtils.isModuleInstalled()) {
             val installSuccess = ConfigUtils.installModule()
             if (installSuccess) {
-                Toast.makeText(app, app.getString(R.string.module_install_success), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    app,
+                    app.getString(R.string.module_install_success),
+                    Toast.LENGTH_SHORT
+                ).show()
                 CLog.i("MainActivity", "模块安装成功")
             } else {
                 MaterialAlertDialogBuilder(this)
@@ -142,18 +146,24 @@ class MainActivity : ComponentActivity() {
                     // 2. 异步检查云端配置更新（不阻塞主流程）
                     launch(Dispatchers.IO) {
                         try {
-                            val remoteConfigManager = RemoteConfigManager.getInstance(this@MainActivity)
+                            val remoteConfigManager =
+                                RemoteConfigManager.getInstance(this@MainActivity)
                             val updateResult = remoteConfigManager.checkAndUpdateConfig()
 
                             when (updateResult) {
                                 is RemoteConfigManager.UpdateResult.Success -> {
                                     CLog.i("MainActivity", "云端配置更新成功")
                                 }
+
                                 is RemoteConfigManager.UpdateResult.NoUpdate -> {
                                     CLog.d("MainActivity", "云端配置无需更新")
                                 }
+
                                 is RemoteConfigManager.UpdateResult.Error -> {
-                                    CLog.w("MainActivity", "云端配置更新失败: ${updateResult.message}")
+                                    CLog.w(
+                                        "MainActivity",
+                                        "云端配置更新失败: ${updateResult.message}"
+                                    )
                                 }
                             }
                         } catch (e: Exception) {
