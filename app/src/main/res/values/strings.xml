@@ -349,6 +349,9 @@
     <string name="oplus_feature_rhythm_eyeprotect_2_0_support">[软] 单扫护眼</string>
     <string name="oplus_feature_super_volume_5x">[软] 超级音量（5×）</string>
 
+    <!-- Edit feature dialog related strings -->
+    <string name="system_feature_name_readonly_hint">系统存在的特性配置，名称不可编辑</string>
+
     <!-- Disclaimer related strings -->
     <string name="disclaimer_title">免责声明</string>
     <string name="disclaimer_accept">我已阅读并同意</string>

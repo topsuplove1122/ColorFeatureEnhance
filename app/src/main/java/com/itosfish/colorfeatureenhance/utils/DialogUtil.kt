@@ -20,6 +20,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.itosfish.colorfeatureenhance.FeatureMode
 import com.itosfish.colorfeatureenhance.R
+import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.data.model.AppFeature
 import com.itosfish.colorfeatureenhance.data.model.AppFeatureMappings
 import com.itosfish.colorfeatureenhance.data.model.FeatureSubNode
@@ -257,6 +259,15 @@ fun EditFeatureDialog(
     var featureDescription by remember { mutableStateOf(originalDescription) }
     var featureEnabled by remember { mutableStateOf(originalEnabled) }
     var argValue by remember { mutableStateOf(originalArgs ?: "") }
+    var isSystemFeature by remember { mutableStateOf(false) }
+
+    // 检查是否为系统存在的特性配置
+    LaunchedEffect(originalName) {
+        isSystemFeature = ConfigMergeManager.isFeatureInSystemBaseline(
+            originalName,
+            currentMode == FeatureMode.APP
+        )
+    }
 
     // 检查是否为预设描述
     val isPresetDesc = if (currentMode == FeatureMode.APP) {
@@ -292,11 +303,23 @@ fun EditFeatureDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = featureName,
-                    onValueChange = { featureName = it },
+                    onValueChange = { if (!isSystemFeature) featureName = it },
                     label = { Text(stringResource(id = R.string.feature_name)) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isSystemFeature,
+                    readOnly = isSystemFeature
                 )
+
+//                // 显示系统特性提示
+//                if (isSystemFeature) {
+//                    Text(
+//                        text = stringResource(id = R.string.system_feature_name_readonly_hint),
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                }
                 Spacer(modifier = Modifier.height(16.dp))
                 // 检查是否为复杂特性
                 val tempFeature = AppFeature(

@@ -289,6 +289,9 @@
     <string name="oplus_feature_rhythm_eyeprotect_2_0_support">[Soft] One-swipe eye-protection 2.0</string>
     <string name="oplus_feature_super_volume_5x">[Soft] Super volume (5×)</string>
 
+    <!-- Edit feature dialog related strings -->
+    <string name="system_feature_name_readonly_hint">System feature configuration, name cannot be edited</string>
+
     <!-- Disclaimer related strings -->
     <string name="disclaimer_title">Disclaimer</string>
     <string name="disclaimer_accept">I have read and agree</string>

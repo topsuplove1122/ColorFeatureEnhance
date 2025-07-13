@@ -205,7 +205,7 @@ object ConfigMergeManager {
      * @param isAppFeature 是否为app-features模式
      * @return true表示存在于系统基线中
      */
-    private suspend fun isFeatureInSystemBaseline(featureName: String, isAppFeature: Boolean): Boolean = withContext(Dispatchers.IO) {
+    suspend fun isFeatureInSystemBaseline(featureName: String, isAppFeature: Boolean): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             if (isAppFeature) {
                 val systemFile = File(configPaths.systemBaselineDir, configPaths.appFeaturesFile)
