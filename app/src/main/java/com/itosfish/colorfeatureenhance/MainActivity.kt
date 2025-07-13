@@ -18,11 +18,13 @@ import com.itosfish.colorfeatureenhance.data.remote.RemoteConfigManager
 import com.itosfish.colorfeatureenhance.data.repository.XmlFeatureRepository
 import com.itosfish.colorfeatureenhance.data.repository.XmlOplusFeatureRepository
 import com.itosfish.colorfeatureenhance.domain.FeatureRepository
+import com.itosfish.colorfeatureenhance.ui.DisclaimerScreen
 import com.itosfish.colorfeatureenhance.ui.FeatureConfigScreen
 import com.itosfish.colorfeatureenhance.ui.theme.ColorFeatureEnhanceTheme
 import com.itosfish.colorfeatureenhance.utils.CLog
 import com.itosfish.colorfeatureenhance.utils.CSU
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
+import com.itosfish.colorfeatureenhance.utils.DisclaimerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,35 +34,67 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         app = this
+
+        // 检查是否需要显示免责声明
+        val disclaimerManager = DisclaimerManager.getInstance(this)
+
         setContent {
             ColorFeatureEnhanceTheme {
-                var currentMode by remember { mutableStateOf(FeatureMode.APP) }
+                var showDisclaimer by remember { mutableStateOf(disclaimerManager.shouldShowDisclaimer()) }
 
-                // 使用新架构的配置路径（从merged_output读取）
-                val configPaths = ConfigUtils.getConfigPaths()
-                val configPath = when (currentMode) {
-                    FeatureMode.APP -> "${configPaths.mergedOutputDir}/${configPaths.appFeaturesFile}"
-                    FeatureMode.OPLUS -> "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
-                }
+                if (showDisclaimer) {
+                    // 显示免责声明
+                    DisclaimerScreen(
+                        onAccepted = {
+                            showDisclaimer = false
+                            CLog.i("MainActivity", "用户已同意免责声明，继续应用启动")
+                            // 用户同意后执行应用初始化
+                            initializeApp()
+                        },
+                        onExit = {
+                            CLog.i("MainActivity", "用户拒绝免责声明，退出应用")
+                            finish()
+                        }
+                    )
+                } else {
+                    // 显示主界面
+                    var currentMode by remember { mutableStateOf(FeatureMode.APP) }
 
-                // 根据模式记忆 repository，切换模式时重建
-                val repository: FeatureRepository = remember(currentMode) {
-                    when (currentMode) {
-                        FeatureMode.APP -> XmlFeatureRepository()
-                        FeatureMode.OPLUS -> XmlOplusFeatureRepository()
+                    // 使用新架构的配置路径（从merged_output读取）
+                    val configPaths = ConfigUtils.getConfigPaths()
+                    val configPath = when (currentMode) {
+                        FeatureMode.APP -> "${configPaths.mergedOutputDir}/${configPaths.appFeaturesFile}"
+                        FeatureMode.OPLUS -> "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
                     }
+
+                    // 根据模式记忆 repository，切换模式时重建
+                    val repository: FeatureRepository = remember(currentMode) {
+                        when (currentMode) {
+                            FeatureMode.APP -> XmlFeatureRepository()
+                            FeatureMode.OPLUS -> XmlOplusFeatureRepository()
+                        }
+                    }
+
+                    FeatureConfigScreen(
+                        configPath = configPath,
+                        currentMode = currentMode,
+                        onModeChange = { currentMode = it },
+                        repository = repository
+                    )
                 }
-
-//                Toast.makeText(this, "配置文件路径: $configPath", Toast.LENGTH_SHORT).show()
-
-                FeatureConfigScreen(
-                    configPath = configPath,
-                    currentMode = currentMode,
-                    onModeChange = { currentMode = it },
-                    repository = repository
-                )
             }
         }
+
+        // 如果用户已经同意过免责声明，直接初始化应用
+        if (!disclaimerManager.shouldShowDisclaimer()) {
+            initializeApp()
+        }
+    }
+
+    /**
+     * 初始化应用（在用户同意免责声明后执行）
+     */
+    private fun initializeApp() {
         CSU.checkRoot()
 
         // 如果检测到 Overlayfs，则提示不支持并跳过安装

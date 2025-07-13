@@ -348,4 +348,12 @@
     <string name="oplus_feature_dynamic_screen_bar_support">[软] 调整亮度条范围（开发者选项）</string>
     <string name="oplus_feature_rhythm_eyeprotect_2_0_support">[软] 单扫护眼</string>
     <string name="oplus_feature_super_volume_5x">[软] 超级音量（5×）</string>
+
+    <!-- Disclaimer related strings -->
+    <string name="disclaimer_title">免责声明</string>
+    <string name="disclaimer_accept">我已阅读并同意</string>
+    <string name="disclaimer_countdown">请仔细阅读免责声明（%d 秒后可继续）</string>
+    <string name="disclaimer_reading_time">请仔细阅读免责声明</string>
+    <string name="disclaimer_exit">退出应用</string>
+    <string name="disclaimer_scroll_hint">请滚动阅读完整内容</string>
 </resources>
