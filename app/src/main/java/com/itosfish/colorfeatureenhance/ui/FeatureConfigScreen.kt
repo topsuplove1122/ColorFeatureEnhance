@@ -8,8 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -195,7 +201,7 @@ fun FeatureConfigScreen(
                         }
                     }
                 )
-                
+
                 // 搜索栏
                 SearchBar(
                     query = searchQuery,
@@ -210,14 +216,16 @@ fun FeatureConfigScreen(
             FloatingActionButton(
                 onClick = { showAddDialog = true },
                 containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = stringResource(id = R.string.add_feature)
                 )
             }
-        }
+        },
+        contentWindowInsets = WindowInsets.statusBars
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.padding(innerPadding),
@@ -367,7 +375,12 @@ fun FeatureConfigScreen(
                 }
             }
             
-            // 删除重复的空列表提示
+            // 添加底部Spacer，确保内容可以滚动到导航栏后面
+            item {
+                Spacer(
+                    Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars)
+                )
+            }
         }
 
         // 添加特性对话框
