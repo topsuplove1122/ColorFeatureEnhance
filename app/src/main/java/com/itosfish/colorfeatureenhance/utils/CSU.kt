@@ -7,6 +7,7 @@ import com.itosfish.colorfeatureenhance.R
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
+import kotlin.system.exitProcess
 
 data class ShellResult(
     val output: String,
@@ -14,6 +15,64 @@ data class ShellResult(
 )
 
 object CSU {
+    const val NONE = -1
+    const val MAGISK = 0
+    const val KSU = 1
+    const val APATCH = 2
+
+    var suType: Int = NONE
+        private set
+
+    /**
+     * 安装模块。
+     *
+     * @param modulePath 模块的路径。
+     * @return 如果安装成功则返回 true，否则返回 false。
+     */
+    fun installModule(
+        modulePath: String
+    ): Boolean {
+        // 构建 Shell 命令：
+        // 根据不同 Root 实现选择不同 ci 命令
+        val command = when (suType) {
+            MAGISK -> {
+                // 使用 Magisk 安装模块的逻辑
+                "magisk --install-module $modulePath"
+            }
+            KSU -> {
+                // 使用 KSU 安装模块的逻辑
+                "ksud module install $modulePath"
+            }
+            APATCH -> {
+                // 使用 APatch 安装模块的逻辑
+                "apd module install $modulePath"
+            }
+            else -> return false
+        }
+
+        // 使用 runWithSu 执行命令并获取返回值
+        // 根据返回值判断模块安装是否成功
+        runWithSu(command).let { result ->
+            return result.exitCode == 0
+        }
+    }
+
+    /**
+     * 判断指定命令是否存在。
+     *
+     * @param command 要检查的命令。
+     * @return 如果文件存在则返回 true，否则返回 false。
+     */
+    fun which(command: String): Boolean {
+        // 构建 Shell 命令：
+        // 使用 which 来检查命令是否存在
+        val command = "which $command"
+
+        // 使用 runWithSu 执行命令并获取返回值
+        // 根据返回值判断命令是否存在
+        return runWithSu(command).exitCode == 0
+    }
+
     /**
      * 判断指定文件是否存在。
      *
@@ -41,16 +100,23 @@ object CSU {
         return runWithSu(command).exitCode == 0
     }
 
-    /**
-     * 判断是否使用 Overlayfs（通过检测 /data/adb/ksu/modules.img 是否存在）
-     */
-    fun isOverlayfs(): Boolean {
-        return fileExists("/data/adb/ksu/modules.img")
-    }
-
     // 检查是否具有root权限
     fun isRooted(): Boolean {
-        return checkRootMethod()
+        return if (checkRootMethod()) {
+            val magisk = which("magisk")
+            val ksu = which("ksud")
+            val ap = which("apd")
+            if (magisk && ksu || magisk && ap || ksu && ap) {
+                exitProcess(255)
+            }
+            suType = when {
+                magisk -> MAGISK
+                ksu -> KSU
+                ap -> APATCH
+                else -> NONE
+            }
+            true
+        } else false
     }
 
     private fun checkRootMethod(): Boolean {
