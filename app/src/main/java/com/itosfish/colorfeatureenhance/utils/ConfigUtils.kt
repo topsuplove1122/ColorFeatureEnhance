@@ -7,14 +7,13 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 
 /**
  * 新架构的配置管理工具类
  * 负责配置目录初始化、模块安装等基础功能
  */
 object ConfigUtils {
+    const val LATEST_MODULE_VERSION = 19
 
     private const val TAG = "ConfigUtils"
 
@@ -94,7 +93,7 @@ object ConfigUtils {
      */
     fun hasSystemBaseline(): Boolean {
         return File(systemBaselineDir, APP_FEATURES_FILE).exists() &&
-               File(systemBaselineDir, OPLUS_FEATURES_FILE).exists()
+                File(systemBaselineDir, OPLUS_FEATURES_FILE).exists()
     }
 
     /**
@@ -102,7 +101,7 @@ object ConfigUtils {
      */
     fun hasMergedOutput(): Boolean {
         return File(mergedOutputDir, APP_FEATURES_FILE).exists() &&
-               File(mergedOutputDir, OPLUS_FEATURES_FILE).exists()
+                File(mergedOutputDir, OPLUS_FEATURES_FILE).exists()
     }
 
     /**
@@ -133,9 +132,8 @@ object ConfigUtils {
      * 从 assets 解压模块到指定目录
      */
     fun installModule(): Boolean {
-        try {
+        return try {
             Log.i(TAG, "开始安装模块")
-            val destDirPath = "/data/adb/modules/ColorOSFeaturesEnhance"
 
             // 临时工作目录
             val tempDir = File(app.cacheDir, "moduleTemp").apply {
@@ -150,33 +148,16 @@ object ConfigUtils {
                 return false
             }
 
-            // 安装到目标目录
-            val extractedDir = File(tempDir, "mod")
-            if (!extractedDir.exists()) {
-                Log.e(TAG, "解压后的模块目录不存在")
-                return false
-            }
-
-            val shellCmd = StringBuilder().apply {
-                append("mkdir -p \"$destDirPath\" && ")
-                append("cp -r \"${extractedDir.absolutePath}/.\" \"$destDirPath/\" && ")
-                append("chmod -R 755 \"$destDirPath\"")
-            }
-
-            CSU.runWithSu(shellCmd.toString())
-
-            val success = CSU.fileExists("$destDirPath/module.prop")
-            if (success) {
+            if (CSU.installModule(tempZip.absolutePath)) {
                 Log.i(TAG, "模块安装成功")
+                true
             } else {
                 Log.e(TAG, "模块安装失败")
+                false
             }
-
-            return success
-
         } catch (e: Exception) {
             Log.e(TAG, "模块安装过程中发生异常", e)
-            return false
+            false
         }
     }
 
@@ -190,62 +171,65 @@ object ConfigUtils {
                     input.copyTo(output)
                 }
             }
-            unzip(tempZip, tempZip.parentFile!!)
+            true
         } catch (e: Exception) {
             Log.e(TAG, "提取模块资源失败", e)
             false
         }
     }
 
-    /**
-     * 解压 zip 文件到指定目录
-     */
-    private fun unzip(zipFile: File, destDir: File): Boolean {
-        return try {
-            ZipInputStream(zipFile.inputStream()).use { zis ->
-                var entry: ZipEntry?
-                while (zis.nextEntry.also { entry = it } != null) {
-                    val newFile = File(destDir, entry!!.name)
-                    if (entry!!.isDirectory) {
-                        newFile.mkdirs()
-                    } else {
-                        newFile.parentFile?.mkdirs()
-                        FileOutputStream(newFile).use { fos ->
-                            zis.copyTo(fos)
+    /*
+        /**
+         * 解压 zip 文件到指定目录
+         */
+        private fun unzip(zipFile: File, destDir: File): Boolean {
+            return try {
+                ZipInputStream(zipFile.inputStream()).use { zis ->
+                    var entry: ZipEntry?
+                    while (zis.nextEntry.also { entry = it } != null) {
+                        val newFile = File(destDir, entry!!.name)
+                        if (entry!!.isDirectory) {
+                            newFile.mkdirs()
+                        } else {
+                            newFile.parentFile?.mkdirs()
+                            FileOutputStream(newFile).use { fos ->
+                                zis.copyTo(fos)
+                            }
                         }
                     }
                 }
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
             }
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
         }
-    }
+    */
 
     /**
      * 检查模块是否已安装
      */
-    fun isModuleInstalled(): Boolean {
-        return CSU.dirExists("/data/adb/modules/ColorOSFeaturesEnhance") &&
-               CSU.fileExists("/data/adb/modules/ColorOSFeaturesEnhance/module.prop")
+    fun shouldInstallModule(): Boolean {
+        return moduleVersion < LATEST_MODULE_VERSION
     }
 
     /**
      * 获取模块版本信息
      */
-    fun getModuleVersion(): String? {
-        val modulePropsPath = "/data/adb/modules/ColorOSFeaturesEnhance/module.prop"
-        if (!CSU.fileExists(modulePropsPath)) return null
+    val moduleVersion: Int
+        get() {
+            val modulePropsPath = "/data/adb/modules/ColorOSFeaturesEnhance/module.prop"
+            if (!CSU.fileExists(modulePropsPath)) return -1
 
-        return try {
-            val output = CSU.runWithSu("grep '^version=' \"$modulePropsPath\" | cut -d'=' -f2").output
-            output.trim().takeIf { it.isNotEmpty() }
-        } catch (e: Exception) {
-            CLog.e(TAG, "获取模块版本失败", e)
-            null
+            return try {
+                val output =
+                    CSU.runWithSu("grep '^versionCode=' \"$modulePropsPath\" | cut -d'=' -f2").output
+                output.trim().takeIf { it.isNotEmpty() }?.toInt() ?: -1
+            } catch (e: Exception) {
+                CLog.e(TAG, "获取模块版本失败", e)
+                -1
+            }
         }
-    }
 
     /**
      * 将merged_output的配置复制到模块挂载目录
@@ -258,7 +242,7 @@ object ConfigUtils {
             val configPaths = getConfigPaths()
             CLog.d(TAG, "配置路径: mergedOutputDir=${configPaths.mergedOutputDir}")
 
-            val moduleBase = "/data/adb/modules/ColorOSFeaturesEnhance"
+            val moduleBase = "/data/adb/cos_feat_e"
             val moduleDirs = listOf(
                 "$moduleBase/my_product/etc/extension",
                 "$moduleBase/anymount/my_product/etc/extension"
@@ -287,7 +271,8 @@ object ConfigUtils {
             }
 
             // 复制oplus-feature.xml
-            val oplusFeaturesSource = "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
+            val oplusFeaturesSource =
+                "${configPaths.mergedOutputDir}/${configPaths.oplusFeaturesFile}"
             CLog.d(TAG, "检查源文件: $oplusFeaturesSource")
             if (File(oplusFeaturesSource).exists()) {
                 CLog.i(TAG, "源文件存在，准备复制 oplus-feature.xml")
@@ -323,7 +308,10 @@ object ConfigUtils {
             moduleDirs.forEach { dir ->
                 val appExists = CSU.fileExists("$dir/${configPaths.appFeaturesFile}")
                 val oplusExists = CSU.fileExists("$dir/${configPaths.oplusFeaturesFile}")
-                CLog.d(TAG, "目录 $dir: app-features存在=$appExists, oplus-feature存在=$oplusExists")
+                CLog.d(
+                    TAG,
+                    "目录 $dir: app-features存在=$appExists, oplus-feature存在=$oplusExists"
+                )
                 if (appExists || oplusExists) {
                     successCount++
                 }

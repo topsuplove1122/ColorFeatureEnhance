@@ -97,18 +97,8 @@ class MainActivity : ComponentActivity() {
     private fun initializeApp() {
         CSU.checkRoot()
 
-        // 如果检测到 Overlayfs，则提示不支持并跳过安装
-        if (CSU.isOverlayfs()) {
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.ksu_not_supported_title)
-                .setMessage(R.string.ksu_not_supported_message)
-                .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
-                .show()
-            return
-        }
-
         // 检查并安装模块
-        if (!ConfigUtils.isModuleInstalled()) {
+        if (ConfigUtils.shouldInstallModule()) {
             val installSuccess = ConfigUtils.installModule()
             if (installSuccess) {
                 Toast.makeText(
