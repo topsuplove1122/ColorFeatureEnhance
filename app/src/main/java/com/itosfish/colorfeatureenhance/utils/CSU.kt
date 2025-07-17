@@ -107,12 +107,22 @@ object CSU {
             val ksu = which("ksud")
             val ap = which("apd")
             if (magisk && ksu || magisk && ap || ksu && ap) {
+                CLog.e("CSU", "不支持多个 Root 实现。 {Magisk: $magisk, KSU: $ksu, APatch: $ap}")
                 exitProcess(255)
             }
             suType = when {
-                magisk -> MAGISK
-                ksu -> KSU
-                ap -> APATCH
+                magisk -> {
+                    CLog.i("CSU", "检测到 Magisk Root 实现")
+                    MAGISK
+                }
+                ksu -> {
+                    CLog.i("CSU", "检测到 KernelSU Root 实现")
+                    KSU
+                }
+                ap -> {
+                    CLog.i("CSU", "检测到 APatch Root 实现")
+                    APATCH
+                }
                 else -> NONE
             }
             true
