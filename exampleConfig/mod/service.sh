@@ -8,7 +8,7 @@ APP_DATA_DIR="/data/media/0/Android/data/com.itosfish.colorfeatureenhance/files/
 SYSTEM_BASELINE_DIR="$APP_DATA_DIR/system_baseline"
 
 # 模块临时目录
-MODULE_TEMP_DIR="$MODDIR/temp_configs"
+MODULE_TEMP_DIR="/data/adb/cos_feat_e/temp_configs"
 
 # 配置文件名
 APP_FEATURES_FILE="com.oplus.app-features.xml"
