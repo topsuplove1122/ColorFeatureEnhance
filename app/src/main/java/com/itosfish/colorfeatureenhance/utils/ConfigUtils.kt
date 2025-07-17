@@ -23,7 +23,7 @@ object ConfigUtils {
     private const val METADATA_FILE = "metadata.json"
 
     // 配置目录路径
-    private val baseDir = app.getExternalFilesDir(null)?.absolutePath ?: ""
+    private val baseDir = app.getExternalFilesDir(null)?.absolutePath!!
     private val configsDir = "$baseDir/configs"
     private val systemBaselineDir = "$configsDir/system_baseline"
     private val userPatchesDir = "$configsDir/user_patches"
@@ -47,11 +47,8 @@ object ConfigUtils {
             Log.i(TAG, "开始初始化配置管理系统")
 
             // 创建目录结构
-            val success = createDirectoryStructure()
-            if (!success) {
-                Log.e(TAG, "创建目录结构失败")
-                return false
-            }
+            Log.e(TAG, "创建目录结构")
+            createDirectoryStructure()
 
             // 初始化元数据文件（如果不存在）
             initializeMetadata()
@@ -68,23 +65,10 @@ object ConfigUtils {
     /**
      * 创建新架构的目录结构
      */
-    private fun createDirectoryStructure(): Boolean {
-        val mediaDirBase = baseDir.replace("/storage/emulated/0", "/data/media/0")
-        val mediaConfigsDir = "$mediaDirBase/configs"
-
-        val shellCmd = StringBuilder().apply {
-            append("mkdir -p \"$mediaConfigsDir/system_baseline\" && ")
-            append("mkdir -p \"$mediaConfigsDir/user_patches\" && ")
-            append("mkdir -p \"$mediaConfigsDir/merged_output\" && ")
-            append("chmod -R 777 \"$mediaDirBase\"")
-        }
-
-        CSU.runWithSu(shellCmd.toString())
-
-        // 验证目录是否创建成功
-        return CSU.dirExists("$mediaConfigsDir/system_baseline") &&
-                CSU.dirExists("$mediaConfigsDir/user_patches") &&
-                CSU.dirExists("$mediaConfigsDir/merged_output")
+    private fun createDirectoryStructure() {
+        File(systemBaselineDir).mkdirs()
+        File(userPatchesDir).mkdirs()
+        File(mergedOutputDir).mkdirs()
     }
 
     /**
