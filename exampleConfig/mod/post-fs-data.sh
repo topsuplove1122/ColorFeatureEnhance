@@ -44,11 +44,6 @@ copy_system_to_temp() {
         return 1
     fi
 
-    log_debug "系统配置目录内容:"
-    ls -la "$SYSTEM_CONFIG_DIR" 2>/dev/null | while read line; do
-        log_debug "  $line"
-    done
-
     local copied_count=0
 
     # 复制 app-features.xml
@@ -125,17 +120,17 @@ ensure_default_configs
 
 # 3. 执行挂载逻辑
 log_info "开始挂载配置文件"
-# mount --bind $MODDIR/my_product/etc/$APP_FEATURES_FILE /my_product/etc/$APP_FEATURES_FILE
-# mount --bind $MODDIR/my_product/etc/$OPLUS_FEATURES_FILE /my_product/etc/$OPLUS_FEATURES_FILE
+mount --bind $MODULE_CONFIG_DIR/$APP_FEATURES_FILE $SYSTEM_CONFIG_DIR/$APP_FEATURES_FILE
+mount --bind $MODULE_CONFIG_DIR/$OPLUS_FEATURES_FILE $SYSTEM_CONFIG_DIR/$OPLUS_FEATURES_FILE
 
 # 挂载any目录下的其他文件
-TMPDIR=/data/adb/cos_feat_e/anymount
-if [ -d "$TMPDIR" ]; then
-    for i in `/bin/find $TMPDIR -type f -printf "%P "`; do
-        /bin/mount /$TMPDIR/$i /$i
-        log_info $i
-        restorecon /$i
-    done
-fi
+# TMPDIR=${0%/*}/anymount
+# if [ -d "$TMPDIR" ]; then
+    # for i in `/bin/find $TMPDIR -type f -printf "%P "`; do
+        # mount /$TMPDIR/$i /$i
+        # log_info $i
+        # restorecon /$i
+    # done
+# fi
 
 log_info "=== post-fs-data阶段完成 ==="
