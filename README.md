@@ -4,8 +4,6 @@
 
 > ⚠️ 本应用 **需要 Root 权限** 才能正常读写系统配置文件，请确保目标设备已 Root。
 
----
-
 ## ✨ 主要功能
 
 ### 🎯 核心特性
@@ -28,8 +26,6 @@
 - **数据持久化**：用户自定义描述映射持久保存
 - **模块集成**：内置 Magisk 模块，支持系统级配置应用
 - **示例配置**：仓库 `exampleConfig/` 提供参考 XML 和模块文件
-
----
 
 ## 📂 项目架构
 
@@ -62,13 +58,11 @@ com.itosfish.colorfeatureenhance/
 └── MainActivity.kt            # 应用入口
 ```
 
----
-
 ## 🏗️ 技术架构
 
 ### 分层架构
 | Layer | 关键职责 | 代表文件/目录 |
-|-------|-----------|----------------|
+|-|--|-|
 | **UI Layer** | Compose 渲染、用户交互、状态管理 | `ui/` `MainActivity.kt` |
 | **Domain Layer** | 业务规则、接口定义 | `domain/FeatureRepository.kt` |
 | **Data Layer** | 数据获取、XML 解析与持久化 | `data/` `config/` |
@@ -92,8 +86,6 @@ com.itosfish.colorfeatureenhance/
 - **智能合并**：自动检测配置变更，仅在必要时执行合并操作
 - **多级回退**：支持系统基线 → 直接系统路径的多级配置源回退
 - **日志追踪**：完整的配置管理操作日志，便于问题排查
-
----
 
 ## 🚀 编译与运行
 
@@ -128,8 +120,6 @@ com.itosfish.colorfeatureenhance/
 - **示例配置**：使用 `exampleConfig/` 中的示例文件快速体验
 - **手动导入**：将配置文件放置到应用的外部存储目录
 
----
-
 ## 🛠️ 技术栈
 
 ### 核心技术
@@ -159,8 +149,6 @@ com.itosfish.colorfeatureenhance/
 - **代码混淆**: ProGuard + R8 优化
 - **多架构支持**: ARM64-v8a
 
----
-
 ## 🔧 使用说明
 
 ### 基本操作
@@ -175,8 +163,6 @@ com.itosfish.colorfeatureenhance/
 - **OTA 兼容**：系统更新后会自动重新合并配置
 - **批量操作**：支持批量启用/禁用相关功能
 - **配置备份**：用户修改以补丁形式保存，便于恢复
-
----
 
 ## 🤝 贡献指南
 
@@ -193,13 +179,14 @@ com.itosfish.colorfeatureenhance/
 - 确保有已 Root 的且搭载基于 ColorOS 14/15 的系统的设备用于测试
 - 熟悉 Magisk 模块开发（如需修改模块部分）
 
----
-
 ## 🙏 致谢
 
 - [Shizuku](https://github.com/RikkaApps/Shizuku) - 提供 关于弹窗 布局文件
 
----
+
+
+## Activity
+![Alt](https://repobeats.axiom.co/api/embed/5c0a87c2274bce91d5b9840f6a3c2bb791fb5ae9.svg "Repobeats analytics image")
 
 ## Star History
 
