@@ -319,13 +319,6 @@ object ConfigUtils {
     */
 
     /**
-     * 检查模块是否已安装
-     */
-    fun shouldInstallModule(): Boolean {
-        return moduleVersion < LATEST_MODULE_VERSION
-    }
-
-    /**
      * 获取模块版本信息
      */
     val moduleVersion: Int

@@ -34,7 +34,11 @@ import com.itosfish.colorfeatureenhance.FeatureMode
 import com.itosfish.colorfeatureenhance.R
 import com.itosfish.colorfeatureenhance.utils.CLog
 import com.itosfish.colorfeatureenhance.utils.CSU
+import com.itosfish.colorfeatureenhance.utils.ModuleAutoUpdater
 import com.itosfish.colorfeatureenhance.utils.showAboutDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -106,6 +110,20 @@ fun ColorOSTopAppBar(
                     shape = RoundedCornerShape(8.dp), // 增大圆角
                     modifier = Modifier.width(menuWidth) // 动态菜单宽度：半屏+10dp
                 ) {
+                    // 强制更新模块选项
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(R.string.update_modules),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        onClick = {
+                            showMoreMenu = false
+                            forceUpdateModule(context as Activity)
+                        }
+                    )
+
                     // 导出日志选项
                     DropdownMenuItem(
                         text = {
@@ -138,6 +156,38 @@ fun ColorOSTopAppBar(
         },
         colors = TopAppBarDefaults.topAppBarColors()
     )
+}
+
+/**
+ * 强制更新模块功能
+ */
+private fun forceUpdateModule(activity: Activity) {
+    CoroutineScope(Dispatchers.Main).launch {
+        try {
+            Toast.makeText(activity, "正在更新模块，请稍候...", Toast.LENGTH_SHORT).show()
+            CLog.i("TopAppBar", "用户手动触发模块更新")
+
+            val updateResult = ModuleAutoUpdater.forceUpdateModule()
+
+            when (updateResult) {
+                is ModuleAutoUpdater.UpdateResult.Success -> {
+                    Toast.makeText(activity, "模块更新成功！", Toast.LENGTH_SHORT).show()
+                    CLog.i("TopAppBar", "手动模块更新成功")
+                }
+                is ModuleAutoUpdater.UpdateResult.Failed -> {
+                    Toast.makeText(activity, "模块更新失败: ${updateResult.reason}", Toast.LENGTH_LONG).show()
+                    CLog.e("TopAppBar", "手动模块更新失败: ${updateResult.reason}")
+                }
+                else -> {
+                    Toast.makeText(activity, "模块更新状态未知", Toast.LENGTH_SHORT).show()
+                    CLog.w("TopAppBar", "手动模块更新状态未知")
+                }
+            }
+        } catch (e: Exception) {
+            Toast.makeText(activity, "模块更新异常: ${e.message}", Toast.LENGTH_LONG).show()
+            CLog.e("TopAppBar", "手动模块更新异常", e)
+        }
+    }
 }
 
 /**

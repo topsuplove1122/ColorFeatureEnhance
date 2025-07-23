@@ -132,7 +132,7 @@ com.itosfish.colorfeatureenhance/
 ### Android 组件
 - **最低 SDK**: Android 14 (API 34)
 - **目标 SDK**: Android 16 (API 36)
-- **版本号**: v0.54 (Build 20250712)
+- **版本号**: v0.83 (Build 25072302)
 - **Compose BOM**: 2025.06.01
 - **Navigation**: Compose Navigation 2.9.1
 - **生命周期**: Lifecycle Runtime KTX 2.9.1

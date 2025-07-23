@@ -84,6 +84,14 @@
     <string name="module_install_success">Module installed successfully!</string>
     <string name="module_install_fail_title">Module installation failed!</string>
     <string name="module_install_fail_message">Please check if root permission is available, otherwise the app cannot work.</string>
+
+    <!-- Module Auto Update -->
+    <string name="module_auto_update_first_launch">First launch, installing module...</string>
+    <string name="module_auto_update_app_updated">App updated %1$s → %2$s, syncing module...</string>
+    <string name="module_auto_update_app_downgraded">App downgraded %1$s → %2$s, reinstalling module...</string>
+    <string name="module_auto_update_module_outdated">App version changed, syncing module...</string>
+    <string name="module_auto_update_success">Module synced with app version (App version: %1$s)</string>
+    <string name="module_auto_update_failed">Module sync failed, please reinstall manually</string>
     <string name="common_ok">OK</string>
     <string name="ksu_not_supported_title">Unsupported KernelSU version</string>
     <string name="ksu_not_supported_message">Original KernelSU detected. This module supports only the KernelSU branch with Magisk Mount support. Please switch and try again.</string>
@@ -299,4 +307,5 @@
     <string name="disclaimer_reading_time">Please read the disclaimer carefully</string>
     <string name="disclaimer_exit">Exit App</string>
     <string name="disclaimer_scroll_hint">Please scroll to read the complete content</string>
+    <string name="update_modules">force_update_modules</string>
 </resources>

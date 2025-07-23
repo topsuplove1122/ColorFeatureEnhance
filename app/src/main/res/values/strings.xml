@@ -83,6 +83,14 @@
     <string name="module_install_success">附加模块安装成功！</string>
     <string name="module_install_fail_title">附加模块安装失败！</string>
     <string name="module_install_fail_message">请检查是否有 Root 权限，软件无法正常使用</string>
+
+    <!-- 模块自动更新 -->
+    <string name="module_auto_update_first_launch">首次启动，正在安装模块...</string>
+    <string name="module_auto_update_app_updated">应用已更新 %1$s → %2$s，正在同步更新模块...</string>
+    <string name="module_auto_update_app_downgraded">应用已降级 %1$s → %2$s，正在重新安装模块...</string>
+    <string name="module_auto_update_module_outdated">应用版本已变化，正在同步更新模块...</string>
+    <string name="module_auto_update_success">模块已同步更新 (应用版本: %1$s)</string>
+    <string name="module_auto_update_failed">模块同步更新失败，请手动重新安装</string>
     <string name="common_ok">确定</string>
     <string name="ksu_not_supported_title">不支持的 KernelSU 版本</string>
     <string name="ksu_not_supported_message">检测到设备正在使用原版 KernelSU。当前模块仅支持 Magisk Mount 版本的 KernelSU，请更换后再尝试。</string>
@@ -359,4 +367,5 @@
     <string name="disclaimer_reading_time">请仔细阅读免责声明</string>
     <string name="disclaimer_exit">退出应用</string>
     <string name="disclaimer_scroll_hint">请滚动阅读完整内容</string>
+    <string name="update_modules">强制更新模块</string>
 </resources>

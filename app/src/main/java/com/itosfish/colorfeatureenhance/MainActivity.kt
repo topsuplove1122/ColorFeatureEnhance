@@ -25,6 +25,8 @@ import com.itosfish.colorfeatureenhance.utils.CLog
 import com.itosfish.colorfeatureenhance.utils.CSU
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
 import com.itosfish.colorfeatureenhance.utils.DisclaimerManager
+import com.itosfish.colorfeatureenhance.utils.ModuleAutoUpdater
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -97,23 +99,31 @@ class MainActivity : ComponentActivity() {
     private fun initializeApp() {
         CSU.checkRoot()
 
-        // 检查并安装模块
-        if (ConfigUtils.shouldInstallModule()) {
-            val installSuccess = ConfigUtils.installModule()
-            if (installSuccess) {
-                Toast.makeText(
-                    app,
-                    app.getString(R.string.module_install_success),
-                    Toast.LENGTH_SHORT
-                ).show()
-                CLog.i("MainActivity", "模块安装成功")
-            } else {
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.module_install_fail_title)
-                    .setMessage(R.string.module_install_fail_message)
-                    .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
-                    .show()
-                CLog.e("MainActivity", "模块安装失败")
+        // 使用新的模块自动更新系统
+        lifecycleScope.launch {
+            try {
+                val updateResult = ModuleAutoUpdater.checkAndUpdateModule(showUserNotification = true)
+
+                when (updateResult) {
+                    is ModuleAutoUpdater.UpdateResult.Success -> {
+                        CLog.i("MainActivity", "模块自动更新成功")
+                    }
+                    is ModuleAutoUpdater.UpdateResult.NoUpdateNeeded -> {
+                        CLog.d("MainActivity", "模块无需更新")
+                    }
+                    is ModuleAutoUpdater.UpdateResult.Failed -> {
+                        CLog.e("MainActivity", "模块自动更新失败: ${updateResult.reason}")
+
+                        // 显示失败对话框
+                        MaterialAlertDialogBuilder(this@MainActivity)
+                            .setTitle(R.string.module_install_fail_title)
+                            .setMessage(updateResult.reason)
+                            .setPositiveButton(R.string.common_ok) { dialog, _ -> dialog.dismiss() }
+                            .show()
+                    }
+                }
+            } catch (e: Exception) {
+                CLog.e("MainActivity", "模块自动更新过程中发生异常", e)
             }
         }
 
