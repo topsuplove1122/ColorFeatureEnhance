@@ -170,7 +170,7 @@
     <string name="oplus_feature_radio_comm_scene_switch_enable">[软] 通信场景智能切换</string>
     <string name="oplus_feature_radio_nwpower_linkpower">[软] 网络链路功耗管理</string>
     <string name="oplus_feature_radio_sido_rat_enhance_nr_backoff_opt">[软] 5G弱信号回落4G</string>
-    <string name="oplus_feature_radio_sido_rat_enhance_lte_backoff_opt">[软] 4G若信号回落3G/2G</string>
+    <string name="oplus_feature_radio_sido_rat_enhance_lte_backoff_opt">[软] 4G弱信号回落3G/2G</string>
     <string name="oplus_feature_radio_sido_inter_cell_coop_dual_cell_strong_sig_opt">[软] SIDO双小区强信号协同</string>
     <string name="oplus_feature_radio_sido_inter_cell_coop_lte_rej_15_opt">[软] SIDO拒绝码15处理优化</string>
     <string name="oplus_feature_radio_sido_gw_lte_pingpong_lte_poor_signal_opt">[软] 防止弱信号基站快速切换</string>
