@@ -11,8 +11,12 @@ import java.io.File
 import android.util.Log
 import com.itosfish.colorfeatureenhance.config.ConfigMergeManager
 import com.itosfish.colorfeatureenhance.utils.ConfigUtils
+import com.itosfish.colorfeatureenhance.utils.CLog
 
 class XmlFeatureRepository : FeatureRepository {
+    companion object {
+        private const val TAG = "XmlFeatureRepository"
+    }
 
     /**
      * 加载 app-feature 列表。
@@ -22,17 +26,41 @@ class XmlFeatureRepository : FeatureRepository {
     override suspend fun loadFeatures(configPath: String): List<AppFeature> = withContext(Dispatchers.IO) {
         val configPaths = ConfigUtils.getConfigPaths()
 
-        // 1. 已合并后的配置（不包含被 REMOVE 的特性）
+        CLog.d(TAG, "开始加载特性配置")
+        CLog.d(TAG, "配置文件路径: $configPath")
+
+        // 1. 尝试从合并后的配置读取，如果失败则从系统基线读取
         val mergedFile = File(configPath)
+        CLog.d(TAG, "合并配置文件存在: ${mergedFile.exists()}")
+        if (mergedFile.exists()) {
+            CLog.d(TAG, "合并配置文件大小: ${mergedFile.length()} 字节")
+        }
+
         val mergedFeatures = if (mergedFile.exists()) {
-            parseXmlFeatures(mergedFile)
-        } else emptyList()
+            val features = parseXmlFeatures(mergedFile)
+            CLog.d(TAG, "从合并配置加载到 ${features.size} 个特性")
+            features
+        } else {
+            CLog.w(TAG, "合并配置文件不存在，将直接使用系统基线配置: $configPath")
+            emptyList()
+        }
 
         // 2. 系统基线配置，用于恢复被删除特性的原始信息
         val systemBaselineFile = File(configPaths.systemBaselineDir, configPaths.appFeaturesFile)
+        CLog.d(TAG, "系统基线配置文件: ${systemBaselineFile.absolutePath}")
+        CLog.d(TAG, "系统基线配置文件存在: ${systemBaselineFile.exists()}")
+        if (systemBaselineFile.exists()) {
+            CLog.d(TAG, "系统基线配置文件大小: ${systemBaselineFile.length()} 字节")
+        }
+
         val systemBaselineFeatures = if (systemBaselineFile.exists()) {
-            parseXmlFeatures(systemBaselineFile)
-        } else emptyList()
+            val features = parseXmlFeatures(systemBaselineFile)
+            CLog.d(TAG, "从系统基线配置加载到 ${features.size} 个特性")
+            features
+        } else {
+            CLog.w(TAG, "系统基线配置文件不存在")
+            emptyList()
+        }
 
         // 3. 用户补丁，检查 REMOVE 项
         val patchFile = File(configPaths.userPatchesDir, "app-features.patch.json")
@@ -57,7 +85,7 @@ class XmlFeatureRepository : FeatureRepository {
         }
 
         // 去重：同名特性仅保留一项，启用状态以至少一个 true 为准
-        return@withContext finalFeatures
+        val result = finalFeatures
             .groupBy { it.name }
             .map { (_, list) ->
                 val first = list.first()
@@ -65,6 +93,10 @@ class XmlFeatureRepository : FeatureRepository {
                 val subNodes = list.flatMap { it.subNodes }.distinctBy { it.args }
                 AppFeature(first.name, enabled, first.args, subNodes)
             }
+
+        CLog.i(TAG, "特性加载完成: 合并特性=${mergedFeatures.size}, 系统基线特性=${systemBaselineFeatures.size}, 删除补丁=${removedPatches.size}, 最终特性=${result.size}")
+
+        return@withContext result
     }
 
     override suspend fun saveFeatures(configPath: String, features: List<AppFeature>): Unit = withContext(Dispatchers.IO) {

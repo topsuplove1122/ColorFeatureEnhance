@@ -2,9 +2,6 @@ package com.itosfish.colorfeatureenhance.utils
 
 import android.util.Log
 import com.itosfish.colorfeatureenhance.MainActivity.Companion.app
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
 
@@ -20,7 +17,6 @@ object ConfigUtils {
     // 配置文件名常量
     private const val APP_FEATURES_FILE = "com.oplus.app-features.xml"
     private const val OPLUS_FEATURES_FILE = "com.oplus.oplus-feature.xml"
-    private const val METADATA_FILE = "metadata.json"
 
     // 配置目录路径
     private val baseDir = app.getExternalFilesDir(null)?.absolutePath!!
@@ -29,13 +25,7 @@ object ConfigUtils {
     private val userPatchesDir = "$configsDir/user_patches"
     private val mergedOutputDir = "$configsDir/merged_output"
 
-    @Serializable
-    data class ConfigMetadata(
-        val systemVersion: String,
-        val lastUpdate: Long,
-        val appFeaturesHash: String? = null,
-        val oplusFeaturesHash: String? = null
-    )
+
 
     /**
      * 初始化新架构的配置管理系统
@@ -44,20 +34,42 @@ object ConfigUtils {
      */
     fun initializeConfigSystem(): Boolean {
         try {
-            Log.i(TAG, "开始初始化配置管理系统")
+            CLog.i(TAG, "开始初始化配置管理系统")
+            CLog.d(TAG, "基础目录: $baseDir")
+            CLog.d(TAG, "配置目录: $configsDir")
+
+            // 检查基础目录是否可访问
+            val baseFile = File(baseDir)
+            if (!baseFile.exists()) {
+                CLog.e(TAG, "基础目录不存在: $baseDir")
+                return false
+            }
+
+            CLog.d(TAG, "基础目录检查: 存在=${baseFile.exists()}, 是目录=${baseFile.isDirectory()}, 可写=${baseFile.canWrite()}")
 
             // 创建目录结构
-            Log.e(TAG, "创建目录结构")
+            CLog.d(TAG, "创建目录结构...")
             createDirectoryStructure()
 
-            // 初始化元数据文件（如果不存在）
-            initializeMetadata()
+            // 确保权限正确
+            CLog.d(TAG, "检查并修复权限...")
+            val permissionFixed = ensureProperPermissions()
+            if (!permissionFixed) {
+                CLog.w(TAG, "权限修复失败，但继续执行")
+            }
 
-            Log.i(TAG, "配置管理系统初始化完成")
-            return true
+            // 验证目录创建结果
+            val success = verifyDirectoryStructure()
+            if (success) {
+                CLog.i(TAG, "配置管理系统初始化完成")
+            } else {
+                CLog.e(TAG, "目录结构验证失败")
+            }
+
+            return success
 
         } catch (e: Exception) {
-            Log.e(TAG, "配置系统初始化失败", e)
+            CLog.e(TAG, "配置系统初始化失败", e)
             return false
         }
     }
@@ -66,25 +78,125 @@ object ConfigUtils {
      * 创建新架构的目录结构
      */
     private fun createDirectoryStructure() {
-        File(systemBaselineDir).mkdirs()
-        File(userPatchesDir).mkdirs()
-        File(mergedOutputDir).mkdirs()
+        try {
+            val directories = listOf(
+                systemBaselineDir to "system_baseline",
+                userPatchesDir to "user_patches",
+                mergedOutputDir to "merged_output"
+            )
+
+            directories.forEach { (path, name) ->
+                val dir = File(path)
+                if (!dir.exists()) {
+                    val success = dir.mkdirs()
+                    if (success) {
+                        CLog.d(TAG, "成功创建目录: $name ($path)")
+                    } else {
+                        CLog.w(TAG, "创建目录失败: $name ($path)")
+                    }
+                } else {
+                    CLog.d(TAG, "目录已存在: $name ($path)")
+                }
+            }
+        } catch (e: Exception) {
+            CLog.e(TAG, "创建目录结构时发生异常", e)
+            throw e // 重新抛出异常，因为目录创建失败是严重问题
+        }
+    }
+
+
+
+    /**
+     * 验证目录结构是否正确创建
+     */
+    private fun verifyDirectoryStructure(): Boolean {
+        val directories = listOf(
+            systemBaselineDir to "system_baseline",
+            userPatchesDir to "user_patches",
+            mergedOutputDir to "merged_output"
+        )
+
+        var allSuccess = true
+        directories.forEach { (path, name) ->
+            val dir = File(path)
+            val exists = dir.exists()
+            val isDirectory = dir.isDirectory()
+
+            CLog.d(TAG, "目录检查: $name - 存在:$exists, 是目录:$isDirectory")
+
+            if (exists && isDirectory) {
+                CLog.d(TAG, "目录验证成功: $name")
+            } else {
+                CLog.e(TAG, "目录验证失败: $name ($path) - 存在:$exists, 是目录:$isDirectory")
+                allSuccess = false
+            }
+        }
+
+        return allSuccess
     }
 
     /**
-     * 初始化元数据文件
+     * 确保配置目录有正确的权限
      */
-    private fun initializeMetadata() {
-        val metadataFile = File(systemBaselineDir, METADATA_FILE)
-        if (!metadataFile.exists()) {
-            val metadata = ConfigMetadata(
-                systemVersion = "unknown",
-                lastUpdate = System.currentTimeMillis()
-            )
+    private fun ensureProperPermissions(): Boolean {
+        return try {
+            val configDir = File(configsDir)
+            if (!configDir.exists()) {
+                CLog.d(TAG, "配置目录不存在，无需修复权限")
+                return true
+            }
 
-            val json = Json { prettyPrint = true }
-            metadataFile.writeText(json.encodeToString(metadata))
-            Log.i(TAG, "创建初始元数据文件")
+            // 检查是否可写
+            if (!configDir.canWrite()) {
+                CLog.w(TAG, "配置目录无写权限，尝试修复")
+
+                val fixCmd = """
+                    # 获取应用数据目录的默认权限
+                    APP_DATA_DIR="$baseDir"
+                    CONFIG_DIR="$configsDir"
+
+                    # 检查应用数据目录是否存在
+                    if [ ! -d "${'$'}APP_DATA_DIR" ]; then
+                        echo "应用数据目录不存在: ${'$'}APP_DATA_DIR"
+                        exit 1
+                    fi
+
+                    # 获取默认权限
+                    APP_UID_GID=${'$'}(stat -c %u:%g "${'$'}APP_DATA_DIR" 2>/dev/null)
+                    FILES_PERM=${'$'}(stat -c %a "${'$'}APP_DATA_DIR/files" 2>/dev/null || echo "771")
+
+                    if [ -n "${'$'}APP_UID_GID" ]; then
+                        echo "检测到应用权限: UID:GID=${'$'}APP_UID_GID, 目录权限=${'$'}FILES_PERM"
+
+                        # 恢复权限
+                        chown -R "${'$'}APP_UID_GID" "${'$'}CONFIG_DIR" 2>/dev/null
+                        find "${'$'}CONFIG_DIR" -type d -exec chmod "${'$'}FILES_PERM" {} \; 2>/dev/null
+                        find "${'$'}CONFIG_DIR" -type f -exec chmod 660 {} \; 2>/dev/null
+
+                        # 验证结果
+                        FINAL_UID_GID=${'$'}(stat -c %u:%g "${'$'}CONFIG_DIR" 2>/dev/null)
+                        FINAL_PERM=${'$'}(stat -c %a "${'$'}CONFIG_DIR" 2>/dev/null)
+                        echo "权限修复完成: UID:GID=${'$'}FINAL_UID_GID, 权限=${'$'}FINAL_PERM"
+                    else
+                        echo "无法获取应用默认权限"
+                        exit 1
+                    fi
+                """.trimIndent()
+
+                val result = CSU.runWithSu(fixCmd)
+                CLog.i(TAG, "权限修复结果: ${result.output}")
+
+                // 重新检查是否可写
+                val canWriteAfterFix = configDir.canWrite()
+                CLog.i(TAG, "权限修复后可写状态: $canWriteAfterFix")
+                return canWriteAfterFix
+            } else {
+                CLog.d(TAG, "配置目录权限正常")
+                return true
+            }
+        } catch (e: Exception) {
+            CLog.e(TAG, "权限检查失败", e)
+            false
         }
     }
 

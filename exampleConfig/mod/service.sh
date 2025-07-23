@@ -121,6 +121,73 @@ write_status() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') $status: $message" > "$STATUS_FILE"
 }
 
+# 恢复配置目录的默认权限
+restore_default_permissions() {
+    local config_dir="$APP_CONFIG_DIR"
+    local app_data_dir="$APP_DATA_BASE"
+
+    log_info "开始恢复配置目录默认权限"
+    log_debug "配置目录: $config_dir"
+    log_debug "应用数据目录: $app_data_dir"
+
+    # 检查应用数据目录是否存在
+    if [ ! -d "$app_data_dir" ]; then
+        log_error "应用数据目录不存在: $app_data_dir"
+        return 1
+    fi
+
+    # 检查配置目录是否存在
+    if [ ! -d "$config_dir" ]; then
+        log_debug "配置目录不存在，无需修复权限: $config_dir"
+        return 0
+    fi
+
+    # 获取应用数据目录的默认权限作为参考
+    local parent_uid_gid=$(stat -c %u:%g "$app_data_dir" 2>/dev/null)
+    local files_dir_perm=$(stat -c %a "$app_data_dir/files" 2>/dev/null || echo "771")
+
+    if [ -n "$parent_uid_gid" ]; then
+        log_debug "检测到应用权限: UID:GID=$parent_uid_gid, 目录权限=$files_dir_perm"
+
+        # 显示修复前的权限状态
+        local current_uid_gid=$(stat -c %u:%g "$config_dir" 2>/dev/null)
+        local current_perm=$(stat -c %a "$config_dir" 2>/dev/null)
+        log_debug "修复前权限: UID:GID=$current_uid_gid, 权限=$current_perm"
+
+        # 恢复所有权
+        chown -R "$parent_uid_gid" "$config_dir" 2>/dev/null
+        local chown_result=$?
+        log_debug "chown执行结果: $chown_result"
+
+        # 恢复目录权限
+        find "$config_dir" -type d -exec chmod "$files_dir_perm" {} \; 2>/dev/null
+        local dir_perm_result=$?
+        log_debug "目录权限设置结果: $dir_perm_result"
+
+        # 恢复文件权限（Android应用私有文件通常是660）
+        find "$config_dir" -type f -exec chmod 660 {} \; 2>/dev/null
+        local file_perm_result=$?
+        log_debug "文件权限设置结果: $file_perm_result"
+
+        # 验证权限恢复结果
+        local final_uid_gid=$(stat -c %u:%g "$config_dir" 2>/dev/null)
+        local final_perm=$(stat -c %a "$config_dir" 2>/dev/null)
+        log_info "权限恢复完成: UID:GID=$final_uid_gid, 权限=$final_perm"
+
+        # 检查是否恢复成功
+        if [ "$final_uid_gid" = "$parent_uid_gid" ]; then
+            log_info "权限恢复成功"
+            return 0
+        else
+            log_error "权限恢复可能失败: 期望=$parent_uid_gid, 实际=$final_uid_gid"
+            return 1
+        fi
+    else
+        log_error "无法获取应用默认权限"
+        return 1
+    fi
+}
+
 # ============================================================================
 # 启动日志
 # ============================================================================
@@ -356,6 +423,14 @@ main() {
         write_status "ERROR" "临时配置文件强制复制失败"
         log_error "临时配置文件强制复制失败"
         return 1
+    fi
+
+    # 5. 恢复配置目录的默认权限
+    log_info "恢复配置目录默认权限..."
+    restore_default_permissions
+    if [ $? -ne 0 ]; then
+        write_status "WARNING" "权限恢复失败，但继续执行"
+        log_error "权限恢复失败，但不影响主流程"
     fi
 
     # 5. 最终状态检查
